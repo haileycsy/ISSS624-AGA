@@ -17,7 +17,9 @@ pacman::p_load(sf, tidyverse)
 
 # Importing Geospatial Data
 
-## Polygon Feature Data
+::: panel-tabset
+
+## **Polygon Data**
 
 ```{r}
 mpsz <- sf::st_read(
@@ -28,11 +30,11 @@ mpsz <- sf::st_read(
 
 ::: {.solvebox .solve data-latex="solve"}
 
-**st_read()** reveals that the geospatial objects are multipolygon features. There are a total of 323 multipolygon features and 15 fields in the **mpsz** simple feature data frame
+**st_read()** reveals that the geospatial objects are multipolygon features. There are a total of 323 multipolygon features and 15 fields in the `mpsz` simple feature data frame
 
 :::
 
-## Polyline Feature Data
+## **Polyline Data**
 
 ```{r}
 cyclingpath <- sf::st_read(
@@ -43,11 +45,11 @@ cyclingpath <- sf::st_read(
 
 ::: {.solvebox .solve data-latex="solve"}
 
-There are a total of 2558 features and 2 fields in cyclingpath linestring feature data frame and it is in **svy21** projected coordinates system
+There are a total of 2558 features and 2 fields in `cyclingpath` linestring feature data frame and it is in **svy21** projected coordinates system
 
 :::
 
-## GIS Data (KML format)
+## **GIS Data (KML format)**
 
 ```{r}
 preschool <- sf::st_read(
@@ -57,6 +59,8 @@ preschool <- sf::st_read(
 ::: {.solvebox .solve data-latex="solve"}
 
 This reveals that `preschool` is a **point feature** data frame. There are a total of 2290 features and 2 fields and is in **wgs84** coordinates system.
+
+:::
 
 :::
 
