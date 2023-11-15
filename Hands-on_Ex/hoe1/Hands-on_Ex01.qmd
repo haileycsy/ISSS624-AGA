@@ -1,0 +1,118 @@
+---
+title: "Hands-on Ex 01"
+date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+---
+
+<font size = "5">**Geospatial Data Wrangling**</font>
+
+# Installing R packages
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```
+
+# Importing Geospatial Data
+
+## Polygon Feature Data
+
+```{r}
+mpsz <- sf::st_read(
+   dsn = "data/geospatial",
+   layer = "MP14_SUBZONE_WEB_PL"
+ )
+```
+
+::: {.solvebox .solve data-latex="solve"}
+
+**st_read()** reveals that the geospatial objects are multipolygon features. There are a total of 323 multipolygon features and 15 fields in the **mpsz** simple feature data frame
+
+:::
+
+## Polyline Feature Data
+
+```{r}
+cyclingpath <- sf::st_read(
+   dsn = "data/geospatial", 
+   layer = "CyclingPathGazette"
+  )
+```
+
+::: {.solvebox .solve data-latex="solve"}
+
+There are a total of 2558 features and 2 fields in cyclingpath linestring feature data frame and it is in **svy21** projected coordinates system
+
+:::
+
+## GIS Data (KML format)
+
+```{r}
+preschool <- sf::st_read(
+   "data/geospatial/PreSchoolsLocation.kml")
+```
+
+::: {.solvebox .solve data-latex="solve"}
+
+This reveals that `preschool` is a **point feature** data frame. There are a total of 2290 features and 2 fields and is in **wgs84** coordinates system.
+
+:::
+
+# What is the Content of A Simple Feature Data Frame?
+
+::: panel-tabset
+
+## **st_geometry()**
+
+```{r}
+st_geometry(mpsz)
+```
+## **glimpse()**
+
+This gives more information about the associated attributes in the data frame:
+
+```{r}
+glimpse(mpsz)
+```
+
+## **head()**
+
+```{r}
+head(mpsz)
+```
+:::
+
+# Plotting the Geospatial Data
+
+## Different variations of `plot()`
+
+::: panel-tabset
+
+## **simple plot()**
+
+```{r}
+#| warning: false
+plot(mpsz)
+```
+## **geometry only**
+
+```{r}
+# Plot only the geometry using st_geometry
+
+plot(st_geometry(mpsz))
+```
+
+## **specific attribute**
+
+```{r}
+plot(mpsz["SUBZONE_C"])
+```
+
+:::
+
+
+
+
+
