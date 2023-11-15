@@ -1,11 +1,12 @@
 ---
-title: "ISSS624-AGA"
+title: ""
+format: 
+  html: 
+    toc: false
 ---
 
-This is a Quarto website.
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+::: {layout-ncol="2"}
+[![](images/map-what.gif){width="200%"}](https://tenor.com/view/map-what-where-searching-gif-15716893)
 
-```{r}
-1 + 1
-```
+:::

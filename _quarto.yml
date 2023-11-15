@@ -2,18 +2,56 @@ project:
   type: website
 
 website:
-  title: "AGA"
+  title: "haileycsy"
+  image: "images/Name_Logo2.png"
+  favicon: "images/apple-touch-icon.png"
+  page-navigation: true
   navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+    logo: "images/Name_Logo2.png"
+    title: false
+    collapse-below: lg
+    search: true
+    right:
+      - text: "{{< fa house-chimney-window >}} Home"
+        menu: 
+          - text: "{{< fa house-chimney-window >}} Home"
+            href: index.qmd
+          - text: "{{< fa robot >}} Hello World"
+            href: about.html
+      - text: "{{< fa hand-sparkles >}} Hands-on Ex"
+        menu:
+          - text: "Hands-on Ex 1"
+     
+      - text: "{{< fa magnifying-glass-chart >}} Take-home Ex"
+        menu:
+          - text: "Take-home Ex 1"
+          - text: "Take-home Ex 2"
+          - text: "Take-home Ex 3"
 
+    left:
+      - icon: linkedin
+        href: https://www.linkedin.com/in/hailey-sy-cheong/
+        aria-label: Linkedin
+      - icon: diagram-3-fill
+        href: https://public.tableau.com/app/profile/hailey.cheong
+        aria-label: Tableau
+      - icon: github
+        href: https://github.com/haileycsy
+        aria-label: Github
+  page-footer:
+    right: |
+      Copyright 2023![](images/Name_Logo3.png){fig-alt="Name_logo" width=100px}
 format:
   html:
-    theme: cosmo
-    css: styles.css
     toc: true
+    theme: 
+      - cosmo
+      - theme.scss
+    highlight-style: tango
+    code-copy: hover
+    code-overflow: wrap
+    css: styles.css
+    
 
 editor: visual
 

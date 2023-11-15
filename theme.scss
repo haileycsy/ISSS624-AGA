@@ -1,0 +1,85 @@
+/*-- scss:defaults --*/
+  @import url('https://fonts.googleapis.com/css2?family=Chivo:wght@200&family=Roboto+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+
+// Colors
+$blue-gray: #340068;
+$eggplant: #6D435A;
+$powder: #FFFCF9;
+$gunmetal: #1F363D;
+$light-gray: #dfdfeb;
+$blue: #4d5887;
+$teal: #B1EDE8;
+$orange: #f5bc5f;
+$pink: #FF6978;
+
+// Base document colors
+$navbar-bg: $gunmetal; // navbar
+$navbar-fg: $light-gray; // navbar foreground elements
+$navbar-hl: $teal; // highlight color when hovering over navbar links
+$body-bg: $powder; // page background 
+$body-color: $blue-gray; // page text 
+$footer-bg: $powder; // footer 
+$link-color: $blue; // hyperlinks 
+
+// fonts
+$font-family: 'Roboto Mono', monospace;
+
+//toc 
+$toc-font-size: 12px;
+$toc-active-border: $teal;
+
+// callouts
+$callout-color-note: $blue;
+$callout-color-tip: $teal;
+$callout-color-caution: $orange;
+$callout-color-important: $pink;
+
+
+/*-- scss:rules --*/
+
+.title {
+  margin-top: 2em !important;
+  margin-bottom: 1.5em;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+body {
+  font-size: 14px;
+  font-family: $font-family;
+}
+
+.left {
+  text-align: left;
+  padding-left: 1em;
+}
+.right {
+  text-align: right;
+  padding-right: 1em;
+}
+
+
+/* Heading 1 */
+h1 {
+  font-size: 24px;
+  font-variant: normal; 
+  font-weight: 500; 
+}
+
+/* Heading 2 */
+h2 {
+  font-size: 21px;
+  font-variant: normal; 
+  font-weight: 500; 
+}
+
+/* Heading 3 */
+h3 {
+  font-size: 18px;
+  font-variant: italic; 
+  font-weight: 500; 
+}
+
+.callout.callout-style-default .callout-body {
+  font-size: 0.75rem;
+}

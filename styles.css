@@ -1,1 +1,86 @@
 /* css styles */
+
+
+/* Navbar Logo */
+.navbar-brand > img {
+  max-height: 50px;
+}
+
+@media (max-width: 1060px) and (min-width: 991.98px) {
+
+#navbarCollapse ul:last-of-type a.nav-link {
+  padding-left: .25em;
+  padding-right: .25em;
+}
+
+.navbar {
+  margin-left: .1em;
+}
+}
+
+/* Custom callout boxes */
+
+.cautionbox {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  border: 1.5px solid #3A3B60;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #fac978 5px center/3em no-repeat;
+}
+
+.caution {
+  background-image: url("images/caution.png");
+}
+
+.focusbox {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  border: 1.5px solid #3A3B60;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #a3b1e6 5px center/3em no-repeat;
+}
+
+.focus {
+  background-image: url("Images/focus.png");
+}
+
+.pinbox {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  border: 1.5px solid #3A3B60;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #d6a3ac 10px center/2.5em no-repeat;
+}
+
+.pin {
+  background-image: url("images/pin.png");
+}
+
+.solvebox {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  border: 1.5px solid #3A3B60;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #a9d9d4 5px center/3em no-repeat;
+}
+
+.solve {
+  background-image: url("images/solution.png");
+}
+
+.pencilbox {
+  padding: 1em 1em 1em 4em;
+  margin-bottom: 10px;
+  border: 1.5px solid #3A3B60;
+  border-radius: 10px;
+  font-size: 13px;
+  background:  #dfdfeb 5px center/3em no-repeat;
+}
+
+.pencil {
+  background-image: url("images/prototype.png");
+}
