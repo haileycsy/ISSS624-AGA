@@ -12,7 +12,7 @@ format:
 # Installing R packages
 
 ```{r}
-pacman::p_load(sf, tidyverse)
+pacman::p_load(sf, tidyverse, Hmisc, urbnthemes, tmap, kableExtra)
 ```
 
 # Importing Geospatial Data
@@ -117,6 +117,697 @@ plot(mpsz["SUBZONE_C"])
 :::
 
 
+# Projection Transformation
+
+Map projection is an important property of geospatial data. In order to perform geoprocessing using different geospatial data sources, both need to be projected using similar coordinate systems.
+
+The technical term of the process of projecting a simple feature data frame from one coordinate system to another is called projection transformation.
+
+## Assigning the right EPSG code based on coordinate system
+
+::: panel-tabset
+
+## **Step 1: Check EPSG Code**
+
+```{r}
+st_crs(mpsz)
+```
+The message indicates that the EPSG is 9001. This is a wrong EPSG code because the correct EPSG code for svy21 should be 3414
+
+## **Step 2: st_set_crs()**
+
+```{r}
+#| warning: false
+mpsz3414 <- st_set_crs(mpsz, 3414)
+```
+
+## **Step 3: Reconfirm EPSG**
+
+```{r}
+st_crs(mpsz3414)
+```
+EPSG code is now 3414
+
+:::
 
 
+## Transforming Coordinate Systems
+
+In geospatial analytics, it is very common for us to transform the original data from geographic coordinate system to projected coordinate system. This is because geographic coordinate system is not appropriate if the analysis need to use distance or/and area measurements.
+
+
+::: panel-tabset
+
+## **Step 1: Check coordinate system**
+
+```{r}
+st_geometry(preschool)
+```
+`preschool` dataframe is in wgs84 coordinate system.
+
+## **st_transform()**
+
+```{r}
+preschool3414 <- st_transform(
+   preschool, 
+   crs = 3414)
+```
+
+## **Recheck coordinate system**
+
+```{r}
+st_geometry(preschool3414)
+```
+Message reveals that the new dataframe has been transformed to svy21 projected coordinate system.
+
+:::
+
+# Importing Aspatial Data
+
+`Airbnb_listings` data set is in csv file format, and can be imported by read_csv() of readr package.The output R object is called `listings` and it is a tibble data frame.
+
+::: panel-tabset
+
+## **Import Data**
+
+```{r}
+listings <- read_csv("data/aspatial/Airbnb_listings.csv")
+```
+## **list()**
+
+```{r}
+list(listings)
+```
+
+## **describe()**
+
+```{r}
+describe(listings)
+```
+
+:::
+
+# Converting Aspatial Data into Geospatial feature Dataframes
+
+## Using **st_as_sf()**
+
+```{r}
+listings_sf <- st_as_sf(
+   listings, 
+   coords = c("longitude", "latitude"),
+   crs=4326
+  ) %>%
+  st_transform(crs = 3414)
+```
+
+::: {.solvebox .solve data-latex="solve"}
+
+*   **coords** > provide the column name of the x-coordinates first then followed by the column name of the y-coordinates
+*   **crs** > provide the coordinates system in epsg format. EPSG: 4326 is wgs84 Geographic Coordinate System and EPSG: 3414 is Singapore SVY21 Projected Coordinate System. This can be found at *epsg.io*
+
+:::
+
+## Checking for added `geometry` variable in dataframe:
+
+```{r}
+glimpse(listings_sf)
+```
+
+# Geoprocessing (GIS Analysis)
+
+## **Buffering**
+
+Scenario: 
+
+Nparks is planning to upgrade the existing cycling paths. To do so, they need to acquire 5 metres of reserved land on both sides of the current cycling path. You are tasked to determine the extent of the land that needs to be acquired and its total area.
+
+::: panel-tabset
+
+## **Define buffer zone**
+
+`st_buffer()` Creates a polygon covering all points of the geometry within a
+given distance. 
+
+```{r}
+#compute the 5-meter buffer zone
+
+buffer_cycling <- st_buffer(cyclingpath, 
+                            # buffer distance
+                            dist = 5, 
+                            # number of segments per quadrant
+                            nQuadSegs = 30) 
+```
+
+
+## **Calculate Area Needed**
+
+`st_area()` returns the area of polygon geometries
+
+```{r}
+buffer_cycling$AREA <- st_area(buffer_cycling)
+```
+
+## **Sum() total land needed**
+
+```{r}
+sum(buffer_cycling$AREA)
+```
+:::
+
+## **Point-in-polygon**
+
+Scenario:
+
+A pre-school service group wants to find out the number of pre-schools in each Planning Subzone.
+
+
+::: panel-tabset
+
+## **Identify and Count**
+
+```{r}
+mpsz3414$PreSch_count<- lengths(st_intersects(mpsz3414, preschool3414))
+```
+
+*   `st_intersects()` identifies pre-schools located inside each Planning Subzone by
+*   `length()` of Base R is used to calculate number of pre-schools that fall inside each planning subzone
+
+
+## **Summary Statistics**
+
+```{r}
+summary(mpsz3414$PreSch_count)
+```
+
+## **List the Top Subzones**
+
+```{r}
+top_n(mpsz3414, 1, PreSch_count)
+```
+:::
+
+### **What is the density of pre-schools by planning subzone?**
+
+::: panel-tabset
+
+## **Step 1: Calculate area of each subzone**
+
+```{r}
+mpsz3414$Area <- mpsz3414 %>%
+  st_area()
+```
+
+## **Step 2: Compute Density**
+
+Density = No. of preschools per subzone area
+
+```{r}
+mpsz3414 <- mpsz3414 %>%
+  mutate(PreSch_density = PreSch_count/Area * 1000000)
+```
+
+## **Step 3: Check Density**
+
+```{r}
+summary(mpsz3414$PreSch_density)
+```
+:::
+
+# Exploratory Analysis
+
+## What is the distribution of Preschool Density?
+
+```{r}
+#| code-fold: true
+
+set_urbn_defaults(style = "print")
+
+ggplot(
+    data = mpsz3414, 
+    aes(x = as.numeric(PreSch_density))
+  )+
+  geom_histogram(
+    bins = 20, 
+    color = "#FFFCF9", 
+    fill = "#1F363D"
+  ) +
+  labs(
+    title = "Are pre-schools evenly distributed in Singapore?",
+    subtitle= "There are many planning sub-zones with a single pre-school. \nHowever, there are also 2 planning sub-zones with >20 pre-schools",
+    x = "Pre-school density (per km sq)",
+    y = "Frequency"
+  ) +
+  theme(
+    panel.grid.major = element_blank()
+  )
+```
+
+
+```{r}
+#| code-fold: true
+
+ggplot(
+    data = mpsz3414, 
+    aes(y = PreSch_count, 
+        x = as.numeric(PreSch_density))
+  ) +
+  geom_point(
+    size = 2,
+    color = "#1F363D",
+    alpha = .6
+  ) +
+  labs(
+    title = "",
+    x = "Pre-school density (per km sq)",
+    y = "Pre-school count"
+  ) +
+  theme(
+    panel.grid.major = element_blank()
+  )
+```
+
+<font size = "5">**Cloropleth Mapping**</font>
+
+# Importing Attribute Data
+
+```{r}
+popdata <- read_csv("data/aspatial/respopagesexfa2011to2020.csv")
+```
+
+# Data Preparation
+
+## How does the data look like?
+
+```{r}
+head(popdata,10) %>%
+  kbl() %>%
+  kable_styling(
+    full_width = F, 
+    bootstrap_options = c("condensed", "responsive"))
+```
+
+## Extracting 2020 Data and creating pivot table
+
+```{r}
+#| warning: false
+#| message: false
+
+popdata2020 <- popdata %>%
+  filter(
+    Time == 2020
+  ) %>%
+  group_by(
+    PA, SZ, AG
+  ) %>%
+  summarise(
+    POP = sum(Pop)
+  ) %>%
+  ungroup() %>%
+  pivot_wider(
+    names_from = AG, 
+    values_from = POP
+  ) %>%
+  mutate(
+    `YOUNG` = rowSums(.[3:6]) + rowSums(.[12]),
+    `ECONOMICALLY ACTIVE` = rowSums(.[7:11]) + rowSums(.[13:15]),
+    `AGED`= rowSums(.[16:21]),
+    `TOTAL`= rowSums(.[3:21])
+  ) %>%  
+  # Define dependency ratio
+  mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)/`ECONOMICALLY ACTIVE`
+  ) %>%
+  # Convert PA and SZ fields to upper case
+  mutate_at(.vars = vars(PA, SZ), 
+            .funs = funs(toupper)
+  ) %>%
+  select(
+    `PA`, `SZ`, `YOUNG`,`ECONOMICALLY ACTIVE`, `AGED`,`TOTAL`, `DEPENDENCY`
+  ) %>%
+  # Get data for only economically active subzones
+  filter(`ECONOMICALLY ACTIVE` > 0)
+```
+```{r}
+head(popdata2020,10) %>%
+  kbl() %>%
+  kable_styling(
+    full_width = F, 
+    bootstrap_options = c("condensed", "responsive"))
+```
+
+
+## Joining Attributes to Geospatial data
+
+```{r}
+mpsz_pop2020 <- left_join(
+                  mpsz, popdata2020,
+                  by = c("SUBZONE_N" = "SZ"))
+
+# Create rds file in new data folder
+write_rds(mpsz_pop2020, "data/rds/mpszpop2020.rds")
+```
+
+
+# Cloropleth Maps
+
+
+## **Simple map using qtm()**
+
+```{r}
+#| warning: false
+#| message: false
+
+tmap_mode("plot")
+qtm(mpsz_pop2020, 
+    fill = "DEPENDENCY")
+```
+
+## **Using tmap arguments**
+
+```{r}
+#| code-fold: true
+
+tm_shape(mpsz_pop2020
+  ) +
+  tm_fill(
+    "DEPENDENCY", 
+    style = "quantile", 
+    palette = "Purples",
+    title = "Dependency ratio"
+  ) +
+  tm_layout(
+    main.title = "Distribution of Dependency Ratio by planning subzone",
+    main.title.position = "center",
+    main.title.size = 1.2,
+    legend.height = .25, 
+    legend.width = .35,
+    frame = FALSE
+  ) +
+  tm_borders(
+    alpha = .3
+  ) +
+  tm_compass(
+    type="8star", 
+    size = 2
+  ) +
+  tm_scale_bar() +
+  tm_grid(
+    alpha = .1
+  ) +
+  tm_credits(
+    "Source: Planning Sub-zone boundary from Urban Redevelopment Authority (URA)\n and Population data from Department of Statistics DOS", 
+    position = c("left", "bottom")
+  )
+```
+
+## **Building a tmap**
+
+::: panel-tabset
+
+## **basic map**
+
+`tm_shape()` is used to define the input data (i.e mpsz_pop2020) and `tm_polygons()` is used to draw the planning subzone polygons
+
+```{r}
+tm_shape(mpsz_pop2020) +
+  tm_polygons()
+```
+
+## **Upgrade to Cloropleth**
+
+Assign variable to `tm_polygons()` to visualise geographical distribution
+
+```{r}
+tm_shape(mpsz_pop2020) +
+  tm_polygons("DEPENDENCY")
+```
+
+## **Using tm_fill() and tm_border()**
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY")
+```
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY") +
+  tm_borders(
+    # Border linewidth
+    lwd = .2,  
+    # Border color
+    col = "#1F363D",
+    # transparency of color
+    alpha = .8
+  )
+```
+
+:::
+
+## **Data Classification Methods**
+
+::: {.solvebox .solve data-latex="solve"}
+
+**tmap** provides a total **10** data classification methods: fixed, sd, equal, pretty (default), quantile, kmeans, hclust, bclust, fisher, and jenks
+
+:::
+
+
+::: panel-tabset
+
+## **jenks**
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          palette = "Purples",
+          n = 5,
+          style = "jenks"
+  ) +
+  tm_borders(alpha = .5)
+```
+
+## **equal**
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          palette = "Greens",
+          n = 5,
+          style = "equal"
+  ) +
+  tm_borders(alpha = .5)
+```
+
+## **kmeans**
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          palette = "Blues",
+          n = 5,
+          style = "kmeans"
+  ) +
+  tm_borders(alpha = .5)
+```
+
+## **fisher**
+
+```{r}
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          palette = "Reds",
+          n = 5,
+          style = "fisher"
+  ) +
+  tm_borders(alpha = .5)
+```
+
+## **Custom Breaks**
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY",
+          breaks = c(0, 0.60, 0.70, 0.80, 0.90, 1.00),
+          palette = "-Purples"
+  ) +
+  tm_borders(alpha = .5)
+```
+
+:::
+
+
+## **Legends and Styles**
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020
+  )+
+  tm_fill("DEPENDENCY", 
+          style = "jenks", 
+          palette = "Blues", 
+          legend.hist = TRUE, 
+          legend.is.portrait = TRUE,
+          legend.hist.z = .1
+  ) +
+  tm_layout(
+    main.title = "Distribution of Dependency Ratio by planning subzone \n(Jenks classification)",
+            main.title.position = "center",
+            main.title.size = .7,
+            legend.height = .25, 
+            legend.width = .25,
+            legend.outside = FALSE,
+            legend.position = c("right", "bottom"),
+            frame = FALSE
+  ) +
+  tm_borders(
+    alpha = .5
+  ) +
+  tm_style("natural")
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020)+
+  tm_fill("DEPENDENCY", 
+          style = "quantile", 
+          palette = "Blues",
+          title = "No. of persons"
+  ) +
+  tm_layout(main.title = "Distribution of Dependency Ratio \nby planning subzone",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE
+  ) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar(width = 0.15) +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS", 
+             position = c("left", "bottom")
+  ) +
+  tm_style("classic")
+```
+
+
+## **Facet maps**
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020)+
+  tm_fill(
+    c("YOUNG", "AGED"),
+    style = "equal", 
+    palette = "Reds"
+  ) +
+  tm_layout(
+    legend.position = c("right", "bottom")
+  ) +
+  tm_borders(
+    alpha = 0.5
+  ) +
+  tmap_style("albatross")
+```
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020
+  )+ 
+  tm_polygons(
+    c("DEPENDENCY","AGED"),
+    style = c("equal", "quantile"), 
+    palette = list("Blues","Greens")
+  ) +
+  tm_layout(legend.position = c("right", "bottom")
+  ) +
+  tmap_style("cobalt")
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_pop2020
+  ) +
+  tm_fill("DEPENDENCY",
+          style = "quantile",
+          palette = "Purples",
+          thres.poly = 0
+  ) + 
+  tm_facets(by="REGION_N", 
+            free.coords = TRUE, 
+            drop.shapes = TRUE
+  ) +
+  tm_layout(legend.show = FALSE,
+            title.position = c("center", "center"), 
+            title.size = 16
+  ) +
+  tm_borders(alpha = .2
+  ) +
+  tm_style("classic")
+```
+
+## **stand-alone maps with tmap_arrange()**
+
+```{r}
+youngmap <- tm_shape(mpsz_pop2020)+ 
+  tm_polygons(
+    "YOUNG", 
+    style = "quantile", 
+    palette = "Reds"
+  ) +
+  tm_style("white")
+
+agedmap <- tm_shape(mpsz_pop2020)+ 
+  tm_polygons(
+    "AGED", 
+    style = "quantile", 
+    palette = "Blues"
+  ) +
+  tm_style("white")
+
+tmap_arrange(youngmap, agedmap, 
+             asp = 1, 
+             ncol = 2)
+```
+
+
+## **Mapping only specific criteria**
+
+```{r}
+#| warning: false
+#| message: false
+
+tm_shape(
+  # Only map central region
+  mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION", ]
+  )+
+  tm_fill("DEPENDENCY", 
+          style = "quantile", 
+          palette = "Greens", 
+          legend.hist = TRUE, 
+          legend.is.portrait = TRUE,
+          legend.hist.z = 0.1
+  ) +
+  tm_layout(legend.outside = TRUE,
+            legend.height = 0.45, 
+            legend.width = 5.0,
+            legend.position = c("right", "bottom"),
+            frame = FALSE
+  ) +
+  tm_borders(alpha = .5)
+```
 
