@@ -1,0 +1,26 @@
+---
+title: "In-class Ex 01"
+date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+execute: 
+  warning: false
+---
+
+# Load R packages
+
+```{r}
+pacman::p_load(tidyverse)
+```
+
+# Importing the data
+
+```{r}
+bus08 <- read_csv("data/aspatial/origin_destination_bus_202308.csv")
+
+bus09 <- read_csv("data/aspatial/origin_destination_bus_202309.csv")
+
+bus10 <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
+```

@@ -1,8 +1,0 @@
----
-title: "In-class Ex 01"
-date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
-format:
-  html:
-    code-fold: false
-    code-summary: "code block"
----
