@@ -1,0 +1,16 @@
+---
+title: "Hands-on Ex 02"
+date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+---
+
+<font size = "5">**Spatial Weights and Applications**</font>
+
+# Installing R packages
+
+```{r}
+pacman::p_load(sf, tidyverse, Hmisc, urbnthemes, tmap, kableExtra)
+```
