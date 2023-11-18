@@ -18,7 +18,6 @@ pacman::p_load(sf, tidyverse, Hmisc, urbnthemes, tmap, kableExtra)
 # Importing Geospatial Data
 
 ::: panel-tabset
-
 ## **Polygon Data**
 
 ```{r}
@@ -29,9 +28,7 @@ mpsz <- sf::st_read(
 ```
 
 ::: {.solvebox .solve data-latex="solve"}
-
 **st_read()** reveals that the geospatial objects are multipolygon features. There are a total of 323 multipolygon features and 15 fields in the `mpsz` simple feature data frame
-
 :::
 
 ## **Polyline Data**
@@ -44,9 +41,7 @@ cyclingpath <- sf::st_read(
 ```
 
 ::: {.solvebox .solve data-latex="solve"}
-
 There are a total of 2558 features and 2 fields in `cyclingpath` linestring feature data frame and it is in **svy21** projected coordinates system
-
 :::
 
 ## **GIS Data (KML format)**
@@ -57,22 +52,19 @@ preschool <- sf::st_read(
 ```
 
 ::: {.solvebox .solve data-latex="solve"}
-
 This reveals that `preschool` is a **point feature** data frame. There are a total of 2290 features and 2 fields and is in **wgs84** coordinates system.
-
 :::
-
 :::
 
 # What is the Content of A Simple Feature Data Frame?
 
 ::: panel-tabset
-
 ## **st_geometry()**
 
 ```{r}
 st_geometry(mpsz)
 ```
+
 ## **glimpse()**
 
 This gives more information about the associated attributes in the data frame:
@@ -93,13 +85,13 @@ head(mpsz)
 ## Different variations of `plot()`
 
 ::: panel-tabset
-
 ## **simple plot()**
 
 ```{r}
 #| warning: false
 plot(mpsz)
 ```
+
 ## **geometry only**
 
 ```{r}
@@ -113,9 +105,7 @@ plot(st_geometry(mpsz))
 ```{r}
 plot(mpsz["SUBZONE_C"])
 ```
-
 :::
-
 
 # Projection Transformation
 
@@ -126,12 +116,12 @@ The technical term of the process of projecting a simple feature data frame from
 ## Assigning the right EPSG code based on coordinate system
 
 ::: panel-tabset
-
 ## **Step 1: Check EPSG Code**
 
 ```{r}
 st_crs(mpsz)
 ```
+
 The message indicates that the EPSG is 9001. This is a wrong EPSG code because the correct EPSG code for svy21 should be 3414
 
 ## **Step 2: st_set_crs()**
@@ -146,23 +136,21 @@ mpsz3414 <- st_set_crs(mpsz, 3414)
 ```{r}
 st_crs(mpsz3414)
 ```
+
 EPSG code is now 3414
-
 :::
-
 
 ## Transforming Coordinate Systems
 
 In geospatial analytics, it is very common for us to transform the original data from geographic coordinate system to projected coordinate system. This is because geographic coordinate system is not appropriate if the analysis need to use distance or/and area measurements.
 
-
 ::: panel-tabset
-
 ## **Step 1: Check coordinate system**
 
 ```{r}
 st_geometry(preschool)
 ```
+
 `preschool` dataframe is in wgs84 coordinate system.
 
 ## **st_transform()**
@@ -178,8 +166,8 @@ preschool3414 <- st_transform(
 ```{r}
 st_geometry(preschool3414)
 ```
-Message reveals that the new dataframe has been transformed to svy21 projected coordinate system.
 
+Message reveals that the new dataframe has been transformed to svy21 projected coordinate system.
 :::
 
 # Importing Aspatial Data
@@ -187,12 +175,12 @@ Message reveals that the new dataframe has been transformed to svy21 projected c
 `Airbnb_listings` data set is in csv file format, and can be imported by read_csv() of readr package.The output R object is called `listings` and it is a tibble data frame.
 
 ::: panel-tabset
-
 ## **Import Data**
 
 ```{r}
 listings <- read_csv("data/aspatial/Airbnb_listings.csv")
 ```
+
 ## **list()**
 
 ```{r}
@@ -204,7 +192,6 @@ list(listings)
 ```{r}
 describe(listings)
 ```
-
 :::
 
 # Converting Aspatial Data into Geospatial feature Dataframes
@@ -221,10 +208,8 @@ listings_sf <- st_as_sf(
 ```
 
 ::: {.solvebox .solve data-latex="solve"}
-
-*   **coords** > provide the column name of the x-coordinates first then followed by the column name of the y-coordinates
-*   **crs** > provide the coordinates system in epsg format. EPSG: 4326 is wgs84 Geographic Coordinate System and EPSG: 3414 is Singapore SVY21 Projected Coordinate System. This can be found at *epsg.io*
-
+-   **coords** \> provide the column name of the x-coordinates first then followed by the column name of the y-coordinates
+-   **crs** \> provide the coordinates system in epsg format. EPSG: 4326 is wgs84 Geographic Coordinate System and EPSG: 3414 is Singapore SVY21 Projected Coordinate System. This can be found at *epsg.io*
 :::
 
 ## Checking for added `geometry` variable in dataframe:
@@ -237,16 +222,14 @@ glimpse(listings_sf)
 
 ## **Buffering**
 
-Scenario: 
+Scenario:
 
 Nparks is planning to upgrade the existing cycling paths. To do so, they need to acquire 5 metres of reserved land on both sides of the current cycling path. You are tasked to determine the extent of the land that needs to be acquired and its total area.
 
 ::: panel-tabset
-
 ## **Define buffer zone**
 
-`st_buffer()` Creates a polygon covering all points of the geometry within a
-given distance. 
+`st_buffer()` Creates a polygon covering all points of the geometry within a given distance.
 
 ```{r}
 #compute the 5-meter buffer zone
@@ -257,7 +240,6 @@ buffer_cycling <- st_buffer(cyclingpath,
                             # number of segments per quadrant
                             nQuadSegs = 30) 
 ```
-
 
 ## **Calculate Area Needed**
 
@@ -280,18 +262,15 @@ Scenario:
 
 A pre-school service group wants to find out the number of pre-schools in each Planning Subzone.
 
-
 ::: panel-tabset
-
 ## **Identify and Count**
 
 ```{r}
 mpsz3414$PreSch_count<- lengths(st_intersects(mpsz3414, preschool3414))
 ```
 
-*   `st_intersects()` identifies pre-schools located inside each Planning Subzone by
-*   `length()` of Base R is used to calculate number of pre-schools that fall inside each planning subzone
-
+-   `st_intersects()` identifies pre-schools located inside each Planning Subzone by
+-   `length()` of Base R is used to calculate number of pre-schools that fall inside each planning subzone
 
 ## **Summary Statistics**
 
@@ -309,7 +288,6 @@ top_n(mpsz3414, 1, PreSch_count)
 ### **What is the density of pre-schools by planning subzone?**
 
 ::: panel-tabset
-
 ## **Step 1: Calculate area of each subzone**
 
 ```{r}
@@ -361,7 +339,6 @@ ggplot(
     panel.grid.major = element_blank()
   )
 ```
-
 
 ```{r}
 #| code-fold: true
@@ -446,6 +423,7 @@ popdata2020 <- popdata %>%
   # Get data for only economically active subzones
   filter(`ECONOMICALLY ACTIVE` > 0)
 ```
+
 ```{r}
 head(popdata2020,10) %>%
   kbl() %>%
@@ -453,7 +431,6 @@ head(popdata2020,10) %>%
     full_width = F, 
     bootstrap_options = c("condensed", "responsive"))
 ```
-
 
 ## Joining Attributes to Geospatial data
 
@@ -466,9 +443,7 @@ mpsz_pop2020 <- left_join(
 write_rds(mpsz_pop2020, "data/rds/mpszpop2020.rds")
 ```
 
-
 # Cloropleth Maps
-
 
 ## **Simple map using qtm()**
 
@@ -522,7 +497,6 @@ tm_shape(mpsz_pop2020
 ## **Building a tmap**
 
 ::: panel-tabset
-
 ## **basic map**
 
 `tm_shape()` is used to define the input data (i.e mpsz_pop2020) and `tm_polygons()` is used to draw the planning subzone polygons
@@ -560,20 +534,15 @@ tm_shape(mpsz_pop2020)+
     alpha = .8
   )
 ```
-
 :::
 
 ## **Data Classification Methods**
 
 ::: {.solvebox .solve data-latex="solve"}
-
 **tmap** provides a total **10** data classification methods: fixed, sd, equal, pretty (default), quantile, kmeans, hclust, bclust, fisher, and jenks
-
 :::
 
-
 ::: panel-tabset
-
 ## **jenks**
 
 ```{r}
@@ -635,9 +604,7 @@ tm_shape(mpsz_pop2020)+
   ) +
   tm_borders(alpha = .5)
 ```
-
 :::
-
 
 ## **Legends and Styles**
 
@@ -697,7 +664,6 @@ tm_shape(mpsz_pop2020)+
   tm_style("classic")
 ```
 
-
 ## **Facet maps**
 
 ```{r}
@@ -734,7 +700,6 @@ tm_shape(mpsz_pop2020
   ) +
   tmap_style("cobalt")
 ```
-
 
 ```{r}
 #| warning: false
@@ -784,7 +749,6 @@ tmap_arrange(youngmap, agedmap,
              ncol = 2)
 ```
 
-
 ## **Mapping only specific criteria**
 
 ```{r}
@@ -810,4 +774,3 @@ tm_shape(
   ) +
   tm_borders(alpha = .5)
 ```
-

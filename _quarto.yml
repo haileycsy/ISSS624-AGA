@@ -12,12 +12,8 @@ website:
     collapse-below: lg
     search: true
     right:
-      - text: "{{< fa house-chimney-window >}} Home"
-        menu: 
-          - text: "{{< fa house-chimney-window >}} Home"
-            href: index.qmd
-          - text: "{{< fa robot >}} Hello World"
-            href: about.html
+      - text: "Hello World"
+        href: about.html
       - text: "In-class Ex"
         menu:
           - text: "In-class Ex 1"
