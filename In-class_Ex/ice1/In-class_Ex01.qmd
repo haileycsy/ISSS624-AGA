@@ -1,6 +1,7 @@
 ---
 title: "In-class Ex 01"
-date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
+date: "Published on November 18 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
 format:
   html:
     code-fold: false
@@ -11,16 +12,85 @@ execute:
 
 # Load R packages
 
+The following code chunk loads the necessary packages:
+
+-   **tmap**: for thematic mapping
+-   **sf**: for geospatial data handling
+-   **tidyverse**: for aspatial data transformation
+
 ```{r}
-pacman::p_load(tidyverse)
+pacman::p_load(tmap, sf, tidyverse)
 ```
 
-# Importing the data
+# Preparing the OD Data
+
+Import the *Passenger Volume by Origin Destination* dataset downloaded from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) using `read_csv()` of the **readr** package:
+
 
 ```{r}
-bus08 <- read_csv("data/aspatial/origin_destination_bus_202308.csv")
+odbus08 <- read_csv("data/aspatial/origin_destination_bus_202308.csv")
 
-bus09 <- read_csv("data/aspatial/origin_destination_bus_202309.csv")
-
-bus10 <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
+# bus09 <- read_csv("data/aspatial/origin_destination_bus_202309.csv")
+# bus10 <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
 ```
+
+::: {.pinbox .solve data-latex="pin"}
+
+**odbus08** is a tibble dataframe. However, `ORIGIN_PT_CODE` and `DESTINATION_PT_CODE` are in character format. These are transformed into factors (categorical data type) for further analysis. 
+
+:::
+
+```{r}
+odbus08 <- odbus08 %>%
+  mutate(
+    ORIGIN_PT_CODE = as.factor(ORIGIN_PT_CODE),
+    DESTINATION_PT_CODE = as.factor(DESTINATION_PT_CODE)
+  )
+```
+
+## Extracting the data for Analysis
+
+Create a new dataframe **origtrip_7_9** by extracting Origin busstop codes and number of trips for **weekdays** between 7 and 9 o'clock: 
+
+```{r}
+origtrip_7_9 <- odbus08 %>%
+  filter(
+    DAY_TYPE == "WEEKDAY"
+  ) %>%
+  filter(
+    TIME_PER_HOUR >= 7 & TIME_PER_HOUR <= 9
+  ) %>%
+  group_by(
+    ORIGIN_PT_CODE
+  ) %>%
+  summarise(
+    TRIPS = sum(TOTAL_TRIPS)
+  ) %>%
+  ungroup()
+```
+
+## Loading the geospatial data
+
+```{r}
+busstop <- st_read(
+    dsn = "data/geospatial",
+    layer = "BusStop"
+  ) %>%
+  # Assigning the right EPSG code based on coordinate system
+  st_transform(
+    crs = 3414
+  )
+```
+
+```{r}
+mpsz <- st_read(
+    dsn = "data/geospatial",
+    layer = "MPSZ-2019"
+  ) %>%
+ # Assigning the right EPSG code based on coordinate system
+  st_transform(
+    crs = 3414
+  )
+```
+
+

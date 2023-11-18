@@ -221,6 +221,20 @@
     "href": "In-class_Ex/ice1/In-class_Ex01.html",
     "title": "In-class Ex 01",
     "section": "",
-    "text": "Load R packages\n\npacman::p_load(tidyverse)\n\n\n\nImporting the data\n\nbus08 <- read_csv(\"data/aspatial/origin_destination_bus_202308.csv\")\n\nbus09 <- read_csv(\"data/aspatial/origin_destination_bus_202309.csv\")\n\nbus10 <- read_csv(\"data/aspatial/origin_destination_bus_202310.csv\")"
+    "text": "The following code chunk loads the necessary packages:\n\ntmap: for thematic mapping\nsf: for geospatial data handling\ntidyverse: for aspatial data transformation\n\n\npacman::p_load(tmap, sf, tidyverse)"
+  },
+  {
+    "objectID": "In-class_Ex/ice1/In-class_Ex01.html#extracting-the-data-for-analysis",
+    "href": "In-class_Ex/ice1/In-class_Ex01.html#extracting-the-data-for-analysis",
+    "title": "In-class Ex 01",
+    "section": "Extracting the data for Analysis",
+    "text": "Extracting the data for Analysis\nCreate a new dataframe origtrip_7_9 by extracting Origin busstop codes and number of trips for weekdays between 7 and 9 o’clock:\n\norigtrip_7_9 <- odbus08 %>%\n  filter(\n    DAY_TYPE == \"WEEKDAY\"\n  ) %>%\n  filter(\n    TIME_PER_HOUR >= 7 & TIME_PER_HOUR <= 9\n  ) %>%\n  group_by(\n    ORIGIN_PT_CODE\n  ) %>%\n  summarise(\n    TRIPS = sum(TOTAL_TRIPS)\n  ) %>%\n  ungroup()"
+  },
+  {
+    "objectID": "In-class_Ex/ice1/In-class_Ex01.html#loading-the-geospatial-data",
+    "href": "In-class_Ex/ice1/In-class_Ex01.html#loading-the-geospatial-data",
+    "title": "In-class Ex 01",
+    "section": "Loading the geospatial data",
+    "text": "Loading the geospatial data\n\nbusstop <- st_read(\n    dsn = \"data/geospatial\",\n    layer = \"BusStop\"\n  ) %>%\n  # Assigning the right EPSG code based on coordinate system\n  st_transform(\n    crs = 3414\n  )\n\nReading layer `BusStop' from data source \n  `C:\\haileycsy\\ISSS624-AGA\\In-class_Ex\\ice1\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 5161 features and 3 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 3970.122 ymin: 26482.1 xmax: 48284.56 ymax: 52983.82\nProjected CRS: SVY21\n\n\n\nmpsz <- st_read(\n    dsn = \"data/geospatial\",\n    layer = \"MPSZ-2019\"\n  ) %>%\n # Assigning the right EPSG code based on coordinate system\n  st_transform(\n    crs = 3414\n  )\n\nReading layer `MPSZ-2019' from data source \n  `C:\\haileycsy\\ISSS624-AGA\\In-class_Ex\\ice1\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 332 features and 6 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775\nGeodetic CRS:  WGS 84"
   }
 ]
