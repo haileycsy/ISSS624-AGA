@@ -87,7 +87,7 @@ mpsz <- st_read(
     dsn = "data/geospatial",
     layer = "MPSZ-2019"
   ) %>%
- # Assigning the right EPSG code based on coordinate system
+ # Assigning the right EPSG code
   st_transform(
     crs = 3414
   )
