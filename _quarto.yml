@@ -11,6 +11,18 @@ website:
     title: false
     collapse-below: lg
     search: true
+    
+    left:
+      - icon: linkedin
+        href: https://www.linkedin.com/in/hailey-sy-cheong/
+        aria-label: Linkedin
+      - icon: diagram-3-fill
+        href: https://public.tableau.com/app/profile/hailey.cheong
+        aria-label: Tableau
+      - icon: github
+        href: https://github.com/haileycsy
+        aria-label: Github
+        
     right:
       - text: "Hello World"
         href: about.html
@@ -28,16 +40,7 @@ website:
           - text: "Take-home Ex 1"
           - text: "Take-home Ex 2"
 
-    left:
-      - icon: linkedin
-        href: https://www.linkedin.com/in/hailey-sy-cheong/
-        aria-label: Linkedin
-      - icon: diagram-3-fill
-        href: https://public.tableau.com/app/profile/hailey.cheong
-        aria-label: Tableau
-      - icon: github
-        href: https://github.com/haileycsy
-        aria-label: Github
+    
   page-footer:
     right: |
       Copyright 2023![](images/Name_Logo3.png){fig-alt="Name_logo" width=100px}

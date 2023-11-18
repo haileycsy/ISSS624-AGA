@@ -5,8 +5,8 @@ format:
     toc: false
 ---
 
-
 ::: {layout-ncol="2"}
 [![](images/map-what.gif){width="200%"}](https://tenor.com/view/map-what-where-searching-gif-15716893)
 
+<font size = "7"></br>Applied</br>Geospatial</br>Analytics</font>
 :::
