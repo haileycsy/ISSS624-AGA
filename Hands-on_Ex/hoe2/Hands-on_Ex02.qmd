@@ -1,10 +1,15 @@
 ---
-title: "Hands-on Ex 02"
-date: "Last updated on `r format(Sys.time(), '%d %B, %Y')`"
+title: "Hands-on Ex 2"
+date: "Published on November 19 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
 format:
   html:
-    code-fold: false
+    code-fold: true
     code-summary: "code block"
+    toc-title: Contents
+    number-sections: true
+execute: 
+  warning: false
 ---
 
 <font size = "5">**Spatial Weights and Applications**</font>
@@ -12,5 +17,408 @@ format:
 # Installing R packages
 
 ```{r}
-pacman::p_load(sf, tidyverse, Hmisc, urbnthemes, tmap, kableExtra)
+#| message: false
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr, kableExtra)
 ```
+
+# Scope of Study
+
+Two datasets will be used in this exercise:
+
+-   **Geospatial:** Hunan county boundary layer set in ESRI shapefile format
+-   **Aspatial:** Hunan's 2012 local development indicators in csv format
+
+## Loading the data
+
+::: panel-tabset
+## **Geospatial shapefile**
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial", 
+                 layer = "Hunan")
+```
+
+## **Aspatial csv**
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+## **Joining the datasets**
+
+By performing a `left_join()`, the geospatial dataframe **hunan** will be updated with attribute fields of **hunan2012**
+
+```{r}
+hunan <- left_join(hunan, hunan2012) %>%
+  select(1:4, 7, 15)
+```
+:::
+
+```{r}
+head(hunan,10) %>%
+  kbl() %>%
+  kable_styling(
+    full_width = F, 
+    bootstrap_options = c("condensed", "responsive"))
+```
+
+# Visualising Regional Development Indicators
+
+**GDPPC** Refers to Gross Domestic Product per capita, which measures a country's economic output per person. To visualise the distribution of GDPPC as a cloropleth map, `qtm()` of **tmap** package can be used.
+
+```{r}
+# Basemap without GDPPC mapping 
+basemap <- tm_shape(hunan) +
+  tm_polygons() +
+  tm_text("NAME_3", size = .5)
+
+# Cloropleth map
+gdppc <- qtm(hunan, "GDPPC")
+
+#Place maps side-by-side
+tmap_arrange(basemap, 
+             gdppc, 
+             asp = 1, 
+             ncol = 2)
+```
+
+# The **neighborhood** in Spatial Analysis
+
+An important concept in spatial analysis is that of a *neighborhood*, which refers to those data points that we consider to be proximate to a given focal data point. With area-based vector data (polygons), there are multiple ways to measure proximity: 
+
+* **Contiguity-based neighbors** consider neighboring polygons to be those that “touch” a focal polygon, and are derived in **spdep** package with the `poly2nb()` function
+
+*  **Distance-based neighbors** are those within a given proximity threshold to a focal polygon; distances are measured between polygon centroid using the `knn2nb()` function
+
+
+## **What are Spatial Weights?**
+
+::: {.pinbox .solve data-latex="pin"}
+
+**Spatial weights** are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.
+
+-   Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: *What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?*
+-   Spatial questions target specific information about the spatial configuration of a specific target ("a neighborhood," "my stalled car") and geographically connected relevant sites ("adjacent neighborhoods", "nearby gas stations")
+
+:::
+
+To use this information in statistical analysis, it's often necessary to compute these relationships between all pairs of observations. This means building a topology ---- a mathematical structure that expresses the connectivity between observations ---- that we can use to examine the data.
+
+**Spatial weights matrices** express this topology of relations as a binary relationship, with weights 1 and 0.
+
+# Computing contiguity-based neighbors
+
+## **What is Contiguity?**
+
+::: {.pinbox .solve data-latex="pin"}
+
+**Contiguity** happens when two spatial units share a common border.
+
+* **Queen Contiguity:** A neigboring polygon is one that shares a vertex with the focal polygon
+
+* **Rook Contiguity:** A neigboring polygon is one that shares an edge (line segment) with the focal polygon
+
+:::
+
+## Computing **Queen contiguity** based neighbours
+
+The code chunk below computes a contiguity matrix based on Queen contiguity principle:
+
+```{r}
+#| code-fold: false
+wm_q <- poly2nb(hunan, 
+                queen = TRUE)
+summary(wm_q)
+```
+::: {.focusbox .solve data-latex="focus"}
+
+The summary report shows that:
+
+*  There are 88 area units in Hunan
+*  The most connected area unit has 11 neighbors (links)
+*  The two least connected areas have only 1 neighbor
+
+:::
+
+::: panel-tabset
+
+## **Listing specific neighbors**
+
+For each polygon in our polygon object, `wm_q` lists all neighboring polygons. For example, to see the neighbors for polygon #1 in the object:
+
+```{r}
+#| code-fold: false
+wm_q[[1]]
+```
+Polygon #1 has 5 neighbors. 
+
+## **Retrieving Country names by polygon #**
+
+We can retrieve the county name of Polygon ID=1 by using the code chunk below:
+
+```{r}
+#| code-fold: false
+hunan$County[1]
+```
+To reveal the county names of the five neighboring polygons, the code chunk will be used:
+
+```{r}
+#| code-fold: false
+hunan$NAME_3[c(2,3,4,57,85)]
+```
+## **Retrieving GDPCC of countries by polygon #**
+
+```{r}
+#| code-fold: false
+# Store all neighbor polygon IDs in new variable
+nb1 <- wm_q[[1]]
+# Replace polygon IDs in the variable with respective GDPPC
+nb1 <- hunan$GDPPC[nb1]
+
+nb1
+```
+The printed output above shows that the GDPPC of the five nearest neighbors based on Queen’s method are 20981, 34592, 24473, 21311 and 22879 respectively.
+
+### **Displaying complete matrix**
+
+You can display the complete weight matrix by using `str()`
+
+```{r}
+#| code-fold: false
+str(wm_q)
+```
+
+:::
+
+## Creating **Rook** contiguity based neighbours
+
+### Compute the Rook contiguity matrix by altering `queen` argument of `poly2nb()` function:
+
+```{r}
+#| code-fold: false
+wm_r <- poly2nb(hunan, 
+                queen = FALSE)
+summary(wm_r)
+```
+::: {.focusbox .solve data-latex="focus"}
+
+The summary report shows that:
+
+*  There are 88 area units in Hunan
+*  The most connected area unit has 10 neighbors (links)
+*  The two least connected areas have only 1 neighbor
+
+:::
+
+# Visualising Contiguity 1
+
+A connectivity graph takes a point and displays a line connecting to each neighboring point. The current geospatial dataset only has **polygons** at the moment, so we will need to compute **points** in order to make our connectivity graphs. The most typical method for this will be using **polygon centroids.**
+
+::: panel-tabset
+
+## **Step 1: Generate lon & lat values for each polygon centroid**
+
+To get our **longitude** values we map the `st_centroid` function over the geometry column of us.bound and access the longitude value through double bracket notation [[]] and 1. This allows us to get only the longitude, which is the first value in each centroid.
+
+```{r}
+#| code-fold: false
+longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
+```
+
+We do the same for latitude with one key difference. We access the second value per each centroid with [[2]].
+
+```{r}
+#| code-fold: false
+latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
+```
+
+## **combine lon & lat values into single data object**
+
+```{r}
+#| code-fold: false
+coords <- cbind(longitude, latitude)
+```
+
+Check the first few observations to see if things are formatted correctly:
+
+```{r}
+head(coords)
+```
+:::
+
+## Plotting Queen contiguity as a map
+
+```{r}
+#| fig-width: 6
+#| fig-height: 6
+plot(hunan$geometry, 
+     border = "#ABA9C3")
+plot(wm_q, 
+     coords, 
+     pch = 20, 
+     cex = .7, 
+     add = TRUE, 
+     col= "salmon"
+     )
+```
+
+## Plotting Rook contiguity as a map
+
+```{r}
+#| fig-width: 6
+#| fig-height: 6
+plot(hunan$geometry, border="lightgrey")
+plot(wm_r, 
+     coords, 
+     pch = 19, 
+     cex = 0.6, 
+     add = TRUE, 
+     col = "#129490")
+```
+
+## Putting both maps together
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+par(mfrow = c(1,2))
+
+# Queen
+plot(hunan$geometry, 
+     border = "lightgrey")
+plot(wm_q, 
+     coords, 
+     pch = 20, 
+     cex = .7, 
+     add = TRUE, 
+     col = "salmon",
+     main = "Queen Contiguity"
+     )
+
+# Rook
+plot(hunan$geometry, border="lightgrey")
+plot(wm_r, 
+     coords, 
+     pch = 19, 
+     cex = 0.6, 
+     add = TRUE, 
+     col = "#129490",
+     main = "Rook Contiguity")
+
+```
+
+# Computing distance-based neighbors
+
+Several steps are needed to obtain a *distance threshold* or *cut-off distance* that will be used to **define neighbors** in the analysis. This `cut-off distance` is crucial for creating a **weight matrix** that reflects the spatial relationships between regions based on their proximity within this defined distance band. 
+
+## Defining cut-off distance
+
+::: panel-tabset
+
+## **Step 1: Create a list of neighbors**
+
+* `knearneigh(coords)` is used to find k nearest neighbors for each point in the spatial dataset defined by the `coords` variable. **Returns:** k-nearest neighbor object (kn object)
+
+* `knn2nb()` is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors. **Returns:** neighbors list (nb object)
+
+```{r}
+#| code-fold: false
+k1 <- knn2nb(knearneigh(coords))
+```
+
+## **Step 2: Calculate distance using `nbdists()`**
+
+*   `nbdists()` calculates the distances between neighboring regions defined by the neighbors list **k1**
+*    The `longlat = TRUE` argument indicates that the distances should be calculated assuming longitude and latitude coordinates, and it returns the distances in kilometers
+*   `unlist()` flattens the result, converting it from a list structure to a simple numeric vector
+
+```{r}
+#| code-fold: false
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+```
+
+## **Step 3: Determine upper threshold**
+
+```{r}
+#| code-fold: false
+
+summary(k1dists)
+```
+The summary report shows that **the largest first nearest neighbour distance is 61.79 km**, so using this as the upper threshold gives certainty that all units will have at least one neighbour.
+
+:::
+
+## Computing fixed distance weight matrix
+
+This is done using `dnearneigh()`:
+
+```{r}
+#| code-fold: false
+wm_d62 <- dnearneigh(
+  coords, 
+  # specify lower and upper distance bands
+  0, 62, 
+  longlat = TRUE)
+
+wm_d62
+```
+::: {.focusbox .solve data-latex="focus"}
+
+The summary report shows that:
+
+*  There are 88 area units in Hunan
+*  There are 324 links between regions that fall within the distance band of 0 - 62km
+*  On average, each region has about 3-4 neighbors that fall within the distance band
+
+:::
+
+
+::: panel-tabset
+
+## Content of `wm_d62` weight matrix
+
+```{r}
+#| code-fold: false
+str(wm_d62)
+```
+
+## Structure of `wm_d62` weight matrix
+
+Use a combination of` table()` and `card()` of **spdep**
+
+```{r}
+#| code-fold: false
+table(hunan$County, card(wm_d62))
+```  
+
+
+:::
+
+
+# Visualising Contiguity 2
+
+```{r}
+plot(hunan$geometry, border = "lightgrey")
+
+plot(wm_d62, coords, add = TRUE)
+plot(k1, coords, add = TRUE, col = "salmon", length = .08)
+```
+
+The red lines show the links of 1st nearest neighbours and the black lines show the links of neighbors within the cut-off distance of 62km.
+
+```{r}
+par(mfrow=c(1,2))
+par(family = "mono")
+
+plot(hunan$geometry, border="lightgrey")
+
+plot(k1, coords, add=TRUE, col="salmon", length=0.08, main="1st nearest neighbours")
+title("1st Nearest Neighbours")
+
+plot(hunan$geometry, border="lightgrey")
+
+plot(wm_d62, coords, add=TRUE, pch = 19, cex = 0.6, main="Distance links")
+title("Distance Links")
+
+```
+

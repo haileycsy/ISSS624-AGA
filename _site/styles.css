@@ -23,10 +23,10 @@
 .cautionbox {
   padding: 1em 1em 1em 4em;
   margin-bottom: 10px;
-  border: 1.5px solid #3A3B60;
+  border: 1.5px solid #1F363D;
   border-radius: 10px;
   font-size: 13px;
-  background: #fac978 5px center/3em no-repeat;
+  background: #FDF0D5 5px center/3em no-repeat;
 }
 
 .caution {
@@ -36,23 +36,23 @@
 .focusbox {
   padding: 1em 1em 1em 4em;
   margin-bottom: 10px;
-  border: 1.5px solid #3A3B60;
+  border: 1.5px solid #1F363D;
   border-radius: 10px;
   font-size: 13px;
-  background: #a3b1e6 5px center/3em no-repeat;
+  background: #CED3DC 5px center/3em no-repeat;
 }
 
 .focus {
-  background-image: url("Images/focus.png");
+  background-image: url("Images/investigation.png");
 }
 
 .pinbox {
   padding: 1em 1em 1em 4em;
   margin-bottom: 10px;
-  border: 1.5px solid #3A3B60;
+  border: 1.5px solid #1F363D;
   border-radius: 10px;
   font-size: 13px;
-  background: #d6a3ac 10px center/2.5em no-repeat;
+  background: #E9B6B2 10px center/2.5em no-repeat;
 }
 
 .pin {
@@ -62,10 +62,10 @@
 .solvebox {
   padding: 1em 1em 1em 4em;
   margin-bottom: 10px;
-  border: 1.5px solid #3A3B60;
+  border: 1.5px solid #1F363D;
   border-radius: 10px;
   font-size: 13px;
-  background: #a9d9d4 5px center/3em no-repeat;
+  background: #C6D8D3 5px center/3em no-repeat;
 }
 
 .solve {
@@ -75,10 +75,10 @@
 .pencilbox {
   padding: 1em 1em 1em 4em;
   margin-bottom: 10px;
-  border: 1.5px solid #3A3B60;
+  border: 1.5px solid #1F363D;
   border-radius: 10px;
   font-size: 13px;
-  background:  #dfdfeb 5px center/3em no-repeat;
+  background:  #ABA9C3 5px center/3em no-repeat;
 }
 
 .pencil {
