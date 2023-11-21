@@ -14,6 +14,23 @@ execute:
 
 <font size = "5">**Spatial Weights and Applications**</font>
 
+A key aspect of spatial analysis is to measure the **strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.** This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning.
+[Handbook of Spatial Analysis](https://www.insee.fr/en/information/3635545)
+
+Computing **spatial weights and neighbor links** is a necessary part of this analysis process, and is the key focus of this exercise. 
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+**What are Spatial Weights?**
+
+**Spatial weights** are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.
+
+-   Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: *What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?*
+-   Spatial questions target specific information about the spatial configuration of a specific target ("a neighborhood," "my stalled car") and geographically connected relevant sites ("adjacent neighborhoods", "nearby gas stations")
+
+:::
+
 # Installing R packages
 
 ```{r}
@@ -84,23 +101,14 @@ tmap_arrange(basemap,
 
 # The **neighborhood** in Spatial Analysis
 
-An important concept in spatial analysis is that of a *neighborhood*, which refers to those data points that we consider to be proximate to a given focal data point. With area-based vector data (polygons), there are multiple ways to measure proximity: 
+An important concept in spatial analysis is that of a *neighborhood*, which refers to those data points that we consider to be proximate to a given focal data point. With area-based vector data (polygons), there are multiple ways to measure proximity:
 
-* **Contiguity-based neighbors** consider neighboring polygons to be those that “touch” a focal polygon, and are derived in **spdep** package with the `poly2nb()` function
+-   **Contiguity-based neighbors** consider neighboring polygons to be those that "touch" a focal polygon, and are derived in **spdep** package with the `poly2nb()` function
 
-*  **Distance-based neighbors** are those within a given proximity threshold to a focal polygon; distances are measured between polygon centroid using the `knn2nb()` function
+-   **Distance-based neighbors** are those within a given proximity threshold to a focal polygon; distances are measured between polygon centroid using the `knn2nb()` function
 
 
-## **What are Spatial Weights?**
 
-::: {.pinbox .solve data-latex="pin"}
-
-**Spatial weights** are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.
-
--   Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: *What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?*
--   Spatial questions target specific information about the spatial configuration of a specific target ("a neighborhood," "my stalled car") and geographically connected relevant sites ("adjacent neighborhoods", "nearby gas stations")
-
-:::
 
 To use this information in statistical analysis, it's often necessary to compute these relationships between all pairs of observations. This means building a topology ---- a mathematical structure that expresses the connectivity between observations ---- that we can use to examine the data.
 
@@ -111,13 +119,11 @@ To use this information in statistical analysis, it's often necessary to compute
 ## **What is Contiguity?**
 
 ::: {.pinbox .solve data-latex="pin"}
-
 **Contiguity** happens when two spatial units share a common border.
 
-* **Queen Contiguity:** A neigboring polygon is one that shares a vertex with the focal polygon
+-   **Queen Contiguity:** A neigboring polygon is one that shares a vertex with the focal polygon
 
-* **Rook Contiguity:** A neigboring polygon is one that shares an edge (line segment) with the focal polygon
-
+-   **Rook Contiguity:** A neigboring polygon is one that shares an edge (line segment) with the focal polygon
 :::
 
 ## Computing **Queen contiguity** based neighbours
@@ -130,18 +136,16 @@ wm_q <- poly2nb(hunan,
                 queen = TRUE)
 summary(wm_q)
 ```
-::: {.focusbox .solve data-latex="focus"}
 
+::: {.focusbox .solve data-latex="focus"}
 The summary report shows that:
 
-*  There are 88 area units in Hunan
-*  The most connected area unit has 11 neighbors (links)
-*  The two least connected areas have only 1 neighbor
-
+-   There are 88 area units in Hunan
+-   The most connected area unit has 11 neighbors (links)
+-   The two least connected areas have only 1 neighbor
 :::
 
 ::: panel-tabset
-
 ## **Listing specific neighbors**
 
 For each polygon in our polygon object, `wm_q` lists all neighboring polygons. For example, to see the neighbors for polygon #1 in the object:
@@ -150,9 +154,10 @@ For each polygon in our polygon object, `wm_q` lists all neighboring polygons. F
 #| code-fold: false
 wm_q[[1]]
 ```
-Polygon #1 has 5 neighbors. 
 
-## **Retrieving Country names by polygon #**
+Polygon #1 has 5 neighbors.
+
+## **Retrieving Country names by polygon \#**
 
 We can retrieve the county name of Polygon ID=1 by using the code chunk below:
 
@@ -160,13 +165,15 @@ We can retrieve the county name of Polygon ID=1 by using the code chunk below:
 #| code-fold: false
 hunan$County[1]
 ```
+
 To reveal the county names of the five neighboring polygons, the code chunk will be used:
 
 ```{r}
 #| code-fold: false
 hunan$NAME_3[c(2,3,4,57,85)]
 ```
-## **Retrieving GDPCC of countries by polygon #**
+
+## **Retrieving GDPCC of countries by polygon \#**
 
 ```{r}
 #| code-fold: false
@@ -177,7 +184,8 @@ nb1 <- hunan$GDPPC[nb1]
 
 nb1
 ```
-The printed output above shows that the GDPPC of the five nearest neighbors based on Queen’s method are 20981, 34592, 24473, 21311 and 22879 respectively.
+
+The printed output above shows that the GDPPC of the five nearest neighbors based on Queen's method are 20981, 34592, 24473, 21311 and 22879 respectively.
 
 ### **Displaying complete matrix**
 
@@ -187,7 +195,6 @@ You can display the complete weight matrix by using `str()`
 #| code-fold: false
 str(wm_q)
 ```
-
 :::
 
 ## Creating **Rook** contiguity based neighbours
@@ -200,14 +207,13 @@ wm_r <- poly2nb(hunan,
                 queen = FALSE)
 summary(wm_r)
 ```
-::: {.focusbox .solve data-latex="focus"}
 
+::: {.focusbox .solve data-latex="focus"}
 The summary report shows that:
 
-*  There are 88 area units in Hunan
-*  The most connected area unit has 10 neighbors (links)
-*  The two least connected areas have only 1 neighbor
-
+-   There are 88 area units in Hunan
+-   The most connected area unit has 10 neighbors (links)
+-   The two least connected areas have only 1 neighbor
 :::
 
 # Visualising Contiguity 1
@@ -215,17 +221,16 @@ The summary report shows that:
 A connectivity graph takes a point and displays a line connecting to each neighboring point. The current geospatial dataset only has **polygons** at the moment, so we will need to compute **points** in order to make our connectivity graphs. The most typical method for this will be using **polygon centroids.**
 
 ::: panel-tabset
-
 ## **Step 1: Generate lon & lat values for each polygon centroid**
 
-To get our **longitude** values we map the `st_centroid` function over the geometry column of us.bound and access the longitude value through double bracket notation [[]] and 1. This allows us to get only the longitude, which is the first value in each centroid.
+To get our **longitude** values we map the `st_centroid` function over the geometry column of us.bound and access the longitude value through double bracket notation \[\[\]\] and 1. This allows us to get only the longitude, which is the first value in each centroid.
 
 ```{r}
 #| code-fold: false
 longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
 ```
 
-We do the same for latitude with one key difference. We access the second value per each centroid with [[2]].
+We do the same for latitude with one key difference. We access the second value per each centroid with \[\[2\]\].
 
 ```{r}
 #| code-fold: false
@@ -309,17 +314,16 @@ plot(wm_r,
 
 # Computing distance-based neighbors
 
-Several steps are needed to obtain a *distance threshold* or *cut-off distance* that will be used to **define neighbors** in the analysis. This `cut-off distance` is crucial for creating a **weight matrix** that reflects the spatial relationships between regions based on their proximity within this defined distance band. 
+Several steps are needed to obtain a *distance threshold* or *cut-off distance* that will be used to **define neighbors** in the analysis. This `cut-off distance` is crucial for creating a **weight matrix** that reflects the spatial relationships between regions based on their proximity within this defined distance band.
 
 ## Defining cut-off distance
 
 ::: panel-tabset
-
 ## **Step 1: Create a list of neighbors**
 
-* `knearneigh(coords)` is used to find k nearest neighbors for each point in the spatial dataset defined by the `coords` variable. **Returns:** k-nearest neighbor object (kn object)
+-   `knearneigh(coords)` is used to find k nearest neighbors for each point in the spatial dataset defined by the `coords` variable. **Returns:** k-nearest neighbor object (kn object)
 
-* `knn2nb()` is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors. **Returns:** neighbors list (nb object)
+-   `knn2nb()` is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors. **Returns:** neighbors list (nb object)
 
 ```{r}
 #| code-fold: false
@@ -328,9 +332,9 @@ k1 <- knn2nb(knearneigh(coords))
 
 ## **Step 2: Calculate distance using `nbdists()`**
 
-*   `nbdists()` calculates the distances between neighboring regions defined by the neighbors list **k1**
-*    The `longlat = TRUE` argument indicates that the distances should be calculated assuming longitude and latitude coordinates, and it returns the distances in kilometers
-*   `unlist()` flattens the result, converting it from a list structure to a simple numeric vector
+-   `nbdists()` calculates the distances between neighboring regions defined by the neighbors list **k1**
+-   The `longlat = TRUE` argument indicates that the distances should be calculated assuming longitude and latitude coordinates, and it returns the distances in kilometers
+-   `unlist()` flattens the result, converting it from a list structure to a simple numeric vector
 
 ```{r}
 #| code-fold: false
@@ -344,8 +348,8 @@ k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
 
 summary(k1dists)
 ```
-The summary report shows that **the largest first nearest neighbour distance is 61.79 km**, so using this as the upper threshold gives certainty that all units will have at least one neighbour.
 
+The summary report shows that **the largest first nearest neighbour distance is 61.79 km**, so using this as the upper threshold gives certainty that all units will have at least one neighbour.
 :::
 
 ## Computing fixed distance weight matrix
@@ -362,19 +366,16 @@ wm_d62 <- dnearneigh(
 
 wm_d62
 ```
-::: {.focusbox .solve data-latex="focus"}
 
+::: {.focusbox .solve data-latex="focus"}
 The summary report shows that:
 
-*  There are 88 area units in Hunan
-*  There are 324 links between regions that fall within the distance band of 0 - 62km
-*  On average, each region has about 3-4 neighbors that fall within the distance band
-
+-   There are 88 area units in Hunan
+-   There are 324 links between regions that fall within the distance band of 0 - 62km
+-   On average, each region has about 3-4 neighbors that fall within the distance band
 :::
 
-
 ::: panel-tabset
-
 ## Content of `wm_d62` weight matrix
 
 ```{r}
@@ -384,16 +385,13 @@ str(wm_d62)
 
 ## Structure of `wm_d62` weight matrix
 
-Use a combination of` table()` and `card()` of **spdep**
+Use a combination of`table()` and `card()` of **spdep**
 
 ```{r}
 #| code-fold: false
 table(hunan$County, card(wm_d62))
-```  
-
-
+```
 :::
-
 
 # Visualising Contiguity 2
 
@@ -422,3 +420,89 @@ title("Distance Links")
 
 ```
 
+# Computing Adaptive distance weight matrix
+
+In fixed distance weight matrices, more densely populated areas (usually the urban areas) tend to have more neighbors and the less densely settled areas (usually the rural counties) tend to have fewer neighbors. Having many neighbors smoothes the neighbor relationship across more neighbors.
+
+It is possible to control the numbers of neighbors directly using k-nearest neighbors, either accepting asymmetric neighbors or imposing symmetry -- stating `k = n` as a parameter where n = number of neighbors:
+
+```{r}
+#| code-fold: false
+
+knn6 <- knn2nb(knearneigh(coords, k = 6))
+knn6
+
+```
+
+```{r}
+#| fig-width: 6
+
+plot(hunan$geometry, border="#dfdfeb")
+
+plot(knn6, 
+     coords, 
+     pch = 15, 
+     cex = .6, 
+     add = TRUE, 
+     col = "#7F0799")
+```
+
+# Computing Inversed Distance Weights (IDW)
+
+The **Inverse Distance** method assigns weights to neighboring locations based on the inverse of the distance between them. **The closer two locations are, the higher the weight assigned to their relationship.** In an IDW spatial weight matrix, regions that are closer to each other will have higher weights, indicating a stronger spatial relationship.
+
+The followig steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix **wm_q** and the corresponding spatial coordinates, **coords**.
+
+::: panel-tabset
+## **Step 1: Compute Distances between areas**
+
+This is done through `nbdists()` of spdep:
+
+```{r}
+# Calculate distance between points
+dist <- nbdists(wm_q, coords, longlat = TRUE)
+
+# Calculate the inverse distance of each element in dist
+ids <- lapply(dist, function(x) 1/(x))
+ids
+```
+
+## **Step 2: Computing a row-standardized spatial weight matrix**
+
+Row-standardization involves dividing each weight in a row by the sum of weights in that row. This ensures that the weights for each observation (row) in the matrix sum to 1, making it a row-standardized spatial weight matrix.
+
+Row-standardization helps to remove the influence of the number of neighbors each observation has, making the spatial weight matrix more comparable across different datasets or regions.
+
+**style = “W” **
+
+```{r}
+#| code-fold: false
+rswm_q <- nb2listw(wm_q, 
+            # Specify spatial weights matrix
+                   style = "W", 
+            # regions with no neighbors are retained in matrix, weights set to zero
+                   zero.policy = TRUE)
+rswm_q
+```
+
+```{r}
+summary(unlist(rswm_q$weights))
+```
+
+
+
+**style = “B”** Creates a binary (unstandardized) spatial weights matrix. 
+
+```{r}
+rswm_ids <- nb2listw(wm_q, glist = ids, style = "B", zero.policy = TRUE)
+rswm_ids
+```
+```{r}
+summary(unlist(rswm_ids$weights))
+```
+
+:::
+
+# Spatial lag variables
+
+Spatial lag variables are used to account for spatial autocorrelation in the data, where the values of a variables in one location are influenced by the values of the variable in nearby locations. A spatially lagged variable is a weighted sum or a weighted average of the neighboring values for that variable where **Lag = E(x) or average value of the neighborhood** 

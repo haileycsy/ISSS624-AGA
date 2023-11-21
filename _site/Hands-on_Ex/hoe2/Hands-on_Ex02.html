@@ -227,18 +227,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data"><span class="toc-section-number">2.1</span>  Loading the data</a></li>
   </ul></li>
   <li><a href="#visualising-regional-development-indicators" id="toc-visualising-regional-development-indicators" class="nav-link" data-scroll-target="#visualising-regional-development-indicators"><span class="toc-section-number">3</span>  Visualising Regional Development Indicators</a></li>
-  <li><a href="#the-neighborhood-in-spatial-analysis" id="toc-the-neighborhood-in-spatial-analysis" class="nav-link" data-scroll-target="#the-neighborhood-in-spatial-analysis"><span class="toc-section-number">4</span>  The <strong>neighborhood</strong> in Spatial Analysis</a>
-  <ul class="collapse">
-  <li><a href="#what-are-spatial-weights" id="toc-what-are-spatial-weights" class="nav-link" data-scroll-target="#what-are-spatial-weights"><span class="toc-section-number">4.1</span>  <strong>What are Spatial Weights?</strong></a></li>
-  </ul></li>
+  <li><a href="#the-neighborhood-in-spatial-analysis" id="toc-the-neighborhood-in-spatial-analysis" class="nav-link" data-scroll-target="#the-neighborhood-in-spatial-analysis"><span class="toc-section-number">4</span>  The <strong>neighborhood</strong> in Spatial Analysis</a></li>
   <li><a href="#computing-contiguity-based-neighbors" id="toc-computing-contiguity-based-neighbors" class="nav-link" data-scroll-target="#computing-contiguity-based-neighbors"><span class="toc-section-number">5</span>  Computing contiguity-based neighbors</a>
   <ul class="collapse">
-  <li><a href="#what-is-contiguity" id="toc-what-is-contiguity" class="nav-link" data-scroll-target="#what-is-contiguity"><span class="toc-section-number">5.1</span>  <strong>What is Contiguity?</strong></a></li>
-  <li><a href="#computing-queen-contiguity-based-neighbours" id="toc-computing-queen-contiguity-based-neighbours" class="nav-link" data-scroll-target="#computing-queen-contiguity-based-neighbours"><span class="toc-section-number">5.2</span>  Computing <strong>Queen contiguity</strong> based neighbours</a></li>
-  <li><a href="#creating-rook-contiguity-based-neighbours" id="toc-creating-rook-contiguity-based-neighbours" class="nav-link" data-scroll-target="#creating-rook-contiguity-based-neighbours"><span class="toc-section-number">5.3</span>  Creating <strong>Rook</strong> contiguity based neighbours</a>
-  <ul class="collapse">
-  <li><a href="#compute-the-rook-contiguity-matrix-by-altering-queen-argument-of-poly2nb-function" id="toc-compute-the-rook-contiguity-matrix-by-altering-queen-argument-of-poly2nb-function" class="nav-link" data-scroll-target="#compute-the-rook-contiguity-matrix-by-altering-queen-argument-of-poly2nb-function"><span class="toc-section-number">5.3.1</span>  Compute the Rook contiguity matrix by altering <code>queen</code> argument of <code>poly2nb()</code> function:</a></li>
-  </ul></li>
+  <li><a href="#computing-queen-contiguity-based-neighbours" id="toc-computing-queen-contiguity-based-neighbours" class="nav-link" data-scroll-target="#computing-queen-contiguity-based-neighbours"><span class="toc-section-number">5.1</span>  Computing <strong>Queen contiguity</strong> based neighbours</a></li>
+  <li><a href="#creating-rook-contiguity-based-neighbours" id="toc-creating-rook-contiguity-based-neighbours" class="nav-link" data-scroll-target="#creating-rook-contiguity-based-neighbours"><span class="toc-section-number">5.2</span>  Creating <strong>Rook</strong> contiguity based neighbours</a></li>
   </ul></li>
   <li><a href="#visualising-contiguity-1" id="toc-visualising-contiguity-1" class="nav-link" data-scroll-target="#visualising-contiguity-1"><span class="toc-section-number">6</span>  Visualising Contiguity 1</a>
   <ul class="collapse">
@@ -252,6 +245,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#computing-fixed-distance-weight-matrix" id="toc-computing-fixed-distance-weight-matrix" class="nav-link" data-scroll-target="#computing-fixed-distance-weight-matrix"><span class="toc-section-number">7.2</span>  Computing fixed distance weight matrix</a></li>
   </ul></li>
   <li><a href="#visualising-contiguity-2" id="toc-visualising-contiguity-2" class="nav-link" data-scroll-target="#visualising-contiguity-2"><span class="toc-section-number">8</span>  Visualising Contiguity 2</a></li>
+  <li><a href="#computing-adaptive-distance-weight-matrix" id="toc-computing-adaptive-distance-weight-matrix" class="nav-link" data-scroll-target="#computing-adaptive-distance-weight-matrix"><span class="toc-section-number">9</span>  Computing Adaptive distance weight matrix</a></li>
+  <li><a href="#computing-inversed-distance-weights-idw" id="toc-computing-inversed-distance-weights-idw" class="nav-link" data-scroll-target="#computing-inversed-distance-weights-idw"><span class="toc-section-number">10</span>  Computing Inversed Distance Weights (IDW)</a>
+  <ul class="collapse">
+  <li><a href="#step-1-compute-distances-between-areas" id="toc-step-1-compute-distances-between-areas" class="nav-link" data-scroll-target="#step-1-compute-distances-between-areas"><span class="toc-section-number">10.1</span>  <strong>Step 1: Compute Distances between areas</strong></a></li>
+  </ul></li>
+  <li><a href="#weight-matrix-standardisation" id="toc-weight-matrix-standardisation" class="nav-link" data-scroll-target="#weight-matrix-standardisation"><span class="toc-section-number">11</span>  Weight Matrix Standardisation</a>
+  <ul class="collapse">
+  <li><a href="#row-standardization" id="toc-row-standardization" class="nav-link" data-scroll-target="#row-standardization"><span class="toc-section-number">11.1</span>  Row Standardization</a></li>
+  <li><a href="#unstandardized-weight-matrix" id="toc-unstandardized-weight-matrix" class="nav-link" data-scroll-target="#unstandardized-weight-matrix"><span class="toc-section-number">11.2</span>  Unstandardized weight matrix</a></li>
+  </ul></li>
+  <li><a href="#spatial-lag-variables" id="toc-spatial-lag-variables" class="nav-link" data-scroll-target="#spatial-lag-variables"><span class="toc-section-number">12</span>  Spatial lag variables</a></li>
   </ul>
 </nav>
     </div>
@@ -278,7 +282,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">November 20, 2023</p>
+      <p class="date-modified">November 21, 2023</p>
     </div>
   </div>
     
@@ -288,6 +292,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </header>
 
 <p><font size="5"><strong>Spatial Weights and Applications</strong></font></p>
+<p>A key aspect of spatial analysis is to measure the <strong>strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.</strong> This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning. Source: <a href="https://www.insee.fr/en/information/3635545">Handbook of Spatial Analysis</a></p>
+<p>Computing <strong>spatial weights and neighbor links</strong> is a necessary part of this analysis process, and is the key focus of this exercise.</p>
+<div class="pinbox solve">
+<p><strong>What are Spatial Weights?</strong></p>
+<p><strong>Spatial weights</strong> are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.</p>
+<ul>
+<li>Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: <em>What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?</em></li>
+<li>Spatial questions target specific information about the spatial configuration of a specific target (“a neighborhood,” “my stalled car”) and geographically connected relevant sites (“adjacent neighborhoods”, “nearby gas stations”)</li>
+</ul>
+</div>
 <section id="installing-r-packages" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Installing R packages</h1>
 <div class="cell">
@@ -501,34 +515,23 @@ Geodetic CRS:  WGS 84</code></pre>
 <li><p><strong>Contiguity-based neighbors</strong> consider neighboring polygons to be those that “touch” a focal polygon, and are derived in <strong>spdep</strong> package with the <code>poly2nb()</code> function</p></li>
 <li><p><strong>Distance-based neighbors</strong> are those within a given proximity threshold to a focal polygon; distances are measured between polygon centroid using the <code>knn2nb()</code> function</p></li>
 </ul>
-<section id="what-are-spatial-weights" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="what-are-spatial-weights"><span class="header-section-number">4.1</span> <strong>What are Spatial Weights?</strong></h2>
-<div class="pinbox solve">
-<p><strong>Spatial weights</strong> are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.</p>
-<ul>
-<li>Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: <em>What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?</em></li>
-<li>Spatial questions target specific information about the spatial configuration of a specific target (“a neighborhood,” “my stalled car”) and geographically connected relevant sites (“adjacent neighborhoods”, “nearby gas stations”)</li>
-</ul>
-</div>
-<p>To use this information in statistical analysis, it’s often necessary to compute these relationships between all pairs of observations. This means building a topology —- a mathematical structure that expresses the connectivity between observations —- that we can use to examine the data.</p>
-<p><strong>Spatial weights matrices</strong> express this topology of relations as a binary relationship, with weights 1 and 0.</p>
-</section>
+<p><img src="images/spatial_relations.png" class="img-fluid"></p>
+<p>To use this information in statistical analysis, it’s often necessary to compute these relationships between all pairs of observations. This means building a topology —- a mathematical structure that expresses the connectivity between observations —- that we can use to examine the data. <strong>A neighborhood matrix is a binary matrix that indicates whether pairs of locations are neighbors or not</strong>, expressing this topology of relations with weights 1 and 0.</p>
 </section>
 <section id="computing-contiguity-based-neighbors" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Computing contiguity-based neighbors</h1>
-<section id="what-is-contiguity" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="what-is-contiguity"><span class="header-section-number">5.1</span> <strong>What is Contiguity?</strong></h2>
+<p>Defining a neighbourhood in the sense of contiguity is often used to study demographic and social data, in which it may be more important to be on either side of an administrative boundary than to be located at a certain distance from one another.</p>
 <div class="pinbox solve">
 <p><strong>Contiguity</strong> happens when two spatial units share a common border.</p>
 <ul>
-<li><p><strong>Queen Contiguity:</strong> A neigboring polygon is one that shares a vertex with the focal polygon</p></li>
-<li><p><strong>Rook Contiguity:</strong> A neigboring polygon is one that shares an edge (line segment) with the focal polygon</p></li>
+<li><strong>Queen Contiguity:</strong> A neigboring polygon is one that shares a vertex with the focal polygon</li>
+<li><strong>Rook Contiguity:</strong> A neigboring polygon is one that shares an edge (line segment) with the focal polygon</li>
 </ul>
 </div>
-</section>
-<section id="computing-queen-contiguity-based-neighbours" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="computing-queen-contiguity-based-neighbours"><span class="header-section-number">5.2</span> Computing <strong>Queen contiguity</strong> based neighbours</h2>
-<p>The code chunk below computes a contiguity matrix based on Queen contiguity principle:</p>
+<p><img src="images/contiguity.png" class="img-fluid"></p>
+<section id="computing-queen-contiguity-based-neighbours" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="computing-queen-contiguity-based-neighbours"><span class="header-section-number">5.1</span> Computing <strong>Queen contiguity</strong> based neighbours</h2>
+<p>The code chunk below computes a contiguity matrix based on Queen contiguity principle and returns a <strong>neighbor list object</strong>:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, </span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">queen =</span> <span class="cn">TRUE</span>)</span>
@@ -599,8 +602,8 @@ Link number distribution:
 </div>
 </div>
 <p>The printed output above shows that the GDPPC of the five nearest neighbors based on Queen’s method are 20981, 34592, 24473, 21311 and 22879 respectively.</p>
-<section id="displaying-complete-matrix" class="level3" data-number="5.2.1">
-<h3 data-number="5.2.1" class="anchored" data-anchor-id="displaying-complete-matrix"><span class="header-section-number">5.2.1</span> <strong>Displaying complete matrix</strong></h3>
+<section id="displaying-complete-matrix" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="displaying-complete-matrix"><span class="header-section-number">5.1.1</span> <strong>Displaying complete matrix</strong></h3>
 <p>You can display the complete weight matrix by using <code>str()</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -706,10 +709,9 @@ Link number distribution:
 </div>
 </div>
 </section>
-<section id="creating-rook-contiguity-based-neighbours" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="creating-rook-contiguity-based-neighbours"><span class="header-section-number">5.3</span> Creating <strong>Rook</strong> contiguity based neighbours</h2>
-<section id="compute-the-rook-contiguity-matrix-by-altering-queen-argument-of-poly2nb-function" class="level3" data-number="5.3.1">
-<h3 data-number="5.3.1" class="anchored" data-anchor-id="compute-the-rook-contiguity-matrix-by-altering-queen-argument-of-poly2nb-function"><span class="header-section-number">5.3.1</span> Compute the Rook contiguity matrix by altering <code>queen</code> argument of <code>poly2nb()</code> function:</h3>
+<section id="creating-rook-contiguity-based-neighbours" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="creating-rook-contiguity-based-neighbours"><span class="header-section-number">5.2</span> Creating <strong>Rook</strong> contiguity based neighbours</h2>
+<p>Compute the Rook contiguity matrix by altering <code>queen</code> argument of <code>poly2nb()</code> function to return a <strong>neighbor list object</strong>:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>wm_r <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, </span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">queen =</span> <span class="cn">FALSE</span>)</span>
@@ -738,7 +740,6 @@ Link number distribution:
 <li>The two least connected areas have only 1 neighbor</li>
 </ul>
 </div>
-</section>
 </section>
 </section>
 <section id="visualising-contiguity-1" class="level1" data-number="6">
@@ -864,10 +865,19 @@ Link number distribution:
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <ul>
 <li><p><code>knearneigh(coords)</code> is used to find k nearest neighbors for each point in the spatial dataset defined by the <code>coords</code> variable. <strong>Returns:</strong> k-nearest neighbor object (kn object)</p></li>
-<li><p><code>knn2nb()</code> is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors. <strong>Returns:</strong> neighbors list (nb object)</p></li>
+<li><p><code>knn2nb()</code> is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors and returns a <strong>neighbor list object</strong>:</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>k1 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>k1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 88 
+Percentage nonzero weights: 1.136364 
+Average number of links: 1 
+Non-symmetric neighbours list</code></pre>
+</div>
 </div>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
@@ -877,12 +887,12 @@ Link number distribution:
 <li><code>unlist()</code> flattens the result, converting it from a list structure to a simple numeric vector</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>k1dists <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">nbdists</span>(k1, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>k1dists <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">nbdists</span>(k1, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(k1dists)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(k1dists)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
   24.79   32.57   38.01   39.07   44.52   61.79 </code></pre>
@@ -897,13 +907,13 @@ Link number distribution:
 <h2 data-number="7.2" class="anchored" data-anchor-id="computing-fixed-distance-weight-matrix"><span class="header-section-number">7.2</span> Computing fixed distance weight matrix</h2>
 <p>This is done using <code>dnearneigh()</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>wm_d62 <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  coords, </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># specify lower and upper distance bands</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>, <span class="dv">62</span>, </span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>wm_d62</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>wm_d62 <span class="ot">&lt;-</span> <span class="fu">dnearneigh</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  coords, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># specify lower and upper distance bands</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>, <span class="dv">62</span>, </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>wm_d62</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
 Number of regions: 88 
@@ -925,7 +935,7 @@ Average number of links: 3.681818 </code></pre>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_d62)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wm_d62)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of 88
  $ : int [1:5] 3 4 5 57 64
@@ -1027,9 +1037,11 @@ Average number of links: 3.681818 </code></pre>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
-<p>Use a combination of<code>table()</code> and <code>card()</code> of <strong>spdep</strong></p>
+<p>Use a combination of<code>table()</code> and <code>card()</code> to return a <strong>contingency matrix</strong> of number of neighbors per country:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(hunan<span class="sc">$</span>County, <span class="fu">card</span>(wm_d62))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(hunan<span class="sc">$</span>County, </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># list number of neighbors for each area</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>      <span class="fu">card</span>(wm_d62))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               
                 1 2 3 4 5 6
@@ -1133,10 +1145,10 @@ Average number of links: 3.681818 </code></pre>
 <div class="cell">
 <details>
 <summary>code block</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"salmon"</span>, <span class="at">length =</span> .<span class="dv">08</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border =</span> <span class="st">"lightgrey"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"salmon"</span>, <span class="at">length =</span> .<span class="dv">08</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Hands-on_Ex02_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
@@ -1146,23 +1158,440 @@ Average number of links: 3.681818 </code></pre>
 <div class="cell">
 <details>
 <summary>code block</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">family =</span> <span class="st">"mono"</span>)</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border=</span><span class="st">"lightgrey"</span>)</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add=</span><span class="cn">TRUE</span>, <span class="at">col=</span><span class="st">"salmon"</span>, <span class="at">length=</span><span class="fl">0.08</span>, <span class="at">main=</span><span class="st">"1st nearest neighbours"</span>)</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="st">"1st Nearest Neighbours"</span>)</span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border=</span><span class="st">"lightgrey"</span>)</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add=</span><span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">main=</span><span class="st">"Distance links"</span>)</span>
-<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="st">"Distance Links"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">family =</span> <span class="st">"mono"</span>)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border=</span><span class="st">"lightgrey"</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(k1, coords, <span class="at">add=</span><span class="cn">TRUE</span>, <span class="at">col=</span><span class="st">"salmon"</span>, <span class="at">length=</span><span class="fl">0.08</span>, <span class="at">main=</span><span class="st">"1st nearest neighbours"</span>)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="st">"1st Nearest Neighbours"</span>)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border=</span><span class="st">"lightgrey"</span>)</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(wm_d62, coords, <span class="at">add=</span><span class="cn">TRUE</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.6</span>, <span class="at">main=</span><span class="st">"Distance links"</span>)</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="fu">title</span>(<span class="st">"Distance Links"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="Hands-on_Ex02_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
+<section id="computing-adaptive-distance-weight-matrix" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Computing Adaptive distance weight matrix</h1>
+<p>In fixed distance weight matrices, more densely populated areas (usually the urban areas) tend to have more neighbors and the less densely settled areas (usually the rural counties) tend to have fewer neighbors. Having many neighbors smoothes the neighbor relationship across more neighbors.</p>
+<p>It is possible to control the numbers of neighbors directly using k-nearest neighbors, either accepting asymmetric neighbors or imposing symmetry – stating <code>k = n</code> as a parameter where n = number of neighbors:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>knn6 <span class="ot">&lt;-</span> <span class="fu">knn2nb</span>(<span class="fu">knearneigh</span>(coords, <span class="at">k =</span> <span class="dv">6</span>))</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>knn6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 528 
+Percentage nonzero weights: 6.818182 
+Average number of links: 6 
+Non-symmetric neighbours list</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>code block</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hunan<span class="sc">$</span>geometry, <span class="at">border=</span><span class="st">"#dfdfeb"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(knn6, </span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>     coords, </span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">15</span>, </span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">cex =</span> .<span class="dv">6</span>, </span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">add =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="st">"#7F0799"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Hands-on_Ex02_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="576"></p>
+</div>
+</div>
+</section>
+<section id="computing-inversed-distance-weights-idw" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Computing Inversed Distance Weights (IDW)</h1>
+<p>The <strong>Inverse Distance</strong> method assigns weights to neighboring locations based on the inverse of the distance between them. <strong>The closer two locations are, the higher the weight assigned to their relationship.</strong> In an IDW spatial weight matrix, regions that are closer to each other will have higher weights, indicating a stronger spatial relationship.</p>
+<p>The following steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix <strong>wm_q</strong> and the corresponding spatial coordinates, <strong>coords</strong>.</p>
+<p>::: panel-tabset</p>
+<section id="step-1-compute-distances-between-areas" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="step-1-compute-distances-between-areas"><span class="header-section-number">10.1</span> <strong>Step 1: Compute Distances between areas</strong></h2>
+<p>This is done through <code>nbdists()</code> of spdep:</p>
+<div class="cell">
+<details>
+<summary>code block</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate distance between points</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">nbdists</span>(wm_q, coords, <span class="at">longlat =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the inverse distance of each element in dist</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">lapply</span>(dist, <span class="cf">function</span>(x) <span class="dv">1</span><span class="sc">/</span>(x))</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>ids</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+[1] 0.01535405 0.03916350 0.01820896 0.02807922 0.01145113
+
+[[2]]
+[1] 0.01535405 0.01764308 0.01925924 0.02323898 0.01719350
+
+[[3]]
+[1] 0.03916350 0.02822040 0.03695795 0.01395765
+
+[[4]]
+[1] 0.01820896 0.02822040 0.03414741 0.01539065
+
+[[5]]
+[1] 0.03695795 0.03414741 0.01524598 0.01618354
+
+[[6]]
+[1] 0.015390649 0.015245977 0.021748129 0.011883901 0.009810297
+
+[[7]]
+[1] 0.01708612 0.01473997 0.01150924 0.01872915
+
+[[8]]
+[1] 0.02022144 0.03453056 0.02529256 0.01036340 0.02284457 0.01500600 0.01515314
+
+[[9]]
+[1] 0.02022144 0.01574888 0.02109502 0.01508028 0.02902705 0.01502980
+
+[[10]]
+[1] 0.02281552 0.01387777 0.01538326 0.01346650 0.02100510 0.02631658 0.01874863
+[8] 0.01500046
+
+[[11]]
+[1] 0.01882869 0.02243492 0.02247473
+
+[[12]]
+[1] 0.02779227 0.02419652 0.02333385 0.02986130 0.02335429
+
+[[13]]
+[1] 0.02779227 0.02650020 0.02670323 0.01714243
+
+[[14]]
+[1] 0.01882869 0.01233868 0.02098555
+
+[[15]]
+[1] 0.02650020 0.01233868 0.01096284 0.01562226
+
+[[16]]
+[1] 0.02281552 0.02466962 0.02765018 0.01476814 0.01671430
+
+[[17]]
+[1] 0.01387777 0.02243492 0.02098555 0.01096284 0.02466962 0.01593341 0.01437996
+
+[[18]]
+[1] 0.02039779 0.02032767 0.01481665 0.01473691 0.01459380
+
+[[19]]
+[1] 0.01538326 0.01926323 0.02668415 0.02140253 0.01613589 0.01412874
+
+[[20]]
+[1] 0.01346650 0.02039779 0.01926323 0.01723025 0.02153130 0.01469240 0.02327034
+
+[[21]]
+[1] 0.02668415 0.01723025 0.01766299 0.02644986 0.02163800
+
+[[22]]
+[1] 0.02100510 0.02765018 0.02032767 0.02153130 0.01489296
+
+[[23]]
+[1] 0.01481665 0.01469240 0.01401432 0.02246233 0.01880425 0.01530458 0.01849605
+
+[[24]]
+[1] 0.02354598 0.01837201 0.02607264 0.01220154 0.02514180
+
+[[25]]
+[1] 0.02354598 0.02188032 0.01577283 0.01949232 0.02947957
+
+[[26]]
+[1] 0.02155798 0.01745522 0.02212108 0.02220532
+
+[[27]]
+[1] 0.02155798 0.02490625 0.01562326
+
+[[28]]
+[1] 0.01837201 0.02188032 0.02229549 0.03076171 0.02039506
+
+[[29]]
+[1] 0.02490625 0.01686587 0.01395022
+
+[[30]]
+[1] 0.02090587
+
+[[31]]
+[1] 0.02607264 0.01577283 0.01219005 0.01724850 0.01229012 0.01609781 0.01139438
+[8] 0.01150130
+
+[[32]]
+[1] 0.01220154 0.01219005 0.01712515 0.01340413 0.01280928 0.01198216 0.01053374
+[8] 0.01065655
+
+[[33]]
+[1] 0.01949232 0.01745522 0.02229549 0.02090587 0.01979045
+
+[[34]]
+[1] 0.03113041 0.03589551 0.02882915
+
+[[35]]
+[1] 0.01766299 0.02185795 0.02616766 0.02111721 0.02108253 0.01509020
+
+[[36]]
+[1] 0.01724850 0.03113041 0.01571707 0.01860991 0.02073549 0.01680129
+
+[[37]]
+[1] 0.01686587 0.02234793 0.01510990 0.01550676
+
+[[38]]
+[1] 0.01401432 0.02407426 0.02276151 0.01719415
+
+[[39]]
+[1] 0.01229012 0.02172543 0.01711924 0.02629732 0.01896385
+
+[[40]]
+[1] 0.01609781 0.01571707 0.02172543 0.01506473 0.01987922 0.01894207
+
+[[41]]
+[1] 0.02246233 0.02185795 0.02205991 0.01912542 0.01601083 0.01742892
+
+[[42]]
+[1] 0.02212108 0.01562326 0.01395022 0.02234793 0.01711924 0.01836831 0.01683518
+
+[[43]]
+[1] 0.01510990 0.02629732 0.01506473 0.01836831 0.03112027 0.01530782
+
+[[44]]
+[1] 0.01550676 0.02407426 0.03112027 0.01486508
+
+[[45]]
+[1] 0.03589551 0.01860991 0.01987922 0.02205991 0.02107101 0.01982700
+
+[[46]]
+[1] 0.03453056 0.04033752 0.02689769
+
+[[47]]
+[1] 0.02529256 0.02616766 0.04033752 0.01949145 0.02181458
+
+[[48]]
+[1] 0.02313819 0.03370576 0.02289485 0.01630057 0.01818085
+
+[[49]]
+[1] 0.03076171 0.02138091 0.02394529 0.01990000
+
+[[50]]
+[1] 0.01712515 0.02313819 0.02551427 0.02051530 0.02187179
+
+[[51]]
+[1] 0.03370576 0.02138091 0.02873854
+
+[[52]]
+[1] 0.02289485 0.02394529 0.02551427 0.02873854 0.03516672
+
+[[53]]
+[1] 0.01630057 0.01979945 0.01253977
+
+[[54]]
+[1] 0.02514180 0.02039506 0.01340413 0.01990000 0.02051530 0.03516672
+
+[[55]]
+[1] 0.01280928 0.01818085 0.02187179 0.01979945 0.01882298
+
+[[56]]
+[1] 0.01036340 0.01139438 0.01198216 0.02073549 0.01214479 0.01362855 0.01341697
+
+[[57]]
+[1] 0.028079221 0.017643082 0.031423501 0.029114131 0.013520292 0.009903702
+
+[[58]]
+[1] 0.01925924 0.03142350 0.02722997 0.01434859 0.01567192
+
+[[59]]
+[1] 0.01696711 0.01265572 0.01667105 0.01785036
+
+[[60]]
+[1] 0.02419652 0.02670323 0.01696711 0.02343040
+
+[[61]]
+[1] 0.02333385 0.01265572 0.02343040 0.02514093 0.02790764 0.01219751 0.02362452
+
+[[62]]
+[1] 0.02514093 0.02002219 0.02110260
+
+[[63]]
+[1] 0.02986130 0.02790764 0.01407043 0.01805987
+
+[[64]]
+[1] 0.02911413 0.01689892
+
+[[65]]
+[1] 0.02471705
+
+[[66]]
+[1] 0.01574888 0.01726461 0.03068853 0.01954805 0.01810569
+
+[[67]]
+[1] 0.01708612 0.01726461 0.01349843 0.01361172
+
+[[68]]
+[1] 0.02109502 0.02722997 0.03068853 0.01406357 0.01546511
+
+[[69]]
+[1] 0.02174813 0.01645838 0.01419926
+
+[[70]]
+[1] 0.02631658 0.01963168 0.02278487
+
+[[71]]
+[1] 0.01473997 0.01838483 0.03197403
+
+[[72]]
+[1] 0.01874863 0.02247473 0.01476814 0.01593341 0.01963168
+
+[[73]]
+[1] 0.01500046 0.02140253 0.02278487 0.01838483 0.01652709
+
+[[74]]
+[1] 0.01150924 0.01613589 0.03197403 0.01652709 0.01342099 0.02864567
+
+[[75]]
+[1] 0.011883901 0.010533736 0.012539774 0.018822977 0.016458383 0.008217581
+
+[[76]]
+[1] 0.01352029 0.01434859 0.01689892 0.02471705 0.01954805 0.01349843 0.01406357
+
+[[77]]
+[1] 0.014736909 0.018804247 0.022761507 0.012197506 0.020022195 0.014070428
+[7] 0.008440896
+
+[[78]]
+[1] 0.02323898 0.02284457 0.01508028 0.01214479 0.01567192 0.01546511 0.01140779
+
+[[79]]
+[1] 0.01530458 0.01719415 0.01894207 0.01912542 0.01530782 0.01486508 0.02107101
+
+[[80]]
+[1] 0.01500600 0.02882915 0.02111721 0.01680129 0.01601083 0.01982700 0.01949145
+[8] 0.01362855
+
+[[81]]
+[1] 0.02947957 0.02220532 0.01150130 0.01979045 0.01896385 0.01683518
+
+[[82]]
+[1] 0.02327034 0.02644986 0.01849605 0.02108253 0.01742892
+
+[[83]]
+[1] 0.023354289 0.017142433 0.015622258 0.016714303 0.014379961 0.014593799
+[7] 0.014892965 0.018059871 0.008440896
+
+[[84]]
+[1] 0.01872915 0.02902705 0.01810569 0.01361172 0.01342099 0.01297994
+
+[[85]]
+ [1] 0.011451133 0.017193502 0.013957649 0.016183544 0.009810297 0.010656545
+ [7] 0.013416965 0.009903702 0.014199260 0.008217581 0.011407794
+
+[[86]]
+[1] 0.01515314 0.01502980 0.01412874 0.02163800 0.01509020 0.02689769 0.02181458
+[8] 0.02864567 0.01297994
+
+[[87]]
+[1] 0.01667105 0.02362452 0.02110260 0.02058034
+
+[[88]]
+[1] 0.01785036 0.02058034</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="weight-matrix-standardisation" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Weight Matrix Standardisation</h1>
+<p>The sum of the weights of the neighbors of a zone is called its <em>degree of connection</em>. Standardized matrices ensure that the degree of connection will depend on the number of its neighbours, which creates heterogeneity between the zones.</p>
+<div class="pinbox solve">
+<p><strong>Types of Standardization:</strong></p>
+<ul>
+<li>Row Standardization, “W”</li>
+<li>Global Standardization, “C”</li>
+<li>Uniform Standardization, “U”</li>
+<li>Variance Stabilization, “S”</li>
+<li>No Standardization, “B”</li>
+</ul>
+</div>
+<p>In general, Row standardization gives more weight to observations bordering the study zone, with a small number of neighbors. In global or uniform standardization, the observations in the centre of the study zone with a large number of neighbors, and are thus subject to more external influences than the border zones. This heterogeneity can have a significant impact on the results of spatial autocorrelation tests.</p>
+<section id="row-standardization" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="row-standardization"><span class="header-section-number">11.1</span> Row Standardization</h2>
+<p>Row-standardization involves dividing each weight in a row by the sum of weights in that row. This ensures that the weights for each observation (row) in the matrix sum to 1, making it a row-standardized spatial weight matrix.</p>
+<p>Row-standardization helps to remove the influence of the number of neighbors each observation has, making the spatial weight matrix more comparable across different datasets or regions.</p>
+<p><code>nb2listw()</code> function converts a neighbors list object into a <strong>weight list object</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>rswm_q <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Specify spatial weights matrix</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">style =</span> <span class="st">"W"</span>, </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>            <span class="co"># regions with no neighbors are retained in matrix, weights set to zero</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>rswm_q</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Characteristics of weights list object:
+Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 448 
+Percentage nonzero weights: 5.785124 
+Average number of links: 5.090909 
+
+Weights style: W 
+Weights constants summary:
+   n   nn S0       S1       S2
+W 88 7744 88 37.86334 365.9147</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>code block</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">unlist</span>(rswm_q<span class="sc">$</span>weights))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.09091 0.14286 0.20000 0.19643 0.20000 1.00000 </code></pre>
+</div>
+</div>
+</section>
+<section id="unstandardized-weight-matrix" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="unstandardized-weight-matrix"><span class="header-section-number">11.2</span> Unstandardized weight matrix</h2>
+<p><strong>style = “B”</strong> Creates a binary (unstandardized) <strong>weight list object</strong>:</p>
+<div class="cell">
+<details>
+<summary>code block</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>rswm_ids <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, <span class="at">glist =</span> ids, <span class="at">style =</span> <span class="st">"B"</span>, <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>rswm_ids</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Characteristics of weights list object:
+Neighbour list object:
+Number of regions: 88 
+Number of nonzero links: 448 
+Percentage nonzero weights: 5.785124 
+Average number of links: 5.090909 
+
+Weights style: B 
+Weights constants summary:
+   n   nn       S0        S1     S2
+B 88 7744 8.786867 0.3776535 3.8137</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>code block</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">unlist</span>(rswm_ids<span class="sc">$</span>weights))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.008218 0.015088 0.018739 0.019614 0.022823 0.040338 </code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="spatial-lag-variables" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Spatial lag variables</h1>
+<p>Spatial lag variables are used to account for spatial autocorrelation in the data, where the values of a variables in one location are influenced by the values of the variable in nearby locations. A spatially lagged variable is a weighted sum or a weighted average of the neighboring values for that variable where <strong>Lag = E(x) or average value of the neighborhood</strong></p>
 
 
 </section>
