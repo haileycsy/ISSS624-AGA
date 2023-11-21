@@ -14,21 +14,17 @@ execute:
 
 <font size = "5">**Spatial Weights and Applications**</font>
 
-A key aspect of spatial analysis is to measure the **strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.** This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning.
-[Handbook of Spatial Analysis](https://www.insee.fr/en/information/3635545)
+A key aspect of spatial analysis is to measure the **strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.** This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning. Source: [Handbook of Spatial Analysis](https://www.insee.fr/en/information/3635545)
 
-Computing **spatial weights and neighbor links** is a necessary part of this analysis process, and is the key focus of this exercise. 
-
+Computing **spatial weights and neighbor links** is a necessary part of this analysis process, and is the key focus of this exercise.
 
 ::: {.pinbox .solve data-latex="pin"}
-
 **What are Spatial Weights?**
 
 **Spatial weights** are one way to represent graphs in geographic data science and spatial statistics and are widely used to represent geographic relationships between the observational units in a spatial dataset.
 
 -   Spatial weights often express our knowledge about spatial relationships. For example, proximity and adjacency are common spatial questions: *What neighborhoods are you surrounded by? How many gas stations are within 5 miles of my stalled car?*
 -   Spatial questions target specific information about the spatial configuration of a specific target ("a neighborhood," "my stalled car") and geographically connected relevant sites ("adjacent neighborhoods", "nearby gas stations")
-
 :::
 
 # Installing R packages
@@ -107,28 +103,27 @@ An important concept in spatial analysis is that of a *neighborhood*, which refe
 
 -   **Distance-based neighbors** are those within a given proximity threshold to a focal polygon; distances are measured between polygon centroid using the `knn2nb()` function
 
+![](images/spatial_relations.png)
 
+To use this information in statistical analysis, it's often necessary to compute these relationships between all pairs of observations. This means building a topology ---- a mathematical structure that expresses the connectivity between observations ---- that we can use to examine the data. **A neighborhood matrix is a binary matrix that indicates whether pairs of locations are neighbors or not**, expressing this topology of relations with weights 1 and 0.
 
-
-To use this information in statistical analysis, it's often necessary to compute these relationships between all pairs of observations. This means building a topology ---- a mathematical structure that expresses the connectivity between observations ---- that we can use to examine the data.
-
-**Spatial weights matrices** express this topology of relations as a binary relationship, with weights 1 and 0.
 
 # Computing contiguity-based neighbors
 
-## **What is Contiguity?**
+Defining a neighbourhood in the sense of contiguity is often used to study demographic and social data, in which it may be more important to be on either side of an administrative boundary than to be located at a certain distance from one another.
 
 ::: {.pinbox .solve data-latex="pin"}
 **Contiguity** happens when two spatial units share a common border.
 
 -   **Queen Contiguity:** A neigboring polygon is one that shares a vertex with the focal polygon
-
 -   **Rook Contiguity:** A neigboring polygon is one that shares an edge (line segment) with the focal polygon
 :::
 
+![](images/contiguity.png)
+
 ## Computing **Queen contiguity** based neighbours
 
-The code chunk below computes a contiguity matrix based on Queen contiguity principle:
+The code chunk below computes a contiguity matrix based on Queen contiguity principle and returns a **neighbor list object**:
 
 ```{r}
 #| code-fold: false
@@ -199,7 +194,7 @@ str(wm_q)
 
 ## Creating **Rook** contiguity based neighbours
 
-### Compute the Rook contiguity matrix by altering `queen` argument of `poly2nb()` function:
+Compute the Rook contiguity matrix by altering `queen` argument of `poly2nb()` function to return a **neighbor list object**:
 
 ```{r}
 #| code-fold: false
@@ -323,11 +318,12 @@ Several steps are needed to obtain a *distance threshold* or *cut-off distance* 
 
 -   `knearneigh(coords)` is used to find k nearest neighbors for each point in the spatial dataset defined by the `coords` variable. **Returns:** k-nearest neighbor object (kn object)
 
--   `knn2nb()` is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors. **Returns:** neighbors list (nb object)
+-   `knn2nb()` is then used to convert the k-nearest neighbor object (kn object) into a neighbors list (nb object). This nb object represents the spatial relationships between neighboring regions based on the k-nearest neighbors and returns a **neighbor list object**:
 
 ```{r}
 #| code-fold: false
 k1 <- knn2nb(knearneigh(coords))
+k1
 ```
 
 ## **Step 2: Calculate distance using `nbdists()`**
@@ -385,11 +381,13 @@ str(wm_d62)
 
 ## Structure of `wm_d62` weight matrix
 
-Use a combination of`table()` and `card()` of **spdep**
+Use a combination of`table()` and `card()` to return a **contingency matrix** of number of neighbors per country:
 
 ```{r}
 #| code-fold: false
-table(hunan$County, card(wm_d62))
+table(hunan$County, 
+    # list number of neighbors for each area
+      card(wm_d62))
 ```
 :::
 
@@ -451,9 +449,10 @@ plot(knn6,
 
 The **Inverse Distance** method assigns weights to neighboring locations based on the inverse of the distance between them. **The closer two locations are, the higher the weight assigned to their relationship.** In an IDW spatial weight matrix, regions that are closer to each other will have higher weights, indicating a stronger spatial relationship.
 
-The followig steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix **wm_q** and the corresponding spatial coordinates, **coords**.
+The following steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix **wm_q** and the corresponding spatial coordinates, **coords**.
 
-::: panel-tabset
+::: panel-tabset 
+
 ## **Step 1: Compute Distances between areas**
 
 This is done through `nbdists()` of spdep:
@@ -467,13 +466,30 @@ ids <- lapply(dist, function(x) 1/(x))
 ids
 ```
 
-## **Step 2: Computing a row-standardized spatial weight matrix**
+# Weight Matrix Standardisation
+
+The sum of the weights of the neighbors of a zone is called its *degree of connection*. Standardized matrices ensure that the degree of connection will depend on the number of its neighbours, which creates heterogeneity between the zones.
+
+::: {.pinbox .solve data-latex="pin"}
+**Types of Standardization:**
+
+-   Row Standardization, "W"
+-   Global Standardization, "C"
+-   Uniform Standardization, "U"
+-   Variance Stabilization, "S"
+-   No Standardization, "B"
+
+:::
+
+In general, Row standardization gives more weight to observations bordering the study zone, with a small number of neighbors. In global or uniform standardization, the observations in the centre of the study zone with a large number of neighbors, and are thus subject to more external influences than the border zones. This heterogeneity can have a significant impact on the results of spatial autocorrelation tests.
+
+## Row Standardization
 
 Row-standardization involves dividing each weight in a row by the sum of weights in that row. This ensures that the weights for each observation (row) in the matrix sum to 1, making it a row-standardized spatial weight matrix.
 
 Row-standardization helps to remove the influence of the number of neighbors each observation has, making the spatial weight matrix more comparable across different datasets or regions.
 
-**style = “W” **
+`nb2listw()` function converts a neighbors list object into a **weight list object**:
 
 ```{r}
 #| code-fold: false
@@ -488,21 +504,19 @@ rswm_q
 ```{r}
 summary(unlist(rswm_q$weights))
 ```
+## Unstandardized weight matrix
 
-
-
-**style = “B”** Creates a binary (unstandardized) spatial weights matrix. 
+**style = "B"** Creates a binary (unstandardized) **weight list object**:
 
 ```{r}
 rswm_ids <- nb2listw(wm_q, glist = ids, style = "B", zero.policy = TRUE)
 rswm_ids
 ```
+
 ```{r}
 summary(unlist(rswm_ids$weights))
 ```
 
-:::
-
 # Spatial lag variables
 
-Spatial lag variables are used to account for spatial autocorrelation in the data, where the values of a variables in one location are influenced by the values of the variable in nearby locations. A spatially lagged variable is a weighted sum or a weighted average of the neighboring values for that variable where **Lag = E(x) or average value of the neighborhood** 
+Spatial lag variables are used to account for spatial autocorrelation in the data, where the values of a variables in one location are influenced by the values of the variable in nearby locations. A spatially lagged variable is a weighted sum or a weighted average of the neighboring values for that variable where **Lag = E(x) or average value of the neighborhood**
