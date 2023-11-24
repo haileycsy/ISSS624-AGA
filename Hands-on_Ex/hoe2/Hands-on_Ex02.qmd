@@ -13,6 +13,7 @@ execute:
 ---
 
 # **Part 1**
+
 <font size = "5">**Spatial Weights and Applications**</font>
 
 A key aspect of spatial analysis is to measure the **strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.** This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning. Source: [Handbook of Spatial Analysis](https://www.insee.fr/en/information/3635545)
@@ -107,7 +108,6 @@ An important concept in spatial analysis is that of a *neighborhood*, which refe
 ![](images/spatial_relations.png)
 
 To use this information in statistical analysis, it's often necessary to compute these relationships between all pairs of observations. This means building a topology ---- a mathematical structure that expresses the connectivity between observations ---- that we can use to examine the data. **A neighborhood matrix is a binary matrix that indicates whether pairs of locations are neighbors or not**, expressing this topology of relations with weights 1 and 0.
-
 
 # Computing contiguity-based neighbors
 
@@ -452,7 +452,7 @@ The **Inverse Distance** method assigns weights to neighboring locations based o
 
 The following steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix **wm_q** and the corresponding spatial coordinates, **coords**.
 
-::: panel-tabset 
+::: panel-tabset
 
 ## **Step 1: Compute Distances between areas**
 
@@ -479,7 +479,6 @@ The sum of the weights of the neighbors of a zone is called its *degree of conne
 -   Uniform Standardization, "U"
 -   Variance Stabilization, "S"
 -   No Standardization, "B"
-
 :::
 
 In general, Row standardization gives more weight to observations bordering the study zone, with a small number of neighbors. In global or uniform standardization, the observations in the centre of the study zone with a large number of neighbors, and are thus subject to more external influences than the border zones. This heterogeneity can have a significant impact on the results of spatial autocorrelation tests.
@@ -505,6 +504,7 @@ rswm_q
 ```{r}
 summary(unlist(rswm_q$weights))
 ```
+
 ## Unstandardized weight matrix
 
 **style = "B"** Creates a binary (unstandardized) **weight list object**:
@@ -529,13 +529,11 @@ Spatial lag variables are used to account for spatial autocorrelation in the dat
 -   spatial lag as a sum of neighboring values
 -   spatial window average
 -   spatial window sum
-
 :::
 
 ## Spatial lag with row-standardized weights
 
 ::: panel-tabset
-
 ## **Calculate variable spatial lag value**
 
 The following code calculates the GDPPC Lag value, or average neighbor GDPPC value for each polygon and returns it as a **numeric vector:**
@@ -545,6 +543,7 @@ The following code calculates the GDPPC Lag value, or average neighbor GDPPC val
 GDPPC_lag <- lag.listw(rswm_q, hunan$GDPPC)
 GDPPC_lag 
 ```
+
 ## **Append values to main dataframe**
 
 ```{r}
@@ -563,8 +562,8 @@ hunan <- left_join(hunan,lag_res)
 
 head(hunan)
 ```
-This reveals that `lag GDPPC` is stored as a new column in the **hunan** dataframe.
 
+This reveals that `lag GDPPC` is stored as a new column in the **hunan** dataframe.
 :::
 
 **Comparing GDPPC and Spatial Lag GDPPC**
@@ -582,7 +581,7 @@ tmap_arrange(gdppc, lag_gdppc, asp = 1, ncol = 2)
 
 ## Spatial lag as a sum of neighboring values
 
-Another way to calculate spatial lag is to sum neighboring values by assigning binary weights. 
+Another way to calculate spatial lag is to sum neighboring values by assigning binary weights.
 
 ## **Create binary spatial weights matrix**
 
@@ -616,6 +615,7 @@ colnames(lag_res) <- c("NAME_3", "lag_sum GDPPC")
 
 hunan <- left_join(hunan, lag_res)
 ```
+
 **Comparing GDPPC and Spatial Lag GDPPC**
 
 ```{r}
@@ -634,7 +634,6 @@ tmap_arrange(gdppc, lag_sum_gdppc, asp=1, ncol=2)
 The spatial window average uses row-standardized weights and includes the diagonal element. To do this in R, we need to go back to the neighbors structure and add the diagonal element before assigning weights.
 
 ::: panel-tabset
-
 ## **including self**
 
 Using the `include.self()` method from **spdep** package modifies the existing spatial weights matrix such that each spatial unit is considered a neighbor to itself. Below is the neighbot list for polygon #1, which now has 6 neighbors instead of the original 5:
@@ -643,13 +642,13 @@ Using the `include.self()` method from **spdep** package modifies the existing s
 wm_qs <- include.self(wm_q)
 wm_qs[[1]]
 ```
+
 ## **Create Spatial weights List**
 
 ```{r}
 wm_qs <- nb2listw(wm_qs)
 wm_qs
 ```
-
 
 ## **Calculate spatial lag variable from new spatial weights list**
 
@@ -658,6 +657,7 @@ lag_w_avg_gpdpc <- lag.listw(wm_qs,
                              hunan$GDPPC)
 lag_w_avg_gpdpc
 ```
+
 ## **Compute lag GDPPC**
 
 ```{r}
@@ -682,7 +682,6 @@ head(hunan,10) %>%
     full_width = F, 
     bootstrap_options = c("condensed", "responsive"))
 ```
-
 :::
 
 **Comparing lag GDPPC to window average Lag GDPPC**
@@ -692,15 +691,14 @@ w_avg_gdppc <- qtm(hunan, "lag_window_avg GDPPC")
 tmap_arrange(lag_gdppc, w_avg_gdppc, asp=1, ncol=2)
 ```
 
-
 ## Spatial window sum
 
 This is similar to the spatial window average, but without using row-standardized weights.
 
 ::: panel-tabset
-
 ## **including self**
-Polygon #1 now has 6 neighbors instead of 5: 
+
+Polygon #1 now has 6 neighbors instead of 5:
 
 ```{r}
 #| code-fold: false
@@ -740,7 +738,6 @@ head(hunan,10) %>%
     full_width = F, 
     bootstrap_options = c("condensed", "responsive"))
 ```
-
 :::
 
 **Comparing all the plots**
@@ -755,24 +752,22 @@ tmap_arrange(gdppc, lag_gdppc, lag_sum_gdppc, w_avg_gdppc, w_sum_gdppc,
 
 ```
 
-
 # **Part 2**
+
 <font size = "5">**Global and Local Measures of Autocorrelation (GLISA)**</font>
 
-One of the key questions for Geospatial Analysis is to uncover the geographical distribution of values across spatial areas. 
-Given a set of areal features and an associated variable, 
+One of the key questions for Geospatial Analysis is to uncover the geographical distribution of values across spatial areas. Given a set of areal features and an associated variable,
 
 -   **global** statistical tools evaluate whether the distribution of that variable follows a clustered, dispersed or random pattern
 -   **local** indicators evaluate the existence of clusters in the spatial arrangement of that variable
-
 
 # Global Measures of Spatial Autocorrelation
 
 ## **Global Moran's I**
 
 ::: panel-tabset
-
 ## **The Math**
+
 Excerpt from [ArcGIS Pro](https://pro.arcgis.com/en/pro-app/3.1/tool-reference/spatial-statistics/h-how-spatial-autocorrelation-moran-s-i-spatial-st.htm)
 
 The tool conducts the following calculations to derive an Index Value, Expected Index value, z-score and p-value:
@@ -781,29 +776,24 @@ The tool conducts the following calculations to derive an Index Value, Expected 
 2.  For each feature value **x**, derive the *deviation from the mean* (**d**) where $d = x - \mu$
 3.  Deviation values **d** of all neighboring areas are multiplied together to create a *cross-product*, **P**
 
-If the values in the dataset tend to cluster spatially (high values cluster near other high values; low values cluster near other low values), the Moran's Index will be **positive**. When high values repel other high values, and tend to be near low values, the Index will be **negative**. If positive cross-product values balance negative cross-product values, the Index will tend towards **zero**. 
+If the values in the dataset tend to cluster spatially (high values cluster near other high values; low values cluster near other low values), the Moran's Index will be **positive**. When high values repel other high values, and tend to be near low values, the Index will be **negative**. If positive cross-product values balance negative cross-product values, the Index will tend towards **zero**.
 
-Given the number of features in the dataset and the variance for the data values overall, the tool computes a z-score and p-value indicating whether this difference is statistically significant or not. Index values cannot be interpreted directly; they can only be interpreted within the context of the null hypothesis. 
-
+Given the number of features in the dataset and the variance for the data values overall, the tool computes a z-score and p-value indicating whether this difference is statistically significant or not. Index values cannot be interpreted directly; they can only be interpreted within the context of the null hypothesis.
 
 ## **The Hypothesis**
 
 As an inferential statistic, **Global Moran's I** tests the following hypothesis:
 
-$$H_0: \text{The variable is randomly distributed among the spatial features in the study area}$$
-$$H_1: \text{The variable is not randomly distributed among the spatial features in the study area}$$
-Interpretation of statistical significance & distribution: 
+$$H_0: \text{The variable is randomly distributed among the spatial features in the study area}$$ $$H_1: \text{The variable is not randomly distributed among the spatial features in the study area}$$ Interpretation of statistical significance & distribution:
 
-
-|                                         | +ve Moran's I                                    | -ve Moran's I                                   |
-|-----------------------------------------|--------------------------------------------------|-------------------------------------------------|
-| **p-value < 0.05<br>(significant)**     | Reject $H_0$<br>Variable is Spatially Clustered  | Reject $H_0$<br>Variable is Spatially Dispersed |
-| **p-value > 0.05<br>(Not significant)** | Accept $H_0$<br>Variable is randomly distributed                                                   |                                                                 |
+|                                          | +ve Moran's I                                    | -ve Moran's I                                   |
+|---------------------|--------------------------|-------------------------|
+| **p-value \< 0.05**<br>(significant)     | Reject $H_0$<br>Variable is Spatially Clustered  | Reject $H_0$<br>Variable is Spatially Dispersed |
+| **p-value \> 0.05**<br>(Not significant) | Accept $H_0$<br>Variable is randomly distributed |                                                 |
 
 ## **The Test**
 
-The code chunk below performs Moran’s I statistical testing using `moran.test()` of spdep:
-
+The code chunk below performs Moran's I statistical testing using `moran.test()` of spdep:
 
 ```{r}
 #| code-fold: false
@@ -812,12 +802,12 @@ moran.test(hunan$GDPPC,
            zero.policy = TRUE, 
            na.action = na.omit)
 ```
-From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering. 
 
+From the test results, p-value is \< 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering.
 
 ## **Monte Carlo Moran**
 
-The code chunk below performs a Monte Carlo simulation of n= 1000 trials for Moran’s I statistic by using `moran.mc()` of spdep:
+The code chunk below performs a Monte Carlo simulation of n= 1000 trials for Moran's I statistic by using `moran.mc()` of spdep:
 
 ```{r}
 #| code-fold: false
@@ -831,8 +821,7 @@ bperm <- moran.mc(hunan$GDPPC,
 bperm
 ```
 
-From the Monte Crlo simulation test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering. 
-
+From the Monte Crlo simulation test results, p-value is \< 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering.
 :::
 
 ### Visualising the results of Monte Carlo Moran's I Test
@@ -891,16 +880,15 @@ Both Moran's I and Geary's C are measures of spatial autocorrelation. However, G
 -   C value **nearer to 2** indicates **negative spatial correlation**
 
 ::: panel-tabset
-
 ## **The Test**
 
-The code chunk below performs Geary’s C test for spatial autocorrelation by using `geary.test()` of spdep
+The code chunk below performs Geary's C test for spatial autocorrelation by using `geary.test()` of spdep
 
 ```{r}
 geary.test(hunan$GDPPC, listw = rswm_q)
 ```
-From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The expected value under spatial randomness (1.0000000) is greater than the observed Geary C statistic (0.6907223), suggesting a spatial pattern of dissimilarity, where dissimilar values are clustered together.
 
+From the test results, p-value is \< 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The expected value under spatial randomness (1.0000000) is greater than the observed Geary C statistic (0.6907223), suggesting a spatial pattern of dissimilarity, where dissimilar values are clustered together.
 
 ## **Monte Carlo Geary's**
 
@@ -914,8 +902,8 @@ gperm <- geary.mc(hunan$GDPPC,
                   nsim = 999)
 gperm
 ```
-From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The alternative hypothesis is stated as "greater", suggesting that the observed Geary C statistic is larger than expected under the assumption of spatial randomness, indicating a tendency for dissimilar values to be close to each other. 
 
+From the test results, p-value is \< 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The alternative hypothesis is stated as "greater", suggesting that the observed Geary C statistic is larger than expected under the assumption of spatial randomness, indicating a tendency for dissimilar values to be close to each other.
 :::
 
 ### Visualising the results of Monte Carlo Geary C's Test
@@ -968,7 +956,6 @@ ggplot(
 ## Statistical results as correlograms
 
 ::: panel-tabset
-
 ## **Moran's I correlogram**
 
 In the code chunk below, `sp.correlogram()` is used to compute a 6-lag spatial correlogram of GDPPC using global spatial autocorrelation Moran's I (`method = "I"`):
@@ -983,13 +970,14 @@ MI_corr <- sp.correlogram(wm_q,
                           style = "W")
 plot(MI_corr)
 ```
+
 Plotting the output may not provide a complete interpretation, because **not all autocorrelation values are statistically significant.** Hence, it is important for us to examine the full analysis report by printing out the analysis results:
 
 ```{r}
 print(MI_corr)
 ```
-::: {.solvebox .solve data-latex="solve"}
 
+::: {.solvebox .solve data-latex="solve"}
 The results table has multiple columns. Each row corresponds to a specific lag distance.
 
 -   **Estimate:** The observed Moran's I statistic at each lag distance.
@@ -997,8 +985,7 @@ The results table has multiple columns. Each row corresponds to a specific lag d
 -   **Variance:** The variance of the Moran's I statistic.
 -   **Standard Deviate:** The standard deviate of the observed Moran's I, indicating how many standard deviations the observed value is from the expected value under spatial randomness.
 -   **Pr(I):** The p-value associated with the observed Moran's I.
--   **Two-sided:** Significance codes indicating the level of significance. Smaller p-values correspond to more asterisk, indicating significance. 
-
+-   **Two-sided:** Significance codes indicating the level of significance. Smaller p-values correspond to more asterisk, indicating significance.
 :::
 
 ## **Geary's C correlogram**
@@ -1014,9 +1001,8 @@ GC_corr <- sp.correlogram(wm_q,
                           style = "W")
 plot(GC_corr)
 ```
+
 ```{r}
 print(GC_corr)
 ```
-
 :::
-
