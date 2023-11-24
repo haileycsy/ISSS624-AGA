@@ -12,6 +12,7 @@ execute:
   warning: false
 ---
 
+# **Part 1**
 <font size = "5">**Spatial Weights and Applications**</font>
 
 A key aspect of spatial analysis is to measure the **strength of the spatial relationships between spatial objects, or how these related spatial objects influence each other.** This would allow us to further the analysis by computing spatial autocorrelation indices, implementing spatial econometrics techniques, studying the spatial distribution of observations, as well as performing spatial sampling or graph partitioning. Source: [Handbook of Spatial Analysis](https://www.insee.fr/en/information/3635545)
@@ -31,7 +32,7 @@ Computing **spatial weights and neighbor links** is a necessary part of this ana
 
 ```{r}
 #| message: false
-pacman::p_load(sf, spdep, tmap, tidyverse, knitr, kableExtra)
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr, kableExtra, urbnthemes, ggplot2)
 ```
 
 # Scope of Study
@@ -753,4 +754,269 @@ tmap_arrange(gdppc, lag_gdppc, lag_sum_gdppc, w_avg_gdppc, w_sum_gdppc,
              nrow = 2, asp = 1)
 
 ```
+
+
+# **Part 2**
+<font size = "5">**Global and Local Measures of Autocorrelation (GLISA)**</font>
+
+One of the key questions for Geospatial Analysis is to uncover the geographical distribution of values across spatial areas. 
+Given a set of areal features and an associated variable, 
+
+-   **global** statistical tools evaluate whether the distribution of that variable follows a clustered, dispersed or random pattern
+-   **local** indicators evaluate the existence of clusters in the spatial arrangement of that variable
+
+
+# Global Measures of Spatial Autocorrelation
+
+## **Global Moran's I**
+
+::: panel-tabset
+
+## **The Math**
+Excerpt from [ArcGIS Pro](https://pro.arcgis.com/en/pro-app/3.1/tool-reference/spatial-statistics/h-how-spatial-autocorrelation-moran-s-i-spatial-st.htm)
+
+The tool conducts the following calculations to derive an Index Value, Expected Index value, z-score and p-value:
+
+1.  Compute the mean ($\mu$) and variance ($\sigma$) for the variable being evaluated
+2.  For each feature value **x**, derive the *deviation from the mean* (**d**) where $d = x - \mu$
+3.  Deviation values **d** of all neighboring areas are multiplied together to create a *cross-product*, **P**
+
+If the values in the dataset tend to cluster spatially (high values cluster near other high values; low values cluster near other low values), the Moran's Index will be **positive**. When high values repel other high values, and tend to be near low values, the Index will be **negative**. If positive cross-product values balance negative cross-product values, the Index will tend towards **zero**. 
+
+Given the number of features in the dataset and the variance for the data values overall, the tool computes a z-score and p-value indicating whether this difference is statistically significant or not. Index values cannot be interpreted directly; they can only be interpreted within the context of the null hypothesis. 
+
+
+## **The Hypothesis**
+
+As an inferential statistic, **Global Moran's I** tests the following hypothesis:
+
+$$H_0: \text{The variable is randomly distributed among the spatial features in the study area}$$
+$$H_1: \text{The variable is not randomly distributed among the spatial features in the study area}$$
+Interpretation of statistical significance & distribution: 
+
+
+|                                         | +ve Moran's I                                    | -ve Moran's I                                   |
+|-----------------------------------------|--------------------------------------------------|-------------------------------------------------|
+| **p-value < 0.05<br>(significant)**     | Reject $H_0$<br>Variable is Spatially Clustered  | Reject $H_0$<br>Variable is Spatially Dispersed |
+| **p-value > 0.05<br>(Not significant)** | Accept $H_0$<br>Variable is randomly distributed                                                   |                                                                 |
+
+## **The Test**
+
+The code chunk below performs Moran’s I statistical testing using `moran.test()` of spdep:
+
+
+```{r}
+#| code-fold: false
+moran.test(hunan$GDPPC, 
+           listw = rswm_q, 
+           zero.policy = TRUE, 
+           na.action = na.omit)
+```
+From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering. 
+
+
+## **Monte Carlo Moran**
+
+The code chunk below performs a Monte Carlo simulation of n= 1000 trials for Moran’s I statistic by using `moran.mc()` of spdep:
+
+```{r}
+#| code-fold: false
+set.seed(1234)
+
+bperm <- moran.mc(hunan$GDPPC, 
+                listw = rswm_q, 
+                nsim = 999, 
+                zero.policy = TRUE, 
+                na.action = na.omit)
+bperm
+```
+
+From the Monte Crlo simulation test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The **alternative hypothesis: greater** indicates a positive spatial autocorrelation, suggestive of spatial clustering. 
+
+:::
+
+### Visualising the results of Monte Carlo Moran's I Test
+
+```{r}
+# Extract result
+sim_moran <- bperm$res
+# Calculate mean result
+sim_mean <- mean(sim_moran)
+
+set_urbn_defaults(style = "print")
+
+ggplot(
+    data = data.frame(sim_moran),
+    aes(x = sim_moran)
+  ) +
+  geom_histogram(
+    bins = 30, 
+    color = "#FFFCF9", 
+    fill = "#1F363D",
+    alpha = .8
+  ) +
+  # Add mean line
+  geom_vline(
+    xintercept = sim_mean, 
+    color = "salmon", 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  # Add line annotations
+  annotate(
+    "text", 
+    x = .035, 
+    y = 100, 
+    label = paste("Mean value =", round(sim_mean, 3)),
+    color = "salmon",
+    size = 3
+  ) +
+  labs(
+    title = "Simulated Moran's I Statistic",
+    subtitle= "(Based on Monte-carlo Simulation of 1000 trials)",
+    x = "Moran's I Statistic",
+    y = "Frequency"
+  ) +
+  theme(
+    panel.grid.major = element_blank()
+  )
+```
+
+## **Geary's C test**
+
+Both Moran's I and Geary's C are measures of spatial autocorrelation. However, Geary's C calculation is a simpler calculation, taking the ratio of the sum of squared differences between neighboring values over the total variance. Their result statistics are also inversely related:
+
+-   C value **close to 1** indicates **no spatial autocorrelation**
+-   C value **nearer to 0** indicates **positive spatial correlation**
+-   C value **nearer to 2** indicates **negative spatial correlation**
+
+::: panel-tabset
+
+## **The Test**
+
+The code chunk below performs Geary’s C test for spatial autocorrelation by using `geary.test()` of spdep
+
+```{r}
+geary.test(hunan$GDPPC, listw = rswm_q)
+```
+From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The expected value under spatial randomness (1.0000000) is greater than the observed Geary C statistic (0.6907223), suggesting a spatial pattern of dissimilarity, where dissimilar values are clustered together.
+
+
+## **Monte Carlo Geary's**
+
+The code chunk below performs a Monte Carlo simulation of n= 1000 trials for Geary's C statistic by using `geary.test()`:
+
+```{r}
+#| code-fold: false
+set.seed(1234)
+gperm <- geary.mc(hunan$GDPPC, 
+                  listw = rswm_q, 
+                  nsim = 999)
+gperm
+```
+From the test results, p-value is < 0.05, so we reject $H_0$ and conclude that the variable is not randomly distributed among the spatial features in the study area. The alternative hypothesis is stated as "greater", suggesting that the observed Geary C statistic is larger than expected under the assumption of spatial randomness, indicating a tendency for dissimilar values to be close to each other. 
+
+:::
+
+### Visualising the results of Monte Carlo Geary C's Test
+
+```{r}
+# Extract result
+sim_geary <- gperm$res
+# Calculate mean result
+sim_g_mean <- mean(sim_geary)
+
+set_urbn_defaults(style = "print")
+
+ggplot(
+    data = data.frame(sim_geary),
+    aes(x = sim_geary)
+  ) +
+  geom_histogram(
+    bins = 25, 
+    color = "#FFFCF9", 
+    fill = "#858AE3",
+    alpha = .8
+  ) +
+  # Add mean line
+  geom_vline(
+    xintercept = sim_g_mean, 
+    color = "#3A435E", 
+    linetype = "dashed", 
+    linewidth = 1
+  ) +
+  # Add line annotations
+  annotate(
+    "text", 
+    x = .95, 
+    y = 115, 
+    label = paste("Mean value =", round(sim_g_mean, 3)),
+    color = "#3A435E",
+    size = 3
+  ) +
+  labs(
+    title = "Simulated Geary's C Statistic",
+    subtitle= "(Based on Monte-carlo Simulation of 1000 trials)",
+    x = "Geary's C Statistic",
+    y = "Frequency"
+  ) +
+  theme(
+    panel.grid.major = element_blank()
+  )
+```
+
+## Statistical results as correlograms
+
+::: panel-tabset
+
+## **Moran's I correlogram**
+
+In the code chunk below, `sp.correlogram()` is used to compute a 6-lag spatial correlogram of GDPPC using global spatial autocorrelation Moran's I (`method = "I"`):
+
+```{r}
+#| code-fold: false
+MI_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order = 6, 
+                        # Use Moran's I Statistic
+                          method = "I", 
+                          style = "W")
+plot(MI_corr)
+```
+Plotting the output may not provide a complete interpretation, because **not all autocorrelation values are statistically significant.** Hence, it is important for us to examine the full analysis report by printing out the analysis results:
+
+```{r}
+print(MI_corr)
+```
+::: {.solvebox .solve data-latex="solve"}
+
+The results table has multiple columns. Each row corresponds to a specific lag distance.
+
+-   **Estimate:** The observed Moran's I statistic at each lag distance.
+-   **Expectation:** The expected Moran's I under the assumption of spatial randomness.
+-   **Variance:** The variance of the Moran's I statistic.
+-   **Standard Deviate:** The standard deviate of the observed Moran's I, indicating how many standard deviations the observed value is from the expected value under spatial randomness.
+-   **Pr(I):** The p-value associated with the observed Moran's I.
+-   **Two-sided:** Significance codes indicating the level of significance. Smaller p-values correspond to more asterisk, indicating significance. 
+
+:::
+
+## **Geary's C correlogram**
+
+`method = "C"` uses Geary's C Statistic instead:
+
+```{r}
+#| code-fold: false
+GC_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order = 6, 
+                          method  ="C", 
+                          style = "W")
+plot(GC_corr)
+```
+```{r}
+print(GC_corr)
+```
+
+:::
 

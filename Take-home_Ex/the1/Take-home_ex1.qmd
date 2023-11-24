@@ -1,0 +1,306 @@
+---
+title: "Take-home Ex 1"
+date: "Published on November 23 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+    toc-title: Contents
+    number-sections: true
+execute: 
+  warning: false
+---
+
+<font size = "5">{{< fa bus >}} **Spatio-temporal Patterns of Public Bus Ridership**</font>
+
+# Project Brief
+
+As city-wide urban infrastructures such as buses, taxis, mass rapid transit, public utilities and roads become digital, the data obtained can be used as a framework for tracking movement patterns through space and time. This is particularly true with the recent deployment of pervasive computing technologies such as Global Positioning System (GPS) and Radio Frequency Identification (RFID) tags on vehicles. One such case is the collection of bus routes and ridership data amassed from the use of smart cards and GPS devices available on public buses. 
+
+This movement data collected is likely to contain patterns that provide useful information about characteristics of the measured phenomena. The identification, analysis and comparison of such patterns will provide greater insights on human movement and behavior within a city. These understandings will potentially contribute to a better urban management and useful information for urban transport services providers both from the private and public sector to formulate informed decision to gain competitive advantage.
+
+This study thus seeks to apply appropriate Local Indicators of Spatial Association (GLISA) and Emerging Hot Spot Analysis (EHSA) to **undercover spatial and spatio-temporal mobility patterns of public bus passengers in Singapore.**
+
+# Installing R Packages
+
+The following packages are used in this exercise:
+
+-   **tmap** for cartography
+-   **sf** for geospatial data handling
+-   **tidyverse** for aspatial data transformation
+-   **spdep** for computing spatial autocorrelation
+-   **Hmisc** for summary statistics
+-   **kableExtra** for formatting of dataframes
+
+```{r}
+pacman::p_load(tmap, sf, tidyverse, spdep, Hmisc, kableExtra)
+```
+
+# Importing the Data
+
+## Aspatial Data
+
+A dataset from [LTA Datamall](https://www.waterpointdata.org/access-data/), *Passenger Volume by Origin Destination Bus Stops* from August to October 2023 is used to compute bus traffic. As these were downloaded as separate .csv files, they are imported and combined into a single dataframe.
+
+::: panel-tabset
+
+## **Importing csv files**
+
+```{r}
+#| message: false
+# Load each csv file into R separately
+bus08 <- read_csv("data/aspatial/origin_destination_bus_202308.csv")
+bus09 <- read_csv("data/aspatial/origin_destination_bus_202309.csv")
+bus10 <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
+
+# Combine all rows into single dataframe
+busod <- rbind(bus08, bus09, bus10)
+
+str(busod)
+```
+
+## **Variable Description**
+
+**busod** is a tibble dataframe consisting of the following variables:
+
+-   **YEAR_MONTH**: Month of data collection in YYYY-MM format
+-   **DAY_TYPE**: Category of Day
+-   **TIME_PER_HOUR**: Extracted hour of day
+-   **PT_TYPE**: Public transport type
+-   **ORIGIN_PT_CODE**: ID of Trip Origin Bus Stop
+-   **DESTINATION_PT_CODE**: ID of Trip Destination Bus Stop
+-   **TOTAL_TRIPS**: Sum of trips made per origin-Destination
+
+
+```{r}
+#| code-fold: true
+head(busod,10) %>%
+  kbl() %>%
+  kable_styling(
+    full_width = F, 
+    bootstrap_options = c("condensed", "responsive"))
+```
+
+## **Summary Statistics**
+
+```{r}
+describe(busod)
+```
+
+::: {.pinbox .solve data-latex="pin"}
+
+**Summary Statistics reveal that:**
+
+-   There are  17,118,005 bus trip combinations recorded over 3 months
+-   **DAY_TYPE** is split into only 2 categories, 'WEEKDAY' and 'WEEKENDS/PUBLIC HOLIDAY'
+-   Data is collected for 24 hours, starting from 0 Hrs to 23 Hrs in **TIME_PER_HOUR**
+-   There are 5075 distinct origin bus stops, and 5079 distinct destination stops
+-   The average number of trips per route is 20.46, with the highest value recorded being a whopping 36,668 -- this points to the presence of possible outliers or anomalies, that may be cause for further analysis
+
+:::
+
+:::
+
+## Geospatial Data
+
+There are two sources of Geospatial data used in this study:
+
+-   **Bus Stop Location** from LTA DataMall, providing information about all the bus stops currently being serviced by buses including the bus stop code (identifier) and location coordinates
+-   **hexagon**, a hexagon layer for mapping
+
+::: panel-tabset
+
+## **Importing Geospatial Files**
+
+Both Simple feature layers are based on SVY21 coordinate reference system (CRS). 
+
+```{r}
+busstop <- st_read(
+    dsn = "data/geospatial",
+    layer = "BusStop"
+  ) 
+```
+```{r}
+hexagon <- st_read(
+    dsn = "data/geospatial",
+    layer = "hexagon"
+  )
+```
+
+## **Check EPSG Code and CRS**
+
+The `st_crs()` function is used to check for ESPG Code and Coordinate System of both geospatial files. In order to perform geoprocessing using different geospatial data sources, both need to be projected using similar coordinate systems and be assigned the correct EPSG code based on CRS. 
+
+```{r}
+st_crs(busstop)
+```
+
+```{r}
+st_crs(hexagon)
+```
+
+
+::: {.cautionbox .solve data-latex="caution"}
+
+According to [epsg.io](https://epsg.io/?q=Singapore), Singapore's coordinate system is **SVY21** with **EPSG 3414**
+
+-   **busstop** is projected in SVY21 with EPSG 9001 -- this will require re-assignment of EPSG code to 3414
+-   **hexagon** is projected in SVY21 with EPSG 3414
+
+:::
+
+## **Assigning the right EPSG Code based on CRS**
+
+This is done using the `st_set_crs()` function
+
+```{r}
+# Assign EPSG code
+busstop <- st_set_crs(busstop, 3414)
+
+# Confirm EPSG code
+st_crs(busstop)
+```
+
+**busstop** and **hexagon** are now both projected in the same CRS and Assigned the correct EPSG codes. 
+
+:::
+
+# Data Preparation
+
+To narrow down the scope of the study, only patterns pertaining to **peak hour trips** will be analysed. They are defined as:
+
+| **Peak Period**              | **Day Type** | **Hour** |
+|------------------------------|--------------|----------|
+| Weekday morning peak         | WEEKDAY      | 6 - 9    |
+| Weekday afternoon peak       | WEEKDAY      | 17 - 20  |
+| Weekend/holiday morning peak | WEEKENDS/PH  | 11 - 14  |
+| Weekend/holiday evening peak | WEEKENDS/PH  | 16 - 19  |
+
+## Aspatial Data Preparation
+
+The following steps are taken to extract each period for analysis as a separate dataframe from **busod**:
+
+::: panel-tabset
+
+## **Changing Data Type**
+
+`ORIGIN_PT_CODE` and `DESTINATION_PT_CODE` are in character format. These represent the busstop locations, and are thus transformed into factors (categorical data type) for further analysis
+
+```{r}
+busod <- busod %>%
+  mutate(
+    ORIGIN_PT_CODE = as.factor(ORIGIN_PT_CODE),
+    DESTINATION_PT_CODE = as.factor(DESTINATION_PT_CODE)
+  )
+```
+
+## **Extracting Period Dataframes**
+
+Using the `filter()` and `summarise()` functions, the number of passenger trips by origin busstop at different day/peak periods are saved in separate dataframes.
+
+**Weekday morning peak**
+
+```{r}
+weekday_morning <- busod %>%
+  filter(
+    DAY_TYPE == "WEEKDAY"
+  ) %>%
+  filter(
+    TIME_PER_HOUR >= 6 & TIME_PER_HOUR <= 9
+  ) %>%
+  group_by(
+    YEAR_MONTH,
+    DAY_TYPE,
+    ORIGIN_PT_CODE,
+    TIME_PER_HOUR
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+  # change all column names to lowercase
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+```
+**Weekday afternoon peak**
+
+```{r}
+weekday_aft <- busod %>%
+  filter(
+    DAY_TYPE == "WEEKDAY"
+  ) %>%
+  filter(
+    TIME_PER_HOUR >= 17 & TIME_PER_HOUR <= 20
+  ) %>%
+  group_by(
+    YEAR_MONTH,
+    DAY_TYPE,
+    ORIGIN_PT_CODE,
+    TIME_PER_HOUR
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+  # change all column names to lowercase
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+```
+**Weekend/holiday morning peak**
+
+```{r}
+weekend_ph_morning <- busod %>%
+  filter(
+    DAY_TYPE != "WEEKDAY"
+  ) %>%
+  filter(
+    TIME_PER_HOUR >= 11 & TIME_PER_HOUR <= 14
+  ) %>%
+  group_by(
+    YEAR_MONTH,
+    DAY_TYPE,
+    ORIGIN_PT_CODE,
+    TIME_PER_HOUR
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+# change all column names to lowercase
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+```
+
+**Weekend/holiday evening peak**
+
+```{r}
+weekend_ph_evening <- busod %>%
+  filter(
+    DAY_TYPE != "WEEKDAY"
+  ) %>%
+  filter(
+    TIME_PER_HOUR >= 16 & TIME_PER_HOUR <= 19
+  ) %>%
+  group_by(
+    YEAR_MONTH,
+    DAY_TYPE,
+    ORIGIN_PT_CODE,
+    TIME_PER_HOUR
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+  # change all column names to lowercase
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+```
+:::
+
+## Geospatial Data Preparation
+
