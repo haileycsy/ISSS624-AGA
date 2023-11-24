@@ -95,6 +95,7 @@ tmap_arrange(basemap,
              gdppc, 
              asp = 1, 
              ncol = 2)
+
 ```
 
 # The **neighborhood** in Spatial Analysis
@@ -452,9 +453,6 @@ The **Inverse Distance** method assigns weights to neighboring locations based o
 
 The following steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix **wm_q** and the corresponding spatial coordinates, **coords**.
 
-::: panel-tabset
-
-## **Step 1: Compute Distances between areas**
 
 This is done through `nbdists()` of spdep:
 
@@ -464,7 +462,7 @@ dist <- nbdists(wm_q, coords, longlat = TRUE)
 
 # Calculate the inverse distance of each element in dist
 ids <- lapply(dist, function(x) 1/(x))
-ids
+head(ids)
 ```
 
 # Weight Matrix Standardisation

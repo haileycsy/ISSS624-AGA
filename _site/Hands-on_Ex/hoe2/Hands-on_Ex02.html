@@ -248,10 +248,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#visualising-contiguity-2" id="toc-visualising-contiguity-2" class="nav-link" data-scroll-target="#visualising-contiguity-2"><span class="toc-section-number">9</span>  Visualising Contiguity 2</a></li>
   <li><a href="#computing-adaptive-distance-weight-matrix" id="toc-computing-adaptive-distance-weight-matrix" class="nav-link" data-scroll-target="#computing-adaptive-distance-weight-matrix"><span class="toc-section-number">10</span>  Computing Adaptive distance weight matrix</a></li>
-  <li><a href="#computing-inversed-distance-weights-idw" id="toc-computing-inversed-distance-weights-idw" class="nav-link" data-scroll-target="#computing-inversed-distance-weights-idw"><span class="toc-section-number">11</span>  Computing Inversed Distance Weights (IDW)</a>
-  <ul class="collapse">
-  <li><a href="#step-1-compute-distances-between-areas" id="toc-step-1-compute-distances-between-areas" class="nav-link" data-scroll-target="#step-1-compute-distances-between-areas"><span class="toc-section-number">11.1</span>  <strong>Step 1: Compute Distances between areas</strong></a></li>
-  </ul></li>
+  <li><a href="#computing-inversed-distance-weights-idw" id="toc-computing-inversed-distance-weights-idw" class="nav-link" data-scroll-target="#computing-inversed-distance-weights-idw"><span class="toc-section-number">11</span>  Computing Inversed Distance Weights (IDW)</a></li>
   <li><a href="#weight-matrix-standardisation" id="toc-weight-matrix-standardisation" class="nav-link" data-scroll-target="#weight-matrix-standardisation"><span class="toc-section-number">12</span>  Weight Matrix Standardisation</a>
   <ul class="collapse">
   <li><a href="#row-standardization" id="toc-row-standardization" class="nav-link" data-scroll-target="#row-standardization"><span class="toc-section-number">12.1</span>  Row Standardization</a></li>
@@ -1239,9 +1236,6 @@ Non-symmetric neighbours list</code></pre>
 <h1 data-number="11"><span class="header-section-number">11</span> Computing Inversed Distance Weights (IDW)</h1>
 <p>The <strong>Inverse Distance</strong> method assigns weights to neighboring locations based on the inverse of the distance between them. <strong>The closer two locations are, the higher the weight assigned to their relationship.</strong> In an IDW spatial weight matrix, regions that are closer to each other will have higher weights, indicating a stronger spatial relationship.</p>
 <p>The following steps are taken to calculate the inverse of distances for each pair of neighboring regions based on a given spatial weight matrix <strong>wm_q</strong> and the corresponding spatial coordinates, <strong>coords</strong>.</p>
-<p>::: panel-tabset</p>
-<section id="step-1-compute-distances-between-areas" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="step-1-compute-distances-between-areas"><span class="header-section-number">11.1</span> <strong>Step 1: Compute Distances between areas</strong></h2>
 <p>This is done through <code>nbdists()</code> of spdep:</p>
 <div class="cell">
 <details>
@@ -1251,7 +1245,7 @@ Non-symmetric neighbours list</code></pre>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the inverse distance of each element in dist</span></span>
 <span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> <span class="fu">lapply</span>(dist, <span class="cf">function</span>(x) <span class="dv">1</span><span class="sc">/</span>(x))</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>ids</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
@@ -1270,264 +1264,9 @@ Non-symmetric neighbours list</code></pre>
 [1] 0.03695795 0.03414741 0.01524598 0.01618354
 
 [[6]]
-[1] 0.015390649 0.015245977 0.021748129 0.011883901 0.009810297
-
-[[7]]
-[1] 0.01708612 0.01473997 0.01150924 0.01872915
-
-[[8]]
-[1] 0.02022144 0.03453056 0.02529256 0.01036340 0.02284457 0.01500600 0.01515314
-
-[[9]]
-[1] 0.02022144 0.01574888 0.02109502 0.01508028 0.02902705 0.01502980
-
-[[10]]
-[1] 0.02281552 0.01387777 0.01538326 0.01346650 0.02100510 0.02631658 0.01874863
-[8] 0.01500046
-
-[[11]]
-[1] 0.01882869 0.02243492 0.02247473
-
-[[12]]
-[1] 0.02779227 0.02419652 0.02333385 0.02986130 0.02335429
-
-[[13]]
-[1] 0.02779227 0.02650020 0.02670323 0.01714243
-
-[[14]]
-[1] 0.01882869 0.01233868 0.02098555
-
-[[15]]
-[1] 0.02650020 0.01233868 0.01096284 0.01562226
-
-[[16]]
-[1] 0.02281552 0.02466962 0.02765018 0.01476814 0.01671430
-
-[[17]]
-[1] 0.01387777 0.02243492 0.02098555 0.01096284 0.02466962 0.01593341 0.01437996
-
-[[18]]
-[1] 0.02039779 0.02032767 0.01481665 0.01473691 0.01459380
-
-[[19]]
-[1] 0.01538326 0.01926323 0.02668415 0.02140253 0.01613589 0.01412874
-
-[[20]]
-[1] 0.01346650 0.02039779 0.01926323 0.01723025 0.02153130 0.01469240 0.02327034
-
-[[21]]
-[1] 0.02668415 0.01723025 0.01766299 0.02644986 0.02163800
-
-[[22]]
-[1] 0.02100510 0.02765018 0.02032767 0.02153130 0.01489296
-
-[[23]]
-[1] 0.01481665 0.01469240 0.01401432 0.02246233 0.01880425 0.01530458 0.01849605
-
-[[24]]
-[1] 0.02354598 0.01837201 0.02607264 0.01220154 0.02514180
-
-[[25]]
-[1] 0.02354598 0.02188032 0.01577283 0.01949232 0.02947957
-
-[[26]]
-[1] 0.02155798 0.01745522 0.02212108 0.02220532
-
-[[27]]
-[1] 0.02155798 0.02490625 0.01562326
-
-[[28]]
-[1] 0.01837201 0.02188032 0.02229549 0.03076171 0.02039506
-
-[[29]]
-[1] 0.02490625 0.01686587 0.01395022
-
-[[30]]
-[1] 0.02090587
-
-[[31]]
-[1] 0.02607264 0.01577283 0.01219005 0.01724850 0.01229012 0.01609781 0.01139438
-[8] 0.01150130
-
-[[32]]
-[1] 0.01220154 0.01219005 0.01712515 0.01340413 0.01280928 0.01198216 0.01053374
-[8] 0.01065655
-
-[[33]]
-[1] 0.01949232 0.01745522 0.02229549 0.02090587 0.01979045
-
-[[34]]
-[1] 0.03113041 0.03589551 0.02882915
-
-[[35]]
-[1] 0.01766299 0.02185795 0.02616766 0.02111721 0.02108253 0.01509020
-
-[[36]]
-[1] 0.01724850 0.03113041 0.01571707 0.01860991 0.02073549 0.01680129
-
-[[37]]
-[1] 0.01686587 0.02234793 0.01510990 0.01550676
-
-[[38]]
-[1] 0.01401432 0.02407426 0.02276151 0.01719415
-
-[[39]]
-[1] 0.01229012 0.02172543 0.01711924 0.02629732 0.01896385
-
-[[40]]
-[1] 0.01609781 0.01571707 0.02172543 0.01506473 0.01987922 0.01894207
-
-[[41]]
-[1] 0.02246233 0.02185795 0.02205991 0.01912542 0.01601083 0.01742892
-
-[[42]]
-[1] 0.02212108 0.01562326 0.01395022 0.02234793 0.01711924 0.01836831 0.01683518
-
-[[43]]
-[1] 0.01510990 0.02629732 0.01506473 0.01836831 0.03112027 0.01530782
-
-[[44]]
-[1] 0.01550676 0.02407426 0.03112027 0.01486508
-
-[[45]]
-[1] 0.03589551 0.01860991 0.01987922 0.02205991 0.02107101 0.01982700
-
-[[46]]
-[1] 0.03453056 0.04033752 0.02689769
-
-[[47]]
-[1] 0.02529256 0.02616766 0.04033752 0.01949145 0.02181458
-
-[[48]]
-[1] 0.02313819 0.03370576 0.02289485 0.01630057 0.01818085
-
-[[49]]
-[1] 0.03076171 0.02138091 0.02394529 0.01990000
-
-[[50]]
-[1] 0.01712515 0.02313819 0.02551427 0.02051530 0.02187179
-
-[[51]]
-[1] 0.03370576 0.02138091 0.02873854
-
-[[52]]
-[1] 0.02289485 0.02394529 0.02551427 0.02873854 0.03516672
-
-[[53]]
-[1] 0.01630057 0.01979945 0.01253977
-
-[[54]]
-[1] 0.02514180 0.02039506 0.01340413 0.01990000 0.02051530 0.03516672
-
-[[55]]
-[1] 0.01280928 0.01818085 0.02187179 0.01979945 0.01882298
-
-[[56]]
-[1] 0.01036340 0.01139438 0.01198216 0.02073549 0.01214479 0.01362855 0.01341697
-
-[[57]]
-[1] 0.028079221 0.017643082 0.031423501 0.029114131 0.013520292 0.009903702
-
-[[58]]
-[1] 0.01925924 0.03142350 0.02722997 0.01434859 0.01567192
-
-[[59]]
-[1] 0.01696711 0.01265572 0.01667105 0.01785036
-
-[[60]]
-[1] 0.02419652 0.02670323 0.01696711 0.02343040
-
-[[61]]
-[1] 0.02333385 0.01265572 0.02343040 0.02514093 0.02790764 0.01219751 0.02362452
-
-[[62]]
-[1] 0.02514093 0.02002219 0.02110260
-
-[[63]]
-[1] 0.02986130 0.02790764 0.01407043 0.01805987
-
-[[64]]
-[1] 0.02911413 0.01689892
-
-[[65]]
-[1] 0.02471705
-
-[[66]]
-[1] 0.01574888 0.01726461 0.03068853 0.01954805 0.01810569
-
-[[67]]
-[1] 0.01708612 0.01726461 0.01349843 0.01361172
-
-[[68]]
-[1] 0.02109502 0.02722997 0.03068853 0.01406357 0.01546511
-
-[[69]]
-[1] 0.02174813 0.01645838 0.01419926
-
-[[70]]
-[1] 0.02631658 0.01963168 0.02278487
-
-[[71]]
-[1] 0.01473997 0.01838483 0.03197403
-
-[[72]]
-[1] 0.01874863 0.02247473 0.01476814 0.01593341 0.01963168
-
-[[73]]
-[1] 0.01500046 0.02140253 0.02278487 0.01838483 0.01652709
-
-[[74]]
-[1] 0.01150924 0.01613589 0.03197403 0.01652709 0.01342099 0.02864567
-
-[[75]]
-[1] 0.011883901 0.010533736 0.012539774 0.018822977 0.016458383 0.008217581
-
-[[76]]
-[1] 0.01352029 0.01434859 0.01689892 0.02471705 0.01954805 0.01349843 0.01406357
-
-[[77]]
-[1] 0.014736909 0.018804247 0.022761507 0.012197506 0.020022195 0.014070428
-[7] 0.008440896
-
-[[78]]
-[1] 0.02323898 0.02284457 0.01508028 0.01214479 0.01567192 0.01546511 0.01140779
-
-[[79]]
-[1] 0.01530458 0.01719415 0.01894207 0.01912542 0.01530782 0.01486508 0.02107101
-
-[[80]]
-[1] 0.01500600 0.02882915 0.02111721 0.01680129 0.01601083 0.01982700 0.01949145
-[8] 0.01362855
-
-[[81]]
-[1] 0.02947957 0.02220532 0.01150130 0.01979045 0.01896385 0.01683518
-
-[[82]]
-[1] 0.02327034 0.02644986 0.01849605 0.02108253 0.01742892
-
-[[83]]
-[1] 0.023354289 0.017142433 0.015622258 0.016714303 0.014379961 0.014593799
-[7] 0.014892965 0.018059871 0.008440896
-
-[[84]]
-[1] 0.01872915 0.02902705 0.01810569 0.01361172 0.01342099 0.01297994
-
-[[85]]
- [1] 0.011451133 0.017193502 0.013957649 0.016183544 0.009810297 0.010656545
- [7] 0.013416965 0.009903702 0.014199260 0.008217581 0.011407794
-
-[[86]]
-[1] 0.01515314 0.01502980 0.01412874 0.02163800 0.01509020 0.02689769 0.02181458
-[8] 0.02864567 0.01297994
-
-[[87]]
-[1] 0.01667105 0.02362452 0.02110260 0.02058034
-
-[[88]]
-[1] 0.01785036 0.02058034</code></pre>
+[1] 0.015390649 0.015245977 0.021748129 0.011883901 0.009810297</code></pre>
 </div>
 </div>
-</section>
 </section>
 <section id="weight-matrix-standardisation" class="level1" data-number="12">
 <h1 data-number="12"><span class="header-section-number">12</span> Weight Matrix Standardisation</h1>
