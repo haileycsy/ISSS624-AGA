@@ -43,6 +43,8 @@ website:
         menu:
           - text: "In-class Ex 1"
             href: In-class_Ex\ice1\In-class_Ex01.html
+          - text: "In-class Ex 2"
+            href: In-class_Ex\ice2\In-class_Ex02.html
     
   page-footer:
     right: |

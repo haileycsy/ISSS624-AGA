@@ -16,7 +16,7 @@ execute:
 
 # Project Brief
 
-As city-wide urban infrastructures such as buses, taxis, mass rapid transit, public utilities and roads become digital, the data obtained can be used as a framework for tracking movement patterns through space and time. This is particularly true with the recent deployment of pervasive computing technologies such as Global Positioning System (GPS) and Radio Frequency Identification (RFID) tags on vehicles. One such case is the collection of bus routes and ridership data amassed from the use of smart cards and GPS devices available on public buses. 
+As city-wide urban infrastructures such as buses, taxis, mass rapid transit, public utilities and roads become digital, the data obtained can be used as a framework for tracking movement patterns through space and time. This is particularly true with the recent deployment of pervasive computing technologies such as Global Positioning System (GPS) and Radio Frequency Identification (RFID) tags on vehicles. One such case is the collection of bus routes and ridership data amassed from the use of smart cards and GPS devices available on public buses.
 
 This movement data collected is likely to contain patterns that provide useful information about characteristics of the measured phenomena. The identification, analysis and comparison of such patterns will provide greater insights on human movement and behavior within a city. These understandings will potentially contribute to a better urban management and useful information for urban transport services providers both from the private and public sector to formulate informed decision to gain competitive advantage.
 
@@ -29,12 +29,14 @@ The following packages are used in this exercise:
 -   **tmap** for cartography
 -   **sf** for geospatial data handling
 -   **tidyverse** for aspatial data transformation
--   **spdep** for computing spatial autocorrelation
+-   **sfdep** for computing spatial autocorrelation
 -   **Hmisc** for summary statistics
 -   **kableExtra** for formatting of dataframes
 
 ```{r}
-pacman::p_load(tmap, sf, tidyverse, spdep, Hmisc, kableExtra)
+pacman::p_load(tmap, sf, tidyverse, sfdep, 
+               Hmisc, kableExtra, 
+               ggplot, knitr)
 ```
 
 # Importing the Data
@@ -44,7 +46,6 @@ pacman::p_load(tmap, sf, tidyverse, spdep, Hmisc, kableExtra)
 A dataset from [LTA Datamall](https://www.waterpointdata.org/access-data/), *Passenger Volume by Origin Destination Bus Stops* from August to October 2023 is used to compute bus traffic. As these were downloaded as separate .csv files, they are imported and combined into a single dataframe.
 
 ::: panel-tabset
-
 ## **Importing csv files**
 
 ```{r}
@@ -72,7 +73,6 @@ str(busod)
 -   **DESTINATION_PT_CODE**: ID of Trip Destination Bus Stop
 -   **TOTAL_TRIPS**: Sum of trips made per origin-Destination
 
-
 ```{r}
 #| code-fold: true
 head(busod,10) %>%
@@ -84,22 +84,17 @@ head(busod,10) %>%
 
 ## **Summary Statistics**
 
-```{r}
 describe(busod)
-```
 
 ::: {.pinbox .solve data-latex="pin"}
-
 **Summary Statistics reveal that:**
 
--   There are  17,118,005 bus trip combinations recorded over 3 months
+-   There are 17,118,005 bus trip combinations recorded over 3 months
 -   **DAY_TYPE** is split into only 2 categories, 'WEEKDAY' and 'WEEKENDS/PUBLIC HOLIDAY'
 -   Data is collected for 24 hours, starting from 0 Hrs to 23 Hrs in **TIME_PER_HOUR**
 -   There are 5075 distinct origin bus stops, and 5079 distinct destination stops
 -   The average number of trips per route is 20.46, with the highest value recorded being a whopping 36,668 -- this points to the presence of possible outliers or anomalies, that may be cause for further analysis
-
 :::
-
 :::
 
 ## Geospatial Data
@@ -110,10 +105,9 @@ There are two sources of Geospatial data used in this study:
 -   **hexagon**, a hexagon layer for mapping
 
 ::: panel-tabset
-
 ## **Importing Geospatial Files**
 
-Both Simple feature layers are based on SVY21 coordinate reference system (CRS). 
+Both Simple feature layers are based on SVY21 coordinate reference system (CRS).
 
 ```{r}
 busstop <- st_read(
@@ -121,6 +115,13 @@ busstop <- st_read(
     layer = "BusStop"
   ) 
 ```
+
+This geospatial layer shows the **point** location of busstops in Singapore:
+
+```{r}
+qtm(busstop)
+```
+
 ```{r}
 hexagon <- st_read(
     dsn = "data/geospatial",
@@ -128,9 +129,15 @@ hexagon <- st_read(
   )
 ```
 
+This geospatial layer splits Singapore into **hexagon** polygon features:
+
+```{r}
+qtm(hexagon)
+```
+
 ## **Check EPSG Code and CRS**
 
-The `st_crs()` function is used to check for ESPG Code and Coordinate System of both geospatial files. In order to perform geoprocessing using different geospatial data sources, both need to be projected using similar coordinate systems and be assigned the correct EPSG code based on CRS. 
+The `st_crs()` function is used to check for ESPG Code and Coordinate System of both geospatial files. In order to perform geoprocessing using different geospatial data sources, both need to be projected using similar coordinate systems and be assigned the correct EPSG code based on CRS.
 
 ```{r}
 st_crs(busstop)
@@ -140,14 +147,11 @@ st_crs(busstop)
 st_crs(hexagon)
 ```
 
-
 ::: {.cautionbox .solve data-latex="caution"}
-
 According to [epsg.io](https://epsg.io/?q=Singapore), Singapore's coordinate system is **SVY21** with **EPSG 3414**
 
 -   **busstop** is projected in SVY21 with EPSG 9001 -- this will require re-assignment of EPSG code to 3414
 -   **hexagon** is projected in SVY21 with EPSG 3414
-
 :::
 
 ## **Assigning the right EPSG Code based on CRS**
@@ -156,14 +160,37 @@ This is done using the `st_set_crs()` function
 
 ```{r}
 # Assign EPSG code
-busstop <- st_set_crs(busstop, 3414)
+busstop <- st_set_crs(
+   busstop, 
+   3414
+  ) %>%
+# rename bus stop origin for easy join to main dataframe
+  mutate(
+    ORIGIN_PT_CODE = as.factor(BUS_STOP_N)
+  ) %>%
+  select(
+    ORIGIN_PT_CODE, 
+    LOC_DESC,
+    geometry
+  )
 
 # Confirm EPSG code
 st_crs(busstop)
 ```
 
-**busstop** and **hexagon** are now both projected in the same CRS and Assigned the correct EPSG codes. 
+**busstop** and **hexagon** are now both projected in the same CRS and Assigned the correct EPSG codes.
 
+## **Joining both geospatial feature frames**
+
+In order to visualise each bus stop as a hexagon on the map, we perform a left join on the geospatial dataframes using `st_join`
+
+```{r}
+busstop_sf <- st_join(hexagon, busstop)
+```
+
+```{r}
+plot(busstop_sf["ORIGIN_PT_CODE"])
+```
 :::
 
 # Data Preparation
@@ -173,7 +200,7 @@ To narrow down the scope of the study, only patterns pertaining to **peak hour t
 | **Peak Period**              | **Day Type** | **Hour** |
 |------------------------------|--------------|----------|
 | Weekday morning peak         | WEEKDAY      | 6 - 9    |
-| Weekday afternoon peak       | WEEKDAY      | 17 - 20  |
+| Weekday evening peak         | WEEKDAY      | 17 - 20  |
 | Weekend/holiday morning peak | WEEKENDS/PH  | 11 - 14  |
 | Weekend/holiday evening peak | WEEKENDS/PH  | 16 - 19  |
 
@@ -182,7 +209,6 @@ To narrow down the scope of the study, only patterns pertaining to **peak hour t
 The following steps are taken to extract each period for analysis as a separate dataframe from **busod**:
 
 ::: panel-tabset
-
 ## **Changing Data Type**
 
 `ORIGIN_PT_CODE` and `DESTINATION_PT_CODE` are in character format. These represent the busstop locations, and are thus transformed into factors (categorical data type) for further analysis
@@ -195,13 +221,48 @@ busod <- busod %>%
   )
 ```
 
+```{r}
+busod_agg <- busod %>%
+  # Categorize trips under period based on day and timeframe
+  mutate(period = ifelse(DAY_TYPE == "WEEKDAY" & 
+                         TIME_PER_HOUR >= 6 & TIME_PER_HOUR <= 9, 
+                         "Weekday morning peak",
+                    ifelse(DAY_TYPE == "WEEKDAY" & 
+                           TIME_PER_HOUR >= 17 & TIME_PER_HOUR <= 20,
+                           "Weekday evening peak",
+                      ifelse(DAY_TYPE == "WEEKENDS/HOLIDAY" &
+                             TIME_PER_HOUR >= 11 & TIME_PER_HOUR <= 14,
+                              "Weekend/PH morning peak",
+                        ifelse(DAY_TYPE == "WEEKENDS/HOLIDAY" & 
+                              TIME_PER_HOUR >= 16 & TIME_PER_HOUR <= 19,
+                               "Weekend/PH evening peak",
+                    "Others"))))
+  ) %>%
+  # Only retain needed periods for analysis
+  filter(
+    period != "Others"
+  ) %>%
+ # compute number of trips per origin busstop per month for each period
+  group_by(
+    YEAR_MONTH,
+    period,
+    ORIGIN_PT_CODE
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+  ungroup()
+```
+
 ## **Extracting Period Dataframes**
 
 Using the `filter()` and `summarise()` functions, the number of passenger trips by origin busstop at different day/peak periods are saved in separate dataframes.
 
+A `left_join` is then performed to the geospatial simple features dataframe **busstop**.
+
 **Weekday morning peak**
 
-```{r}
+
 weekday_morning <- busod %>%
   filter(
     DAY_TYPE == "WEEKDAY"
@@ -218,15 +279,35 @@ weekday_morning <- busod %>%
   summarise(
     num_trips = sum(TOTAL_TRIPS)
   ) %>%
-  # change all column names to lowercase
+  ungroup()
+
+# Join with geospatial dataframe
+weekday_morning_sf <- left_join(
+    busstop_sf,
+    weekday_morning,
+    by = "ORIGIN_PT_CODE"
+  ) %>%
+    # change all column names to lowercase
   rename_with(
     tolower, everything()
-  ) %>%
-  ungroup()
-```
+  )
+
+
+
+tm_shape(weekday_morning_sf) +
+  tm_fill(
+    "num_trips",
+    style = "quantile", 
+    palette = "Purples"
+  ) +
+  tm_borders(
+    lwd = .1,  
+    alpha = .8)
+
+
 **Weekday afternoon peak**
 
-```{r}
+
 weekday_aft <- busod %>%
   filter(
     DAY_TYPE == "WEEKDAY"
@@ -238,7 +319,9 @@ weekday_aft <- busod %>%
     YEAR_MONTH,
     DAY_TYPE,
     ORIGIN_PT_CODE,
-    TIME_PER_HOUR
+    LOC_DESC,
+    TIME_PER_HOUR,
+    geometry
   ) %>%
   summarise(
     num_trips = sum(TOTAL_TRIPS)
@@ -248,10 +331,11 @@ weekday_aft <- busod %>%
     tolower, everything()
   ) %>%
   ungroup()
-```
+
+
 **Weekend/holiday morning peak**
 
-```{r}
+
 weekend_ph_morning <- busod %>%
   filter(
     DAY_TYPE != "WEEKDAY"
@@ -273,11 +357,11 @@ weekend_ph_morning <- busod %>%
     tolower, everything()
   ) %>%
   ungroup()
-```
+
 
 **Weekend/holiday evening peak**
 
-```{r}
+
 weekend_ph_evening <- busod %>%
   filter(
     DAY_TYPE != "WEEKDAY"
@@ -299,8 +383,22 @@ weekend_ph_evening <- busod %>%
     tolower, everything()
   ) %>%
   ungroup()
-```
+
 :::
 
 ## Geospatial Data Preparation
 
+```{mermaid}
+%%| fig-width: 6
+flowchart TD
+A[busstop] -->|geometry| B[hexagon] -->|traffic| C(weekday morning)
+B -->|traffic| D(weekday afternoon)
+B -->|traffic| E(weekend/PH morning)
+B -->|traffic| F(weekend/PH evening)
+```
+
+**busstop** is a simple feature dataframe with bus stop number and geometry (longitude and latitude) attributes, which locates each bus stop as a point:
+
+# LISA Local moran's I
+
+# EHSA Local GI* 
