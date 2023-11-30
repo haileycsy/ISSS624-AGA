@@ -20,26 +20,24 @@ As city-wide urban infrastructures such as buses, taxis, mass rapid transit, pub
 
 This movement data collected is likely to contain patterns that provide useful information about characteristics of the measured phenomena. The identification, analysis and comparison of such patterns will provide greater insights on human movement and behavior within a city. These understandings will potentially contribute to a better urban management and useful information for urban transport services providers both from the private and public sector to formulate informed decision to gain competitive advantage.
 
-This study thus seeks to **undercover spatial and spatio-temporal mobility patterns of public bus passengers in Singapore** through Geospatial Analysis and use of Local Indicators of Spatial Association (LISA). 
-
-
+This study thus seeks to **undercover spatial and spatio-temporal mobility patterns of public bus passengers in Singapore** through Geospatial Analysis and use of Local Indicators of Spatial Association (LISA).
 
 # Installing R Packages
 
 The following packages are used in this exercise:
 
 -   **tmap** for cartography
--   **mapview** for interactive map backgrouds
+-   **mapview** for interactive map backgrouds & **leaflet.providers** for basemap customisation
 -   **sf** for geospatial data handling
 -   **tidyverse** for aspatial data transformation
--   **sfdep** for computing spatial autocorrelation
+-   **sfdep** and **spdep** for computing spatial autocorrelation
 -   **Hmisc** for summary statistics
 -   **kableExtra** and **DT** for formatting of dataframes
 -   **ggplot2, patchwork** and **ggrain** for visualising attributes
 -   **urbnthemes** for consistent plot theming
 
 ```{r}
-pacman::p_load(tmap, sf, tidyverse, sfdep, mapview,
+pacman::p_load(tmap, sf, tidyverse, sfdep, mapview, leaflet.providers,
                Hmisc, kableExtra, DT,
                ggplot2, patchwork, ggrain, urbnthemes, knitr)
 ```
@@ -90,7 +88,9 @@ head(busod,10) %>%
 
 ## **Summary Statistics**
 
-describe(busod)
+```{r}
+summary(busod)
+```
 
 ::: {.pinbox .solve data-latex="pin"}
 **Summary Statistics reveal that:**
@@ -101,7 +101,6 @@ describe(busod)
 -   There are 5075 distinct origin bus stops, and 5079 distinct destination stops
 -   The average number of trips per route is 20.46, with the highest value recorded being a whopping 36,668 -- this points to the presence of possible outliers or anomalies, that may be cause for further analysis
 :::
-
 :::
 
 ## Geospatial Data
@@ -177,16 +176,16 @@ The mapview below shows the location of each bus stop in the **busstop** Simple 
 
 ```{r}
 #| code-fold: true
-map_busstops <- mapview(
-  busstop, 
-  cex = 3, 
-  alpha = .5, 
-  id = "origin_pt_code",
-  popup = NULL)
+
+tmap_mode("view")
+
+map_busstops <- 
+  tm_shape(busstop) +
+  tm_dots(col = "#451F55",
+          size = .01)
 
 map_busstops
 ```
-
 
 # Data Preparation
 
@@ -201,11 +200,9 @@ B -->|traffic| E(weekend/PH morning) -.- I(11am - 2pm)
 B -->|traffic| F(weekend/PH evening) -.- J(4 - 7pm)
 ```
 
-
 ## Aspatial Data Preparation
 
 ::: panel-tabset
-
 ## **Changing Data Type**
 
 `ORIGIN_PT_CODE` and `DESTINATION_PT_CODE` are in character format. These represent the busstop locations, and are thus transformed into factors (categorical data type) for further analysis
@@ -217,7 +214,6 @@ busod <- busod %>%
     DESTINATION_PT_CODE = as.factor(DESTINATION_PT_CODE)
   )
 ```
-
 
 ## **Create Categorical Variable for Periods of study**
 
@@ -262,18 +258,18 @@ busod_agg <- busod %>%
     tolower, everything()
   ) %>%
   ungroup()
-```  
+```
 :::
 
 # {{< fa bus >}} **What is the Distribution of Passenger Traffic across peak periods?**
 
-It is important to understand the distribution of passenger trip volume across different time periods in a day for better urban traffic management and alleviating commuter congestion. Geospatial analysis methods enable us to visualise areas where commuter traffic is particularly dense, or uncover daily commuter patterns. 
+It is important to understand the distribution of passenger trip volume across different time periods in a day for better urban traffic management and alleviating commuter congestion. Geospatial analysis methods enable us to visualise areas where commuter traffic is particularly dense, or uncover daily commuter patterns.
 
 As a start, we will look at the distribution of passenger trips for different periods in August 2023:
 
 ```{r}
 #| code-fold: true
-#| fig-width: 6
+#| fig-width: 8
 set_urbn_defaults(style = "print")
   
 
@@ -313,20 +309,19 @@ bus08_density <- busod_agg %>%
 
 bus08_density
 ```
-::: {.focusbox .solve data-latex="focus"}
 
+::: {.focusbox .solve data-latex="focus"}
 **Initial Insights**
 
--   The range of passenger volume is much larger during weekday peak hours compared to weekends/public holidays 
--   All four peak periods show a right-skewed distribution, with several outliers recording a much higher passenger volume 
+-   The range of passenger volume is much larger during weekday peak hours compared to weekends/public holidays
+-   All four peak periods show a right-skewed distribution, with several outliers recording a much higher passenger volume
 -   This could be suggestive of high traffic in busy locations. especially in the CBD area or Bus/MRT interchanges
 -   Further analysis could be done to determine if they are in similar areas, to determine potential hot spots
-
 :::
 
 ## {{< fa bus >}} **Does this distribution change over time?**
 
-To understand if this distribution is unique to the month of August, or records similar trends throughout the months, the distribution of passenger traffic across peak periods over 3 months is compared: 
+To understand if this distribution is unique to the month of August, or records similar trends throughout the months, the distribution of passenger traffic across peak periods over 3 months is compared:
 
 ```{r}
 #| code-fold: true
@@ -377,7 +372,7 @@ bus_density
 
 The density plots above reveal that the distribution of number of trips recorded over a 3-month period are very similar. It is thus reasonable to deduce that **there are several bus stops with very high passenger volume, especially on weekday evening peak periods** -- if these bus stops are within close proximity to each other, it could point towards **possible hot spots for traffic congestion.**
 
-As the trend does not change significantly over the months, further geospatial analysis is conducted on **August 2023** passenger traffic data to locate these potential hot spots. 
+As the trend does not change significantly over the months, further geospatial analysis is conducted on **August 2023** passenger traffic data to locate these potential hot spots.
 
 ## Extracting Specific data for study
 
@@ -399,13 +394,11 @@ busod_08 <- busod_agg %>%
 DT::datatable(busod_08,
               options = list(pageLength = 8),
               rownames = FALSE)
-```  
-
+```
 
 ## Creating Spatial Polygon Dataframe
 
 ::: panel-tabset
-
 ## **Join Aspatial to Geospatial point dataframe**
 
 Using `left_join` to map busstops by bus stop code
@@ -421,15 +414,13 @@ busod_08_sf
 **busod_08_sf** is a spatial point dataframe. This is not particularly useful when dealing with spatial autocorrelation analysis, as 'areas' need to be defined as planes in space (polygons instead of points). The following code chunks place these bus stops into a **hexagon** grid:
 
 ::: {.pinbox .solve data-latex="pin"}
-
 **Step 1: Create a hexagon grid frame**
 
 -   Use the `st_make_grid()` function
--   `cellsize` argument units are the same as the dataframe's. As **busod_08_sf** is projected in ESPG code 3414, the unit is in meters and defines the width of the hexagon. This is set to 500m. 
+-   `cellsize` argument units are the same as the dataframe's. As **busod_08_sf** is projected in ESPG code 3414, the unit is in meters and defines the width of the hexagon. This is set to 500m.
 -   Assign a `hex_id` to each hexagon as primary key
 
 **output: Spatial polygons, with hex_id and geometry data**
-
 :::
 
 ```{r}
@@ -442,9 +433,7 @@ busod_08_hex <- st_make_grid(
   rowid_to_column("hex_id")
 ```
 
-
 ::: {.pinbox .solve data-latex="pin"}
-
 **Step 2: Create Attribute dataframe using hex id instead of busstop code**
 
 As each hexagon area may contain more than a single bus stop, we need to use `hex_id` as primary key. The following steps are taken to group the attributes by `hex_id`:
@@ -456,7 +445,6 @@ As each hexagon area may contain more than a single bus stop, we need to use `he
 -   `replace(is.na(.), 0)` replaces all `NA` values with 0
 
 **output: Aspatial Attributes dataframe, with hex_id as primary key**
-
 :::
 
 ```{r}
@@ -482,14 +470,12 @@ busod_08_stops <- st_join(
 ```
 
 ::: {.pinbox .solve data-latex="pin"}
-
 **Step 3: Create Spatial Polygon dataframe by joining**
 
 -   `left_join` the new **busod_08_stops** aspatial dataframe to **busod_08_hex** hexagon geospatial layer by `hex_id` to add attributes to the spatial polygon dataframe
 -   `filter` out the hexagons with no bus stops
 
 **Output: Spatial Polygon Dataframe**
-
 :::
 
 ```{r}
@@ -502,10 +488,9 @@ busod_08_hex <- busod_08_hex %>%
 bustraffic08 <- filter(busod_08_hex,
                        n_busstops > 0)
 ```
-
 :::
 
-The following map shows each area coloured by bus stop concentration: 
+The following map shows each area coloured by bus stop density:
 
 ```{r}
 #| code-fold: true
@@ -515,21 +500,25 @@ bustraffic08_map <- tm_basemap("CartoDB.Positron") +
   tm_shape(bustraffic08) +
   tm_fill(
     col = "n_busstops",
-    palette = "YlOrRd",
+    palette = "PuBu",
     style = "cont",
     id = "hex_id",
     popup.vars = c("No. of bus stops: " = "n_busstops",
                    "Bus Stop codes: " = "busstop_codes"),
     legend.title = "No. of bus stops"
+  ) +
+  tm_layout(
+    title = ""
   )
 
 bustraffic08_map
 ```
 
-# {{< fa bus >}} **Does an area with more bus stops correlate to higher passenger volume**?
+# {{< fa bus >}} **Does an area with higher bus stop density record higher passenger volume**?
 
 ```{r}
 #| code-fold: true
+#| fig-width: 8
 weekday_m_scat <- ggplot(
   bustraffic08,
   aes(x = as.factor(n_busstops), 
@@ -617,111 +606,918 @@ weekday_patch <- (weekday_m_scat + weekday_e_scat)
 weekend_patch <- (ph_m_scat + ph_e_scat)
 
 fullpatch <- (weekday_patch / weekend_patch) +
-  plot_annotation(title = "Areas with highest no. bus stops not the most congested")
+  plot_annotation(title = "Areas with highest bus stop density not the most congested")
 
 fullpatch
 
 ```
 
+::: {.focusbox .solve data-latex="focus"}
+-   Passenger trip volume seems to he highest in areas with 5 - 8 number of bus stops
+-   Areas with the highest bus stop density (9 - 11) Did not record the highest passenger traffic across all peak periods
+-   This suggests that there may be an **optimum number of bus stops per 500m width area** that would reduce congestion
+:::
 
+# {{< fa bus >}} **Where are the passenger volume hotspots on weekday peak periods?**?
+
+Based on the following animated map, there are several areas that record similarly high passenger traffic during morning and evening peak period:
+
+```{r}
+#| code-fold: true
+#| message: false
+#| eval: false
+
+weekday_hourly <- busod %>%
+  filter(YEAR_MONTH == "2023-08") %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  group_by(
+    ORIGIN_PT_CODE,
+    TIME_PER_HOUR
+  ) %>%
+  summarise(
+    TOTAL_TRIPS = sum(TOTAL_TRIPS)
+  ) %>%
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+
+
+wd_hourly_sf <- left_join(busstop, weekday_hourly, by = "origin_pt_code")
+
+wd_hourly_hex <- st_make_grid(
+    wd_hourly_sf,
+    cellsize = 500,
+    square = FALSE
+  ) %>%
+  st_sf() %>%
+  rowid_to_column("hex_id")
+
+wd_hourly_stops <- st_join(
+  wd_hourly_sf, 
+  wd_hourly_hex, 
+  join = st_within
+  ) %>%
+  st_set_geometry(NULL) %>%
+  group_by(
+    hex_id,
+    time_per_hour
+  ) %>%
+  summarise(
+    n_busstops = n(),
+    busstop_codes = str_c(origin_pt_code, collapse = ","),
+    total_trips = sum(total_trips)
+  ) %>%
+  replace(is.na(.), 0) %>%
+  ungroup()
+
+
+wd_hourly_hex <- wd_hourly_hex %>%
+  left_join(wd_hourly_stops,
+            by = "hex_id"
+  ) %>%
+  replace(is.na(.), 0)
+
+wd_hourly08 <- filter(wd_hourly_hex,
+                       n_busstops > 0)
+
+wd_hourly_map <- tm_shape(wd_hourly08) +
+  tm_fill(
+    col = "total_trips",
+    palette = "OrRd",
+    style = "cont"
+  ) +
+  tm_layout(
+    title = "Weekday Passenger Volume",
+    frame = FALSE
+  ) +
+  tm_facets(
+    along = "time_per_hour",
+    free.coords = FALSE
+  ) 
+
+# Save animation as gif
+tmap_animation(wd_hourly_map,
+               "wd_hourly_map.gif",
+               loop = TRUE,
+               delay = 40,
+               outer.margins = NA,)
+
+```
+
+![](wd_hourly_map.gif)
+
+The following maps compare the passenger traffic distribution between weekday morning and evening peak periods:
+
+## Continuous Intervals
+
+`style = "cont"` argument is specified to fill the hexagons along a continuous colour scale according to passenger trip volume.
 
 ```{r}
 #| code-fold: true
 #| fig-width: 8
 
-# bustraffic08weekend <- bustraffic08
-# 
-# tmap_mode("view")
-# 
-# weekday_morning08 <- tm_shape(bustraffic08, alpha = .5) +
-#   tm_fill(
-#     col = "Weekday morning peak",
-#     palette = "Purples",
-#     alpha = .5,
-#     style = "quantile"
-#   ) +
-#   tm_shape(bustraffic08weekend, alpha = 0) +
-#   tm_fill(
-#     col = "Weekend/PH morning peak",
-#     palette = "Purples",
-#     alpha = .5,
-#     style = "quantile"
-#   ) +
-#   tm_layout(
-#     frame = FALSE,
-#     legend.outside = TRUE,
-#     legend.outside.position = "bottom"
-#   )
-# 
-# 
-# weekday_evening08 <- tm_shape(bustraffic08) +
-#   tm_fill(
-#     col = "Weekday evening peak",
-#     palette = "Purples"
-#   )
-# 
-# ph_morning08 <- tm_shape(bustraffic08) +
-#   tm_fill(
-#     col = "Weekend/PH morning peak",
-#     palette = "Blues"
-#   )
-# 
-# ph_evening08 <- tm_shape(bustraffic08) +
-#   tm_fill(
-#     col = "Weekend/PH evening peak",
-#     palette = "Blues"
-#   )
-# 
-# weekday_morning08
-
-# 
-# tmap_arrange(weekday_morning08, weekday_evening08,
-#              ph_morning08, ph_evening08,
-#              ncol = 2)
-```
-
-
-```{r}
-#| fig-width: 8
-bustraffic08_long <- bustraffic08 %>%
-  pivot_longer(cols = 4:7,
-               names_to = "peak_period",
-               values_to = "num_trips")
-
-bus08_facet <- bustraffic08_long %>%
-  filter(peak_period == "Weekday morning peak" | peak_period == "Weekday evening peak") %>%
-  tm_shape() +
-  tm_fill(col = "num_trips",
+bus08_facet <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekday morning peak", "Weekday evening peak"),
           palette = "Reds",
-          style = "equal",
-          alpha = .7
+          style = "cont",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekday Morning traffic: " = "Weekday morning peak",
+                         "Weekday Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
   ) +
-  tm_facets(by = "peak_period",
-            ncol = 2
-  ) +
+  tm_scale_bar(width = 0.15) +
   tm_layout(
     title = c("Weekday morning peak", "Weekday evening peak"),
     panel.labels = c("Weekday morning peak", "Weekday evening peak")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
   )
 
 bus08_facet
 ```
 
+## Binned by Quantiles
 
+`style = "quantile"` argument is used categorically bin the variable based on quantile values. The traffic appears far more congested using this binning method compared to the continuous scale, and is largely due to the highly skewed distribution of the variable. It is thus not a conclusive way of determining which areas are true hot spots based on volume of trips.
 
+```{r}
+#| code-fold: true
+#| fig-width: 8
 
-# tmap mode set to plotting
-tmap_mode("plot")
-
-tm_shape(weekday_morning_sf) +
-  tm_polygons(
-    "num_trips",
-    palette = "RdYlBu"
+bus08_facet2 <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekday morning peak", "Weekday evening peak"),
+          palette = "Reds",
+          style = "quantile",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekday Morning traffic: " = "Weekday morning peak",
+                         "Weekday Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_scale_bar(width = 0.15) +
+  tm_layout(
+    title = c("Weekday morning peak", "Weekday evening peak"),
+    panel.labels = c("Weekday morning peak", "Weekday evening peak")
   ) +
   tm_facets(
-    by = "year_month"
+    sync = TRUE, 
+    ncol = 1
   )
 
-# LISA Local moran's I
+bus08_facet2
+```
 
-# EHSA Local GI
+## Binned by jenks algorithm
+
+`style = "jenks"` argument is used to 'cluster' groups with similar values and maximize the difference between each group. It is based on the **Jenks natural breaks classification method**, a data clustering algorithm used to determine the best arrangement of values and assign them into 'classes'. This is chosen over `equal` or `quantile` binning due to the wide range of values present in the distribution.
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+bus08_facet3 <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekday morning peak", "Weekday evening peak"),
+          palette = "Reds",
+          style = "jenks",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekday Morning traffic: " = "Weekday morning peak",
+                         "Weekday Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_scale_bar(width = 0.15) +
+  tm_layout(
+    title = c("Weekday morning peak", "Weekday evening peak"),
+    panel.labels = c("Weekday morning peak", "Weekday evening peak")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  )
+
+bus08_facet3
+```
+
+.
+
+::: {.focusbox .solve data-latex="focus"}
+While the continuous colour-scale map showed more isolated pockets of areas as potential hotspots, the quantile binning and jenks algorithm revealed a more **clustered distribution of hotspot areas.**
+:::
+
+Comparing the maps, several Areas have been identified as **Weekday Peak high passenger volume hotspots**. These are mostly areas encompassing an MRT Station and/or Bus Interchange, and are listed out by hexagon ID below:
+
+::: panel-tabset
+## **hex_id 2411: Woodlands MRT Station**
+
+```{r}
+hex_2411 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("46649","46339","46009","46321","46641","46639","46631","46329")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_2411)
+```
+
+## **hex_id 3239: Ang Mo Kio MRT Station/ Bus Interchange**
+
+```{r}
+hex_3239 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("54247","54339","54391","54261","54009","54399")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_3239)
+
+```
+
+## **hex_id 4349: Bedok MRT station/ Bus Interchange**
+
+```{r}
+hex_4349 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("84031","84139","84131","84009","84039")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_4349)
+```
+
+## **hex_id 4018: Punggol Road**
+
+```{r}
+hex_4018 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("65079","65191","65199","65071")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_4018)
+```
+
+## **hex_id 2054: Clementi MRT Station**
+
+```{r}
+hex_2054 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("20019","17179","17171")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_2054)
+```
+:::
+
+# {{< fa bus >}} **Are these the same hotspots as Weekend/Public Holiday peak periods?**?
+
+The following maps compare the passenger traffic distribution between weekend/Public holiday morning and evening peak periods:
+
+## Continuous Intervals
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+ph_bus08_facet <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekend/PH morning peak", "Weekend/PH evening peak"),
+          palette = "Purples",
+          style = "cont",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekend/PH Morning traffic: " = "Weekday morning peak",
+                         "Weekend/PH Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_scale_bar(width = 0.15) +
+  tm_layout(
+    title = c("Weekend/PH morning peak", "Weekend/PH evening peak")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  )
+
+ph_bus08_facet
+```
+
+## Binned by quantile
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+tmap_mode("view")
+
+ph_bus08_facet2 <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekend/PH morning peak", "Weekend/PH evening peak"),
+          palette = "Purples",
+          style = "quantile",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekend/PH Morning traffic: " = "Weekday morning peak",
+                         "Weekend/PH Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_scale_bar(width = 0.15) +
+  tm_layout(
+    title = c("Weekend/PH morning peak", "Weekend/PH evening peak")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  )
+
+ph_bus08_facet2
+```
+
+## Binned by jenks algorithm
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+ph_bus08_facet3 <- tm_shape(bustraffic08) +
+  tm_fill(c("Weekend/PH morning peak", "Weekend/PH evening peak"),
+          palette = "Purples",
+          style = "jenks",
+          alpha = .7,
+          popup.vars = c("No. of bus stops: " = "n_busstops",
+                         "Weekend/PH Morning traffic: " = "Weekday morning peak",
+                         "Weekend/PH Evening traffic: " = "Weekday evening peak",
+                         "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_scale_bar(width = 0.15) +
+  tm_layout(
+    title = c("Weekend/PH morning peak", "Weekend/PH evening peak")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  )
+
+ph_bus08_facet3
+```
+
+The 'clustered' maps above reveal denser hotspots in the north and central regions compared to Weekday peak periods. However, similarly high passenger traffic was recording in specific areas, identified and listed below:
+
+::: panel-tabset
+## **hex_id 3292: Bugis & Bencoolen MRT station**
+
+```{r}
+hex_3292 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("01013","01119","01112","01019","01012","04029","07569","07561")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_3292)
+```
+
+## **hex_id 3014: Orchard MRT Station**
+
+```{r}
+hex_3014 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("09011","09022","09048","09047","09023")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_3014)
+```
+
+## **hex_id 2135: Johor Bahru Checkpoint**
+
+```{r}
+hex_2135 <- busstop %>%
+  filter(
+    origin_pt_code %in% c("46211","46219")
+  ) %>%
+  st_set_geometry(NULL) %>%
+  select(
+    origin_pt_code, loc_desc
+  )
+
+DT::datatable(hex_2135)
+```
+:::
+
+::: {.focusbox .solve data-latex="focus"}
+**Weekday vs Weekend/PH Peak Periods**
+
+-   Key hotspot areas were similar, **especially in larger heartland areas with busy MRT stations and bus interchanges**
+-   Jenks algorithm revealed smaller 'clusters' of hot spots during weekend peak periods compared to weekday peak periods, although both day types had similar highest passenger traffic areas
+-   The visualised distribution of passenger volume using continuous scale versus binned intervals reveals different patterns, and further investigation needs to be conducted to determine if those areas are truly spatially clustered or are outliers in the overall distribution
+:::
+
+# {{< fa bus >}} **Which areas are likely to have passenger congestion?**
+
+To uncover any trends in spatial clustering, we conduct the **local Moran's I Test** to determine if there are clusters of high traffic, or if there are areas that are outliers in the overall spatial distribution.
+
+Computing this LISA statistic for each observation gives an indication of **the extent of significant spatial clustering of similar values around that observation** and helps in determining areas that are passenger traffic-heavy during the peak hour periods.
+
+## Computing local Moran's I statistics
+
+::: panel-tabset
+## **Step 1: Compute spatial weight matrix**
+
+The code chunk below performs the following actions:
+
+-   `mutate` creates 2 new columns, **nb** and **wt**
+-   **nb** stores the Queen'c contiguity weight matrix, computed using `st_contiguity`
+-   **wt** stores the row-standardised weight matrix
+
+```{r}
+wm08 <- busod_08_hex %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1)
+
+```
+
+## **Step 2: Monte Carlo simulation of Local Moran's I**
+
+The following code runs a Monte Carlo simulation of Local Moran's I on **weekday morning peak traffic**.This function returns the following values as separate columns:
+
+-   **ii (Moran's I for each observation):** the local spatial autocorrelation for each hexagon. +ve values suggest clustering while -ve values suggest dispersion.
+-   **E_ii (Expected Moran's I for each observation):** the expected value of Moran's I under spatial randomness, based on the assumption that there is no spatial autocorrelation.
+-   **var_ii (Variance of Ii):** the variability of the Moran's I values across observations
+-   **z_ii (Z-score):** A standardized score that measures how many standard deviations an observed Moran's I deviates from the expected Moran's I. +ve scores indicate higher correlation than expected
+-   **p_ii (p-value):** the probability of observing the given Moran's I under the assumption of spatial randomness. A p-value less than the chosen significance level (e.g., 0.05) suggests that the spatial pattern is statistically significant.
+-   **p_ii_sim (simulated p-value):** the p-value based on monte carlo simulation of 1000 trials
+-   **mean, median, pysal:** the cluster category based spatial patterns
+
+```{r}
+# set seed to ensure that results from simulation are reproducible
+set.seed(8888)
+
+# Weekday morning
+lisa08_wdm <- wm08 %>%
+  mutate(local_moran = local_moran(`Weekday morning peak`,
+                                   nb,
+                                   wt,
+                                   nsim = 999),
+         .before = 1) %>%
+  unnest(local_moran) %>%
+  # only retain hexagons with a bus stop
+  filter(n_busstops > 0)
+
+# Weekday evening
+lisa08_wde <- wm08 %>%
+  mutate(local_moran = local_moran(`Weekday evening peak`,
+                                   nb,
+                                   wt,
+                                   nsim = 999),
+         .before = 1) %>%
+  unnest(local_moran) %>%
+  # only retain hexagons with a bus stop
+  filter(n_busstops > 0)
+```
+:::
+
+## **Step 3: Visualise I statistic and p-value**
+
+::: {.pinbox .solve data-latex="pin"}
+An area could be identified as a **cluster** or an **outlier** based on I statistic value and p-value:
+
+-   **outlier:** significant and negative i value (area is associated with relatively low i values of neighbors)
+-   **cluster:** significant and positive i value (area is associated with relatively high i values of neighbors)
+:::
+
+```{r}
+#| code-fold: true
+#| fig-height: 8
+#| fig-width: 8
+
+# Set map to static
+tmap_mode("plot")
+
+# weekday morning moran I values
+map_wdm_moran08 <- tm_shape(lisa08_wdm) +
+  tm_fill(
+    col = "ii",
+    palette = "OrRd",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekday Morning Peak Traffic",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekday morning p-values
+map_wdm_pvalue <- tm_shape(lisa08_wdm) +
+  tm_fill(
+    col = "p_ii_sim",
+    palette = "-BuGn",
+    alpha = .8,
+    breaks = c(0, 0.001, 0.01, 0.05, 1),
+    labels = c("0.001", "0.01", "0.05", "Not Sig"),
+    title = "p-value"
+  ) + 
+  tm_layout(main.title = "p-values of Local Moran's I",
+            main.title.size = 0.8,
+            main.title.position = "center",
+            legend.position = c("right", "top"),
+            legend.height = .5,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekday evening moran I values
+map_wde_moran08 <- tm_shape(lisa08_wde) +
+  tm_fill(
+    col = "ii",
+    palette = "OrRd",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekday Evening Peak Traffic",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekday evening p-values
+map_wde_pvalue <- tm_shape(lisa08_wde) +
+  tm_fill(
+    col = "p_ii_sim",
+    palette = "-BuGn",
+    alpha = .8,
+    breaks = c(0, 0.001, 0.01, 0.05, 1),
+    labels = c("0.001", "0.01", "0.05", "Not Sig"),
+    title = "p-value"
+  ) + 
+  tm_layout(main.title = "p-values of Local Moran's I",
+            main.title.size = 0.8,
+            main.title.position = "center",
+            legend.position = c("right", "top"),
+            legend.height = .5,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+tmap_arrange(map_wdm_moran08, map_wdm_pvalue,
+             map_wde_moran08, map_wde_pvalue,
+             ncol = 2)
+
+```
+
+```{r}
+#| code-fold: true
+set.seed(8888)
+
+# Compute local moran's I simulation for weekend/PH morning peak
+lisa08_phm <- wm08 %>%
+  mutate(local_moran = local_moran(`Weekend/PH morning peak`,
+                                   nb,
+                                   wt,
+                                   nsim = 999),
+         .before = 1) %>%
+  unnest(local_moran) %>%
+  # only retain hexagons with a bus stop
+  filter(n_busstops > 0)
+
+# Compute local moran's I simulation for weekend/PH evening peak
+lisa08_phe <- wm08 %>%
+  mutate(local_moran = local_moran(`Weekend/PH evening peak`,
+                                   nb,
+                                   wt,
+                                   nsim = 999),
+         .before = 1) %>%
+  unnest(local_moran) %>%
+  # only retain hexagons with a bus stop
+  filter(n_busstops > 0)
+```
+
+```{r}
+#| code-fold: true
+#| fig-height: 8
+#| fig-width: 8
+
+# Set map to static
+tmap_mode("plot")
+
+# weekend/PH  moran I values
+map_phm_moran08 <- tm_shape(lisa08_phm) +
+  tm_fill(
+    col = "ii",
+    palette = "RdPu",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekend/PH Morning Peak Traffic",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekend/PH  p-values
+map_phm_pvalue <- tm_shape(lisa08_phm) +
+  tm_fill(
+    col = "p_ii_sim",
+    palette = "-BuGn",
+    alpha = .8,
+    breaks = c(0, 0.001, 0.01, 0.05, 1),
+    labels = c("0.001", "0.01", "0.05", "Not Sig"),
+    title = "p-value"
+  ) + 
+  tm_layout(main.title = "p-values of Local Moran's I",
+            main.title.size = 0.8,
+            main.title.position = "center",
+            legend.position = c("right", "top"),
+            legend.height = .5,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekend/PH moran I values
+map_phe_moran08 <- tm_shape(lisa08_phe) +
+  tm_fill(
+    col = "ii",
+    palette = "RdPu",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekend/PHEvening Peak Traffic",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+# weekend/PH evening p-values
+map_phe_pvalue <- tm_shape(lisa08_phe) +
+  tm_fill(
+    col = "p_ii_sim",
+    palette = "-BuGn",
+    alpha = .8,
+    breaks = c(0, 0.001, 0.01, 0.05, 1),
+    labels = c("0.001", "0.01", "0.05", "Not Sig"),
+    title = "p-value"
+  ) + 
+  tm_layout(main.title = "p-values of Local Moran's I",
+            main.title.size = 0.8,
+            main.title.position = "center",
+            legend.position = c("right", "top"),
+            legend.height = .5,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+tmap_arrange(map_phm_moran08, map_phm_pvalue,
+             map_phe_moran08, map_phe_pvalue,
+             ncol = 2)
+
+```
+
+From comparing the maps above, we can detect multiple **clusters** that are significant and possess high, positive Local Moran's I values. In general, there are more clusters during Weekday morning peak hours compared to evening, while the number of clusters during Weekends or Public holiday morning and evening peak periods do not show large variation. To visualise the extent of the spatial clustering, we look at the mean Local Moran's I cluster quadrants, computed as variable `mean`.
+
+## **Visualising Local Moran Clusters**
+
+The spatial clusters are visualised in the map below, with one showing all values and the other displaying only statistically significant clusters (p-value \<0.05):
+
+```{r}
+#| code-fold: true
+
+colors <- c("#4d5887", "#B1EDE8", "#f5bc5f", "salmon")
+
+tmap_mode("plot")
+
+mean_wdm <- lisa08_wdm  %>%
+  filter(p_ii_sim < 0.05)
+
+# All significant values
+plot_wdm_all <- 
+  tm_shape(lisa08_wdm) +
+  tm_fill(
+    col = "mean",
+    style = "cat",
+    palette = colors
+  ) +
+  tm_layout(
+    main.title = "Local Moran Clusters (All)",
+    main.title.size = .8,
+    main.title.position = "center",
+    frame = FALSE)
+
+plot_wdm_mean <- 
+  tm_shape(lisa08_wdm) +
+  tm_polygons(
+    col = "#ffffff"
+  ) +
+  tm_borders(col = NA) +
+  tm_shape(mean_wdm) +
+  tm_fill(
+    col = "mean",
+    style = "cat",
+    palette = colors
+  ) +
+  tm_layout(
+    main.title = "Local Moran Clusters (Significant)",
+    main.title.size = .8,
+    main.title.position = "center",
+    frame = FALSE)
+
+tmap_arrange(plot_wdm_all, plot_wdm_mean,
+             ncol = 2)
+
+
+```
+
+We can deduce that there are 2 main types of statistically significant clusters present during **Weekday Morning Peak Periods:**
+
+-   **High-High** clusters suggest spatial autocorrelation, indicating that areas with similar attribute values are clustered together to form possible hot spots for passenger congestion
+-   **Low-High** clusters suggest spatial outliers, where areas with dissimilar attribute values are located near each other. Passenger volume is much lower and these ares are not flagged for possible congestion.
+
+## {{< fa sun >}} **Weekday Morning Peak Periods**
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+tmap_mode("view")
+
+plot_wdm <- tm_basemap("OneMapSG.Grey") +
+  tm_shape(mean_wdm) +
+  tm_fill(
+    c("Weekday morning peak", "mean"),
+    alpha = .7,
+    title = c("Passenger Volume", "Cluster"),
+    popup.vars = c("Hex ID: " = "hex_id", 
+                   "Cluster" = "mean",
+                   "No. of bus stops: " = "n_busstops",
+                   "Weekday Morning traffic: " = "Weekday morning peak",
+                   "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  ) +
+  tm_layout(
+    title = "Weekday Morning Peak Traffic",
+    title.size = 1
+  )
+
+plot_wdm
+```
+
+## {{< fa moon >}} **Weekday Evening Peak Periods**
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+mean_wde <- lisa08_wde  %>%
+  filter(p_ii_sim < 0.05)
+
+plot_wde <- tm_basemap("OneMapSG.Night") +
+  tm_shape(mean_wde) +
+  tm_fill(
+    c("Weekday evening peak", "mean"),
+    alpha = .7,
+    title = c("Passenger Volume", "Cluster"),
+    popup.vars = c("Hex ID: " = "hex_id", 
+                   "Cluster" = "mean",
+                   "No. of bus stops: " = "n_busstops",
+                   "Weekday Morning traffic: " = "Weekday morning peak",
+                   "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  ) +
+  tm_layout(
+    title = "Weekday Evening Peak Traffic",
+    title.size = 1
+  )
+
+plot_wde
+```
+
+## {{< fa sun >}} **Weekend/Public Holiday Morning Peak Periods**
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+mean_phm <- lisa08_phm  %>%
+  filter(p_ii_sim < 0.05)
+
+tmap_mode("view")
+
+plot_phm <- tm_basemap("OneMapSG.Grey") +
+  tm_shape(mean_phm) +
+  tm_fill(
+    c("Weekend/PH morning peak", "mean"),
+    alpha = .7,
+    title = c("Passenger Volume", "Cluster"),
+    popup.vars = c("Hex ID: " = "hex_id", 
+                   "Cluster" = "mean",
+                   "No. of bus stops: " = "n_busstops",
+                   "Weekday Morning traffic: " = "Weekday morning peak",
+                   "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  ) +
+  tm_layout(
+    title = "Weekend/PH Morning Peak Traffic",
+    title.size = 1
+  )
+
+plot_phm
+```
+
+## {{< fa moon >}} **Weekend/Public Holiday Evening Peak Periods**
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+mean_phe <- lisa08_phe  %>%
+  filter(p_ii_sim < 0.05)
+
+tmap_mode("view")
+
+plot_phe <- tm_basemap("OneMapSG.Night") +
+  tm_shape(mean_phe) +
+  tm_fill(
+    c("Weekend/PH evening peak", "mean"),
+    alpha = .7,
+    title = c("Passenger Volume", "Cluster"),
+    popup.vars = c("Hex ID: " = "hex_id", 
+                   "Cluster" = "mean",
+                   "No. of bus stops: " = "n_busstops",
+                   "Weekday Morning traffic: " = "Weekday morning peak",
+                   "Bus Stop codes: " = "busstop_codes")
+  ) +
+  tm_facets(
+    sync = TRUE, 
+    ncol = 1
+  ) +
+  tm_layout(
+    title = "Weekend/PH Evening Peak Traffic",
+    title.size = 1
+  )
+
+plot_phe
+```
+
+::: {.focusbox .solve data-latex="focus"}
+There are several key insights to be drawn from the maps presented above:
+
+-   Weekday Morning and Evening Peak Timings have similar hot spot clusters, **concentrated around MRT Stations of residential neighbourhoods** such as Woodlands, Yishun, Ang Mo Kio, etc.
+-   However, Weekday Evening Peak Periods reveal clusters of high traffic in the **Central, CBD area as well**. As the aggregation of trips is based on point of origin, this shows that the general traffic flows outward from the CBD area after working hours.
+-   Weekend/Public Holiday Morning and Evening Peak traffic have similar high-high clusters as well, even though the absolute volume of passenger trips is lower. This could be due to more people driving rather than commuting via bus.
+-   Hot spot clusters around residential neighborhoods' MRT stations persists on Weekends/PH as well, suggesting a high population density in those areas.
+:::
+
+# {{< fa bus >}} **Conclusion & Areas for further study**
+
+The insights presented above reveal traffic patterns that could be helpful for urban transport management. In particular, it shows areas of high passenger traffic, **that could be alleviated by increasing bus frequency.** However, more information is needed to optimize this:
+
+-   As the study considers only **origin bus stop** to compute passenger volume, it does not accurately capture the flow of the passenger journey and where the passengers alight. This data could help with understanding denser or more popular areas amongst bus users.
+
+-   The study does not provide data on bus number or bus route. Having this information could help in investigating the more popular bus routes as well as cross reference this with bus frequency per hour. It would then help with diagnosing if the high passenger traffic is due to increased bus frequency (low passenger density per bus) or if bus frequency needs to be increased (if there is high passenger density per bus)
+
+-   Collect more data over a period of time to **conduct Emerging Hot Spot Analysis (EHSA)**, to understand the time-based trends of these clusters and evaluate how these hot (or cold) spots are changing over time.
