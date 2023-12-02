@@ -38,7 +38,7 @@ Ordinary least square (OLS), log-normal, Poisson and negative binomial (NB) regr
 ```{r}
 pacman::p_load(tmap, sf, sp, DT,
                performance, reshape2,
-               ggpubr, tidyverse)
+               ggpubr, tidyverse, ggplot2, ggstatsplot, urbnthemes)
 ```
 
 # Importing the Data
@@ -123,6 +123,7 @@ The resultant distance matrix now has planning subzone code as row and column la
 
 :::
 
+To plot the flows, we need a tibble form of the distance matrix to show the attributes of each trip (origin-destination). 
 
 ## Dealing with 0-value intra-zonal distances
 
@@ -131,6 +132,8 @@ The diagonals of the distance matrix are 0, and represent intra-zonal distances.
 ::: panel-tabset
 
 ## Pivot by SUBZONE_C
+
+`melt()` converts the matrix into a long dataframe, where each row reprsents a flow (origin-destination) pair
 
 ```{r}
 distPair <- melt(dist) %>%
@@ -156,7 +159,8 @@ The minimum distance recorded is 173.8
 
 ## Assign constant as intra-zonal distance
 
-Next, a constant distance value of 50m is assigned to intra-zonal distance
+Next, a constant distance value of 50m is assigned to intra-zonal distance (less that minimum inter-zonal distance of 173.8)
+
 
 ```{r}
 distPair$dist <- ifelse(distPair$dist == 0,
@@ -170,4 +174,183 @@ summary(distPair)
 The minimum distance recorded is 50, our intra-zonal distance.
 
 :::
+
+# Preparing the Flow~ data
+
+::: panel-tabset
+
+## import od_data
+
+```{r}
+od_data <- read_rds("data/rds/od_data.rds")
+```  
+
+## compute the total passenger trips
+
+We compute the total passenger trip between and within planning subzones by using the code chunk below:
+
+```{r}
+flow_data <- od_data %>%
+  rename(TRIPS = MORNING_PEAK)
+```  
+
+```{r}
+head(flow_data, 10)
+```  
+  
+## Separate intra-flow from passenger volume df  
+
+We add 2 new fields into the **flow_data** dataframe, 
+
+-   **FlowNoIntra** to keep intra-subzone number of trips as 0
+-   **offset** separated by intra-subzone flows
+  
+```{r}
+flow_data$FlowNoIntra <- ifelse(
+  flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 
+  0, flow_data$TRIPS)
+
+flow_data$offset <- ifelse(
+  flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 
+  0.000001, 1)
+```
+
+## Combining passenger volume data with distance value
+
+Before we can join flow_data and distPair, we need to convert data value type of ORIGIN_SZ and DESTIN_SZ fields of flow_data dataframe into factor data type.
+
+```{r}
+flow_data <- flow_data %>%
+  mutate(
+    ORIGIN_SZ = as.factor(ORIGIN_SZ),
+    DESTIN_SZ = as.factor(DESTIN_SZ)
+  )
+```
+
+Now, left_join() of dplyr will be used to flow_data dataframe and distPair dataframe
+
+```{r}
+flow_data1 <- flow_data %>%
+  left_join (distPair,
+             by = c("ORIGIN_SZ" = "orig",
+                    "DESTIN_SZ" = "dest"))
+```
+
+:::
+
+#  Preparing Origin and Destination Attributes
+
+::: panel-tabset
+
+## Importing population data
+
+```{r}
+pop <- read_csv("data/aspatial/pop.csv")
+```  
+
+## Adding geospatial attributes
+
+```{r}
+pop <- pop %>%
+  left_join(mpsz,
+            by = c("PA" = "PLN_AREA_N",
+                   "SZ" = "SUBZONE_N")) %>%
+  select(1:6) %>%
+  rename(SZ_NAME = SZ,
+         SZ = SUBZONE_C)
+```
+
+## Preparing origin attributes
+
+```{r}
+flow_data1 <- flow_data1 %>%
+  left_join(pop,
+            by = c(ORIGIN_SZ = "SZ")
+  ) %>%
+  rename(
+    ORIGIN_AGE7_12 = AGE7_12,
+    ORIGIN_AGE13_24 = AGE13_24,
+    ORIGIN_AGE25_64 = AGE25_64
+  ) %>%
+  select(-c(PA, SZ_NAME))
+```
+
+
+## Preparing destination attribute
+
+```{r}
+flow_data1 <- flow_data1 %>%
+  left_join(pop,
+            by = c(DESTIN_SZ = "SZ")
+  ) %>%
+  rename(
+    DESTIN_AGE7_12 = AGE7_12,
+    DESTIN_AGE13_24 = AGE13_24,
+    DESTIN_AGE25_64 = AGE25_64
+  ) %>%
+  select(-c(PA, SZ_NAME))
+```
+
+## Save output as RDS file
+
+```{r}
+write_rds(flow_data1, "data/rds/SIM_data2")
+```
+
+:::
+
+
+# Visualizing the dependent attributes
+
+## What is the distribution of trips?
+
+```{r}
+set_urbn_defaults(style = "print")
+
+ggplot(data = flow_data1,
+       aes(x = TRIPS)) +
+  geom_histogram()
+
+```
+
+The distribution is highly right-skewed.
+
+## What is the correlation between distance and number of trips?
+
+Next, we visualise the relation between the dependent variable and one of the key independent variable in Spatial Interaction Model -- distance:
+
+```{r}
+ggplot(data = flow_data1,
+       aes(x = dist,
+           y = TRIPS)) +
+  geom_point(
+    size = .5
+  ) +
+  geom_smooth(method = lm)
+
+```
+
+ggscatterstats(
+    data = flow_data1, ## data frame from which variables are taken
+    x = dist, ## predictor/independent variable
+    y = TRIPS, ## dependent variable
+    xlab = "Distance (m)", 
+    ylab = "No. of Trips",
+    title = "Relationship between Distance and No. of Trips"
+  )
+
+Notice that their relationship hardly resemble linear relationship.
+
+On the other hand, if we plot the scatter plot by using the log transformed version of both variables, we can see that their relationship is more resemble linear relationship.
+
+```{r}
+ggplot(data = flow_data1,
+       aes(x = log(dist),
+           y = log(TRIPS))) +
+  geom_point(
+    size = .5
+  ) +
+  geom_smooth(method = lm)
+```
+
 
