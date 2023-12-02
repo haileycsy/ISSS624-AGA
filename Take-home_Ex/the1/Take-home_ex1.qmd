@@ -172,20 +172,6 @@ st_crs(busstop)
 **busstop** is now assigned the correct EPSG code.
 :::
 
-The mapview below shows the location of each bus stop in the **busstop** Simple features dataframe:
-
-```{r}
-#| code-fold: true
-
-tmap_mode("view")
-
-map_busstops <- 
-  tm_shape(busstop) +
-  tm_dots(col = "#451F55",
-          size = .01)
-
-map_busstops
-```
 
 # Data Preparation
 
@@ -505,10 +491,11 @@ bustraffic08_map <- tm_basemap("CartoDB.Positron") +
     id = "hex_id",
     popup.vars = c("No. of bus stops: " = "n_busstops",
                    "Bus Stop codes: " = "busstop_codes"),
-    legend.title = "No. of bus stops"
+    title = " "
   ) +
   tm_layout(
-    title = ""
+    # Set legend.show to FALSE to hide the legend
+    legend.show = FALSE
   )
 
 bustraffic08_map

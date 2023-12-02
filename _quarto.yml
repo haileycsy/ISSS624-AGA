@@ -33,6 +33,8 @@ website:
             href: Hands-on_Ex/hoe1/Hands-on_Ex01.html
           - text: "Hands-on Ex 2"
             href: Hands-on_Ex/hoe2/Hands-on_Ex02.html
+          - text: "Hands-on Ex 3"
+            href: Hands-on_Ex/hoe3/Hands-on_Ex03.html
      
       - text: "{{< fa magnifying-glass-chart >}} Take-home Ex"
         menu:
@@ -46,6 +48,8 @@ website:
             href: In-class_Ex\ice1\In-class_Ex01.html
           - text: "In-class Ex 2"
             href: In-class_Ex\ice2\In-class_Ex02.html
+          - text: "In-class Ex 3"
+            href: In-class_Ex/ice3/In-class_Ex03.html
     
   page-footer:
     right: |

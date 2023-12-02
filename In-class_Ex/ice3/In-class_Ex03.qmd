@@ -1,0 +1,173 @@
+---
+title: "In-class Ex 3"
+date: "Published on December 2 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+    toc-title: Contents
+    number-sections: true
+execute: 
+  warning: false
+---
+
+<font size = "5">**Spatial Interaction Models**</font>
+
+**Spatial Interaction Models (SIMs)** are mathematical models for estimating flows between spatial entities developed by Alan Wilson in the late 1960s and early 1970, with considerable uptake and refinement for transport modelling since then Boyce and Williams (2015).
+
+There are four main types of traditional SIMs (Wilson 1971):
+
+-   Unconstrained
+-   Production-constrained
+-   Attraction-constrained
+-   Doubly-constrained
+
+
+Calibrating Flows:
+
+Ordinary least square (OLS), log-normal, Poisson and negative binomial (NB) regression methods have been used extensively to calibrate OD flow models by processing flow data as different types of dependent variables. This exercise will focus on using appropriate R packages to calibrate SIMs by using the four regression methods.  
+
+
+# Loading R packages
+
+-   **performance** for Assessment, Comparison and Testing of Statistical Models
+-   **reshape2** for handling matrix dataframes
+-   **ggpubr** for composing multiplots
+
+```{r}
+pacman::p_load(tmap, sf, sp, DT,
+               performance, reshape2,
+               ggpubr, tidyverse)
+```
+
+# Importing the Data
+
+The following data files will be used for the study: 
+
+-   **od_data.rds:** weekday morning peak passenger flows at planning subzone level
+-   **mpsz.rds:** URA Master Plan 2019 Planning Subzone boundary 
+
+
+## mpsz
+
+::: panel-tabset
+
+## Import RDS
+
+```{r}
+mpsz <- read_rds("data/rds/mpsz.rds")
+mpsz
+```  
+
+## Converting from sf data.table to SpatialPolygonsDataFrame
+
+`as_Spatial()` will be used to convert **mpsz** from sf tibble data frame to a SpatialPolygonsDataFrame (sp object)
+
+```{r}
+mpsz_sp <- mpsz %>%
+  as_Spatial()
+
+mpsz_sp
+```   
+
+:::
+
+# Computing the distance matrix
+
+## Creating distance matrix frame
+
+`spDists()` of sp package will be used to compute the Euclidean distance between the centroids of the planning subzones.
+
+Centroids of each planning subzones are used as points of origin and destination for easy calculations. 
+
+```{r}
+dist <- spDists(mpsz_sp, 
+                # df is already polygon, so set longlat as FALSE
+                longlat = FALSE)
+```
+
+```{r}
+head(dist, n=c(10, 10))
+```
+
+The resultant **distance matrix** shows the relative distances between each subzone centroid. 
+
+
+## Labelling column and row headers
+
+::: panel-tabset
+
+## Sort by sub-zone code
+
+We first create a list, **sz_names**, sorted according to the the distance matrix by planning sub-zone code:
+
+```{r}
+sz_names <- mpsz$SUBZONE_C
+```
+
+
+## Attach Subzone names
+
+Next, we assign **SUBZONE_C** to rows and columns for distance matrix matching
+
+```{r}
+colnames(dist) <- paste0(sz_names)
+rownames(dist) <- paste0(sz_names)
+```
+
+```{r}
+head(dist, n=c(10, 10))
+```  
+The resultant distance matrix now has planning subzone code as row and column labels. 
+
+:::
+
+
+## Dealing with 0-value intra-zonal distances
+
+The diagonals of the distance matrix are 0, and represent intra-zonal distances. We append a constant value to replace the intra-zonal distance of 0.
+
+::: panel-tabset
+
+## Pivot by SUBZONE_C
+
+```{r}
+distPair <- melt(dist) %>%
+  rename(dist = value,
+         orig = Var1,
+         dest = Var2
+)
+
+head(distPair, 10)
+```
+
+## Find minimum distance 
+
+select and find out the minimum value of the distance by using `summary()`
+
+```{r}
+distPair %>%
+  filter(dist > 0) %>%
+  summary()
+```
+
+The minimum distance recorded is 173.8
+
+## Assign constant as intra-zonal distance
+
+Next, a constant distance value of 50m is assigned to intra-zonal distance
+
+```{r}
+distPair$dist <- ifelse(distPair$dist == 0,
+                        50, distPair$dist)
+```
+
+```{r}
+summary(distPair)
+```  
+
+The minimum distance recorded is 50, our intra-zonal distance.
+
+:::
+
