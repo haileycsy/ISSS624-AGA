@@ -50,6 +50,8 @@ website:
             href: In-class_Ex\ice2\In-class_Ex02.html
           - text: "In-class Ex 3"
             href: In-class_Ex/ice3/In-class_Ex03.html
+          - text: "In-class Ex 4"
+            href: In-class_Ex/ice4/In-class_Ex04.html
     
   page-footer:
     right: |

@@ -172,7 +172,6 @@ st_crs(busstop)
 **busstop** is now assigned the correct EPSG code.
 :::
 
-
 # Data Preparation
 
 To narrow down the scope of the study, only patterns pertaining to **peak hour trips** will be analysed.
@@ -311,7 +310,7 @@ To understand if this distribution is unique to the month of August, or records 
 
 ```{r}
 #| code-fold: true
-#| #| fig-width: 8
+#| fig-width: 8
 bus_density <- busod_agg %>%
   ggplot(
     aes(x = period,

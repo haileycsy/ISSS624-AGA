@@ -16,8 +16,7 @@ execute:
 
 # What is Spatial Interaction?
 
-Spatial interaction represents the flow of people, materials, or information between locations in geographical space. Each spatial interaction is composed of a discrete origin->destination pair. Each pair can be represented as a cell in a matrix where rows are related to the locations (centroids) of origin, while columns are related to locations (centroids) of destination. Such a matrix is commonly known as an **origin/destination matrix**, or a **spatial interaction matrix**.
-
+Spatial interaction represents the flow of people, materials, or information between locations in geographical space. Each spatial interaction is composed of a discrete origin-\>destination pair. Each pair can be represented as a cell in a matrix where rows are related to the locations (centroids) of origin, while columns are related to locations (centroids) of destination. Such a matrix is commonly known as an **origin/destination matrix**, or a **spatial interaction matrix**.
 
 # Loading the Packages
 
@@ -34,16 +33,16 @@ pacman::p_load(tmap, sf, DT, stplanr,
                ggpubr, tidyverse)
 ```
 
-
 # Loading Aspatial Data
 
-The dataset used is *Passenger Volume by Origin Bus Stop* from LTA Datamall. The data extracted is from September 2023. 
+The dataset used is *Passenger Volume by Origin Bus Stop* from LTA Datamall. The data extracted is from September 2023.
 
 ```{r}
 odbus09 <- read_csv("data/aspatial/origin_destination_bus_202309.csv")
 
 glimpse(odbus09)
 ```
+
 `glimpse()` reveals that the values in **ORIGIN_PT_CODE** and **DESTINATON_PT_CODE** are character data types. As these represent unique bus stops, we treat them as categorical data and cast them as `factor` type:
 
 ```{r}
@@ -52,10 +51,9 @@ odbus09 <- odbus09 %>%
          DESTINATION_PT_CODE = as.factor( DESTINATION_PT_CODE))
 ```
 
-
 ## Extracting data for study
 
-For the purpose of this exercise, we will extract commuting flows on weekday and between 6 and 9 o’clock.
+For the purpose of this exercise, we will extract commuting flows on weekday and between 6 and 9 o'clock.
 
 ```{r}
 odbus6_9 <- odbus09 %>%
@@ -92,7 +90,6 @@ Then, import the rds file into the R environment
 odbus6_9 <- read_rds("data/rds/odbus6_9.rds")
 ```
 
-
 # Loading Geospatial Data
 
 Two geospatial data will be used in this exercise, they are:
@@ -103,8 +100,7 @@ Two geospatial data will be used in this exercise, they are:
 Both geospatial dataframes are transformed into the same EPSG code 3414 based on Co-ordinate Reference System (CRS)
 
 ::: panel-tabset
-
-## **busstop** 
+## **busstop**
 
 **busstop** is a Simple Features Dataframe (point)
 
@@ -123,17 +119,14 @@ busstop <- st_read(dsn = "data/geospatial",
 mpsz <- st_read(dsn = "data/geospatial",
                 layer = "MPSZ-2019") %>%
   st_transform(crs = 3414)
-```  
+```
 
 The code chunk below writes the **mpsz** sf tibble data frame into an rds file for future use:
 
 ```{r}
 mpsz <- write_rds(mpsz, "data/rds/mpsz.rds")
 ```
-
-
 :::
-
 
 # Geospatial Data Wrangling
 
@@ -144,8 +137,7 @@ The following code chunk integrates the planning subzone codes (i.e. SUBZONE_C) 
 
 *Note:5 bus stops are excluded in the resultant data frame because they are outside of Singapore boundary.*
 
-::: panel-tabset 
-
+::: panel-tabset
 ## Extract bus stop numbers and subzone codes
 
 ```{r}
@@ -165,7 +157,7 @@ od_data <- left_join(
     ORIGIN_BS = ORIGIN_PT_CODE,
     ORIGIN_SZ = SUBZONE_C,
     DESTIN_BS = DESTINATION_PT_CODE)
-```  
+```
 
 ## Check for duplicates
 
@@ -184,7 +176,6 @@ There are 1,154 duplicated rows. These are removed by retaining only unique valu
 od_data <- unique(od_data)
 ```
 
-
 Check again to ensure that duplicates have been truly removed:
 
 ```{r}
@@ -194,7 +185,7 @@ duplicates_2 <- od_data %>%
   ungroup()
 
 duplicates_2
-```  
+```
 
 ## Update od_data with planning subzone codes
 
@@ -214,7 +205,7 @@ od_data <- od_data %>%
     MORNING_PEAK = sum(TRIPS)
   ) %>%
   ungroup()
-```  
+```
 
 ## Save files as rds
 
@@ -225,8 +216,6 @@ write_rds(od_data, "data/rds/od_data.rds")
 ```{r}
 od_data <- read_rds("data/rds/od_data.rds")
 ```
-
-
 :::
 
 # Visualising Spatial Interaction
@@ -241,13 +230,9 @@ od_data1 <- od_data[od_data$ORIGIN_SZ!=od_data$DESTIN_SZ,]
 
 ## Creating desire lines
 
-
 ::: {.pinbox .solve data-latex="pin"}
-
-**Desire lines** are straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones)  
-
-:::  
-
+**Desire lines** are straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones)
+:::
 
 In this code chunk, `od2line()` of **stplanr** package is used to create the desire lines:
 
@@ -279,10 +264,9 @@ tm_shape() +
   )
 ```
 
+When the flow data is visually messy and highly skewed like the one shown above, it is wiser to focus on selected flows.
 
-When the flow data is visually messy and highly skewed like the one shown above, it is wiser to focus on selected flows. 
-
-Thus, we will focus on flows greater >= 5000:
+Thus, we will focus on flows greater \>= 5000:
 
 ```{r}
 tm_shape(mpsz) +
@@ -304,4 +288,3 @@ tm_shape() +
   ) +
   tmap_style("classic")
 ```
-

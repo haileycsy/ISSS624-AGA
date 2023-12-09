@@ -23,11 +23,9 @@ There are four main types of traditional SIMs (Wilson 1971):
 -   Attraction-constrained
 -   Doubly-constrained
 
-
 Calibrating Flows:
 
-Ordinary least square (OLS), log-normal, Poisson and negative binomial (NB) regression methods have been used extensively to calibrate OD flow models by processing flow data as different types of dependent variables. This exercise will focus on using appropriate R packages to calibrate SIMs by using the four regression methods.  
-
+Ordinary least square (OLS), log-normal, Poisson and negative binomial (NB) regression methods have been used extensively to calibrate OD flow models by processing flow data as different types of dependent variables. This exercise will focus on using appropriate R packages to calibrate SIMs by using the four regression methods.
 
 # Loading R packages
 
@@ -43,22 +41,20 @@ pacman::p_load(tmap, sf, sp, DT,
 
 # Importing the Data
 
-The following data files will be used for the study: 
+The following data files will be used for the study:
 
 -   **od_data.rds:** weekday morning peak passenger flows at planning subzone level
--   **mpsz.rds:** URA Master Plan 2019 Planning Subzone boundary 
-
+-   **mpsz.rds:** URA Master Plan 2019 Planning Subzone boundary
 
 ## mpsz
 
 ::: panel-tabset
-
 ## Import RDS
 
 ```{r}
 mpsz <- read_rds("data/rds/mpsz.rds")
 mpsz
-```  
+```
 
 ## Converting from sf data.table to SpatialPolygonsDataFrame
 
@@ -69,8 +65,7 @@ mpsz_sp <- mpsz %>%
   as_Spatial()
 
 mpsz_sp
-```   
-
+```
 :::
 
 # Computing the distance matrix
@@ -79,7 +74,7 @@ mpsz_sp
 
 `spDists()` of sp package will be used to compute the Euclidean distance between the centroids of the planning subzones.
 
-Centroids of each planning subzones are used as points of origin and destination for easy calculations. 
+Centroids of each planning subzones are used as points of origin and destination for easy calculations.
 
 ```{r}
 dist <- spDists(mpsz_sp, 
@@ -91,13 +86,11 @@ dist <- spDists(mpsz_sp,
 head(dist, n=c(10, 10))
 ```
 
-The resultant **distance matrix** shows the relative distances between each subzone centroid. 
-
+The resultant **distance matrix** shows the relative distances between each subzone centroid.
 
 ## Labelling column and row headers
 
 ::: panel-tabset
-
 ## Sort by sub-zone code
 
 We first create a list, **sz_names**, sorted according to the the distance matrix by planning sub-zone code:
@@ -105,7 +98,6 @@ We first create a list, **sz_names**, sorted according to the the distance matri
 ```{r}
 sz_names <- mpsz$SUBZONE_C
 ```
-
 
 ## Attach Subzone names
 
@@ -118,19 +110,18 @@ rownames(dist) <- paste0(sz_names)
 
 ```{r}
 head(dist, n=c(10, 10))
-```  
-The resultant distance matrix now has planning subzone code as row and column labels. 
+```
 
+The resultant distance matrix now has planning subzone code as row and column labels.
 :::
 
-To plot the flows, we need a tibble form of the distance matrix to show the attributes of each trip (origin-destination). 
+To plot the flows, we need a tibble form of the distance matrix to show the attributes of each trip (origin-destination).
 
 ## Dealing with 0-value intra-zonal distances
 
 The diagonals of the distance matrix are 0, and represent intra-zonal distances. We append a constant value to replace the intra-zonal distance of 0.
 
 ::: panel-tabset
-
 ## Pivot by SUBZONE_C
 
 `melt()` converts the matrix into a long dataframe, where each row reprsents a flow (origin-destination) pair
@@ -145,7 +136,7 @@ distPair <- melt(dist) %>%
 head(distPair, 10)
 ```
 
-## Find minimum distance 
+## Find minimum distance
 
 select and find out the minimum value of the distance by using `summary()`
 
@@ -161,7 +152,6 @@ The minimum distance recorded is 173.8
 
 Next, a constant distance value of 50m is assigned to intra-zonal distance (less that minimum inter-zonal distance of 173.8)
 
-
 ```{r}
 distPair$dist <- ifelse(distPair$dist == 0,
                         50, distPair$dist)
@@ -169,21 +159,19 @@ distPair$dist <- ifelse(distPair$dist == 0,
 
 ```{r}
 summary(distPair)
-```  
+```
 
 The minimum distance recorded is 50, our intra-zonal distance.
-
 :::
 
-# Preparing the Flow~ data
+# Preparing the Flow\~ data
 
 ::: panel-tabset
-
 ## import od_data
 
 ```{r}
 od_data <- read_rds("data/rds/od_data.rds")
-```  
+```
 
 ## compute the total passenger trips
 
@@ -192,19 +180,19 @@ We compute the total passenger trip between and within planning subzones by usin
 ```{r}
 flow_data <- od_data %>%
   rename(TRIPS = MORNING_PEAK)
-```  
+```
 
 ```{r}
 head(flow_data, 10)
-```  
-  
-## Separate intra-flow from passenger volume df  
+```
 
-We add 2 new fields into the **flow_data** dataframe, 
+## Separate intra-flow from passenger volume df
+
+We add 2 new fields into the **flow_data** dataframe,
 
 -   **FlowNoIntra** to keep intra-subzone number of trips as 0
 -   **offset** separated by intra-subzone flows
-  
+
 ```{r}
 flow_data$FlowNoIntra <- ifelse(
   flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 
@@ -235,18 +223,16 @@ flow_data1 <- flow_data %>%
              by = c("ORIGIN_SZ" = "orig",
                     "DESTIN_SZ" = "dest"))
 ```
-
 :::
 
-#  Preparing Origin and Destination Attributes
+# Preparing Origin and Destination Attributes
 
 ::: panel-tabset
-
 ## Importing population data
 
 ```{r}
 pop <- read_csv("data/aspatial/pop.csv")
-```  
+```
 
 ## Adding geospatial attributes
 
@@ -275,7 +261,6 @@ flow_data1 <- flow_data1 %>%
   select(-c(PA, SZ_NAME))
 ```
 
-
 ## Preparing destination attribute
 
 ```{r}
@@ -296,9 +281,7 @@ flow_data1 <- flow_data1 %>%
 ```{r}
 write_rds(flow_data1, "data/rds/SIM_data2")
 ```
-
 :::
-
 
 # Visualizing the dependent attributes
 
@@ -330,14 +313,15 @@ ggplot(data = flow_data1,
 
 ```
 
-ggscatterstats(
-    data = flow_data1, ## data frame from which variables are taken
-    x = dist, ## predictor/independent variable
-    y = TRIPS, ## dependent variable
-    xlab = "Distance (m)", 
-    ylab = "No. of Trips",
-    title = "Relationship between Distance and No. of Trips"
-  )
+```{r}
+ggscatterstats(data = flow_data1, ## data frame from which variables are taken 
+              x = dist, ## predictor/independent variable 
+              y = TRIPS, ## dependent variable 
+              xlab = "Distance (m)", 
+              ylab = "No. of Trips", 
+              title = "Relationship between Distance and No. of Trips")
+                
+```
 
 Notice that their relationship hardly resemble linear relationship.
 
@@ -352,5 +336,3 @@ ggplot(data = flow_data1,
   ) +
   geom_smooth(method = lm)
 ```
-
-

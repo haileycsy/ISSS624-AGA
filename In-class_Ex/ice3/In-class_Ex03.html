@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-12-02">
+
+<title>haileycsy - In-class Ex 3</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/apple-touch-icon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../images/Name_Logo2.png" alt="" class="navbar-logo">
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/hailey-sy-cheong/"><i class="bi bi-linkedin" role="img" aria-label="Linkedin">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://public.tableau.com/app/profile/hailey.cheong"><i class="bi bi-diagram-3-fill" role="img" aria-label="Tableau">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/haileycsy"><i class="bi bi-github" role="img" aria-label="Github">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text"><i class="fa-solid fa-face-smile" aria-label="face-smile"></i> Hello World</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-hand-sparkles--hands-on-ex" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text"><i class="fa-solid fa-hand-sparkles" aria-label="hand-sparkles"></i> Hands-on Ex</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-fa-hand-sparkles--hands-on-ex">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/hoe1/Hands-on_Ex01.html">
+ <span class="dropdown-text">Hands-on Ex 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/hoe2/Hands-on_Ex02.html">
+ <span class="dropdown-text">Hands-on Ex 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/hoe3/Hands-on_Ex03.html">
+ <span class="dropdown-text">Hands-on Ex 3</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-magnifying-glass-chart--take-home-ex" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text"><i class="fa-solid fa-magnifying-glass-chart" aria-label="magnifying-glass-chart"></i> Take-home Ex</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-fa-magnifying-glass-chart--take-home-ex">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/the1/Take-home_ex1.html">
+ <span class="dropdown-text">Take-home Ex 1</span></a>
+  </li>  
+        <li class="dropdown-header">Take-home Ex 2</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-fa-chalkboard-user--in-class-ex" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text"><i class="fa-solid fa-chalkboard-user" aria-label="chalkboard-user"></i> In-class Ex</span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-fa-chalkboard-user--in-class-ex">    
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex\ice1\In-class_Ex01.html">
+ <span class="dropdown-text">In-class Ex 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex\ice2\In-class_Ex02.html">
+ <span class="dropdown-text">In-class Ex 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/ice3/In-class_Ex03.html">
+ <span class="dropdown-text">In-class Ex 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/ice4/In-class_Ex04.html">
+ <span class="dropdown-text">In-class Ex 4</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#loading-r-packages" id="toc-loading-r-packages" class="nav-link active" data-scroll-target="#loading-r-packages"><span class="toc-section-number">1</span>  Loading R packages</a></li>
+  <li><a href="#importing-the-data" id="toc-importing-the-data" class="nav-link" data-scroll-target="#importing-the-data"><span class="toc-section-number">2</span>  Importing the Data</a>
+  <ul class="collapse">
+  <li><a href="#mpsz" id="toc-mpsz" class="nav-link" data-scroll-target="#mpsz"><span class="toc-section-number">2.1</span>  mpsz</a></li>
+  </ul></li>
+  <li><a href="#computing-the-distance-matrix" id="toc-computing-the-distance-matrix" class="nav-link" data-scroll-target="#computing-the-distance-matrix"><span class="toc-section-number">3</span>  Computing the distance matrix</a>
+  <ul class="collapse">
+  <li><a href="#creating-distance-matrix-frame" id="toc-creating-distance-matrix-frame" class="nav-link" data-scroll-target="#creating-distance-matrix-frame"><span class="toc-section-number">3.1</span>  Creating distance matrix frame</a></li>
+  <li><a href="#labelling-column-and-row-headers" id="toc-labelling-column-and-row-headers" class="nav-link" data-scroll-target="#labelling-column-and-row-headers"><span class="toc-section-number">3.2</span>  Labelling column and row headers</a></li>
+  <li><a href="#dealing-with-0-value-intra-zonal-distances" id="toc-dealing-with-0-value-intra-zonal-distances" class="nav-link" data-scroll-target="#dealing-with-0-value-intra-zonal-distances"><span class="toc-section-number">3.3</span>  Dealing with 0-value intra-zonal distances</a></li>
+  </ul></li>
+  <li><a href="#preparing-the-flow-data" id="toc-preparing-the-flow-data" class="nav-link" data-scroll-target="#preparing-the-flow-data"><span class="toc-section-number">4</span>  Preparing the Flow~ data</a></li>
+  <li><a href="#preparing-origin-and-destination-attributes" id="toc-preparing-origin-and-destination-attributes" class="nav-link" data-scroll-target="#preparing-origin-and-destination-attributes"><span class="toc-section-number">5</span>  Preparing Origin and Destination Attributes</a></li>
+  <li><a href="#visualizing-the-dependent-attributes" id="toc-visualizing-the-dependent-attributes" class="nav-link" data-scroll-target="#visualizing-the-dependent-attributes"><span class="toc-section-number">6</span>  Visualizing the dependent attributes</a>
+  <ul class="collapse">
+  <li><a href="#what-is-the-distribution-of-trips" id="toc-what-is-the-distribution-of-trips" class="nav-link" data-scroll-target="#what-is-the-distribution-of-trips"><span class="toc-section-number">6.1</span>  What is the distribution of trips?</a></li>
+  <li><a href="#what-is-the-correlation-between-distance-and-number-of-trips" id="toc-what-is-the-correlation-between-distance-and-number-of-trips" class="nav-link" data-scroll-target="#what-is-the-correlation-between-distance-and-number-of-trips"><span class="toc-section-number">6.2</span>  What is the correlation between distance and number of trips?</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">In-class Ex 3</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 2, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">December 9, 2023</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<p><font size="5"><strong>Spatial Interaction Models</strong></font></p>
+<p><strong>Spatial Interaction Models (SIMs)</strong> are mathematical models for estimating flows between spatial entities developed by Alan Wilson in the late 1960s and early 1970, with considerable uptake and refinement for transport modelling since then Boyce and Williams (2015).</p>
+<p>There are four main types of traditional SIMs (Wilson 1971):</p>
+<ul>
+<li>Unconstrained</li>
+<li>Production-constrained</li>
+<li>Attraction-constrained</li>
+<li>Doubly-constrained</li>
+</ul>
+<p>Calibrating Flows:</p>
+<p>Ordinary least square (OLS), log-normal, Poisson and negative binomial (NB) regression methods have been used extensively to calibrate OD flow models by processing flow data as different types of dependent variables. This exercise will focus on using appropriate R packages to calibrate SIMs by using the four regression methods.</p>
+<section id="loading-r-packages" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Loading R packages</h1>
+<ul>
+<li><strong>performance</strong> for Assessment, Comparison and Testing of Statistical Models</li>
+<li><strong>reshape2</strong> for handling matrix dataframes</li>
+<li><strong>ggpubr</strong> for composing multiplots</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tmap, sf, sp, DT,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               performance, reshape2,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>               ggpubr, tidyverse, ggplot2, ggstatsplot, urbnthemes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="importing-the-data" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Importing the Data</h1>
+<p>The following data files will be used for the study:</p>
+<ul>
+<li><strong>od_data.rds:</strong> weekday morning peak passenger flows at planning subzone level</li>
+<li><strong>mpsz.rds:</strong> URA Master Plan 2019 Planning Subzone boundary</li>
+</ul>
+<section id="mpsz" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="mpsz"><span class="header-section-number">2.1</span> mpsz</h2>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Import RDS</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Converting from sf data.table to SpatialPolygonsDataFrame</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/mpsz.rds"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mpsz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 332 features and 6 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33
+Projected CRS: SVY21 / Singapore TM
+First 10 features:
+                 SUBZONE_N SUBZONE_C       PLN_AREA_N PLN_AREA_C       REGION_N
+1              MARINA EAST    MESZ01      MARINA EAST         ME CENTRAL REGION
+2         INSTITUTION HILL    RVSZ05     RIVER VALLEY         RV CENTRAL REGION
+3           ROBERTSON QUAY    SRSZ01  SINGAPORE RIVER         SR CENTRAL REGION
+4  JURONG ISLAND AND BUKOM    WISZ01  WESTERN ISLANDS         WI    WEST REGION
+5             FORT CANNING    MUSZ02           MUSEUM         MU CENTRAL REGION
+6         MARINA EAST (MP)    MPSZ05    MARINE PARADE         MP CENTRAL REGION
+7                   SUDONG    WISZ03  WESTERN ISLANDS         WI    WEST REGION
+8                  SEMAKAU    WISZ02  WESTERN ISLANDS         WI    WEST REGION
+9           SOUTHERN GROUP    SISZ02 SOUTHERN ISLANDS         SI CENTRAL REGION
+10                 SENTOSA    SISZ01 SOUTHERN ISLANDS         SI CENTRAL REGION
+   REGION_C                       geometry
+1        CR MULTIPOLYGON (((33222.98 29...
+2        CR MULTIPOLYGON (((28481.45 30...
+3        CR MULTIPOLYGON (((28087.34 30...
+4        WR MULTIPOLYGON (((14557.7 304...
+5        CR MULTIPOLYGON (((29542.53 31...
+6        CR MULTIPOLYGON (((35279.55 30...
+7        WR MULTIPOLYGON (((15772.59 21...
+8        WR MULTIPOLYGON (((19843.41 21...
+9        CR MULTIPOLYGON (((30870.53 22...
+10       CR MULTIPOLYGON (((26879.04 26...</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p><code>as_Spatial()</code> will be used to convert <strong>mpsz</strong> from sf tibble data frame to a SpatialPolygonsDataFrame (sp object)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mpsz_sp <span class="ot">&lt;-</span> mpsz <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>mpsz_sp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatialPolygonsDataFrame 
+features    : 332 
+extent      : 2667.538, 56396.44, 15748.72, 50256.33  (xmin, xmax, ymin, ymax)
+crs         : +proj=tmerc +lat_0=1.36666666666667 +lon_0=103.833333333333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+variables   : 6
+names       : SUBZONE_N, SUBZONE_C, PLN_AREA_N, PLN_AREA_C,       REGION_N, REGION_C 
+min values  : ADMIRALTY,    AMSZ01, ANG MO KIO,         AM, CENTRAL REGION,       CR 
+max values  :    YUNNAN,    YSSZ09,     YISHUN,         YS,    WEST REGION,       WR </code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-the-distance-matrix" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Computing the distance matrix</h1>
+<section id="creating-distance-matrix-frame" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="creating-distance-matrix-frame"><span class="header-section-number">3.1</span> Creating distance matrix frame</h2>
+<p><code>spDists()</code> of sp package will be used to compute the Euclidean distance between the centroids of the planning subzones.</p>
+<p>Centroids of each planning subzones are used as points of origin and destination for easy calculations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">spDists</span>(mpsz_sp, </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                <span class="co"># df is already polygon, so set longlat as FALSE</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">longlat =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dist, <span class="at">n=</span><span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]       [,2]      [,3]      [,4]       [,5]      [,6]      [,7]
+ [1,]     0.000  3926.0025  3939.108 20252.964  2989.9839  1431.330 19211.836
+ [2,]  3926.003     0.0000   305.737 16513.865   951.8314  5254.066 16242.523
+ [3,]  3939.108   305.7370     0.000 16412.062  1045.9088  5299.849 16026.146
+ [4,] 20252.964 16513.8648 16412.062     0.000 17450.3044 21665.795  7229.017
+ [5,]  2989.984   951.8314  1045.909 17450.304     0.0000  4303.232 17020.916
+ [6,]  1431.330  5254.0664  5299.849 21665.795  4303.2323     0.000 20617.082
+ [7,] 19211.836 16242.5230 16026.146  7229.017 17020.9161 20617.082     0.000
+ [8,] 14960.942 12749.4101 12477.871 11284.279 13336.0421 16281.453  5606.082
+ [9,]  7515.256  7934.8082  7649.776 18427.503  7801.6163  8403.896 14810.930
+[10,]  6391.342  4975.0021  4669.295 15469.566  5226.8731  7707.091 13111.391
+           [,8]      [,9]     [,10]
+ [1,] 14960.942  7515.256  6391.342
+ [2,] 12749.410  7934.808  4975.002
+ [3,] 12477.871  7649.776  4669.295
+ [4,] 11284.279 18427.503 15469.566
+ [5,] 13336.042  7801.616  5226.873
+ [6,] 16281.453  8403.896  7707.091
+ [7,]  5606.082 14810.930 13111.391
+ [8,]     0.000  9472.024  8575.490
+ [9,]  9472.024     0.000  3780.800
+[10,]  8575.490  3780.800     0.000</code></pre>
+</div>
+</div>
+<p>The resultant <strong>distance matrix</strong> shows the relative distances between each subzone centroid.</p>
+</section>
+<section id="labelling-column-and-row-headers" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="labelling-column-and-row-headers"><span class="header-section-number">3.2</span> Labelling column and row headers</h2>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Sort by sub-zone code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Attach Subzone names</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p>We first create a list, <strong>sz_names</strong>, sorted according to the the distance matrix by planning sub-zone code:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sz_names <span class="ot">&lt;-</span> mpsz<span class="sc">$</span>SUBZONE_C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<p>Next, we assign <strong>SUBZONE_C</strong> to rows and columns for distance matrix matching</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(dist) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(sz_names)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(dist) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(sz_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dist, <span class="at">n=</span><span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          MESZ01     RVSZ05    SRSZ01    WISZ01     MUSZ02    MPSZ05    WISZ03
+MESZ01     0.000  3926.0025  3939.108 20252.964  2989.9839  1431.330 19211.836
+RVSZ05  3926.003     0.0000   305.737 16513.865   951.8314  5254.066 16242.523
+SRSZ01  3939.108   305.7370     0.000 16412.062  1045.9088  5299.849 16026.146
+WISZ01 20252.964 16513.8648 16412.062     0.000 17450.3044 21665.795  7229.017
+MUSZ02  2989.984   951.8314  1045.909 17450.304     0.0000  4303.232 17020.916
+MPSZ05  1431.330  5254.0664  5299.849 21665.795  4303.2323     0.000 20617.082
+WISZ03 19211.836 16242.5230 16026.146  7229.017 17020.9161 20617.082     0.000
+WISZ02 14960.942 12749.4101 12477.871 11284.279 13336.0421 16281.453  5606.082
+SISZ02  7515.256  7934.8082  7649.776 18427.503  7801.6163  8403.896 14810.930
+SISZ01  6391.342  4975.0021  4669.295 15469.566  5226.8731  7707.091 13111.391
+          WISZ02    SISZ02    SISZ01
+MESZ01 14960.942  7515.256  6391.342
+RVSZ05 12749.410  7934.808  4975.002
+SRSZ01 12477.871  7649.776  4669.295
+WISZ01 11284.279 18427.503 15469.566
+MUSZ02 13336.042  7801.616  5226.873
+MPSZ05 16281.453  8403.896  7707.091
+WISZ03  5606.082 14810.930 13111.391
+WISZ02     0.000  9472.024  8575.490
+SISZ02  9472.024     0.000  3780.800
+SISZ01  8575.490  3780.800     0.000</code></pre>
+</div>
+</div>
+<p>The resultant distance matrix now has planning subzone code as row and column labels.</p>
+</div>
+</div>
+</div>
+<p>To plot the flows, we need a tibble form of the distance matrix to show the attributes of each trip (origin-destination).</p>
+</section>
+<section id="dealing-with-0-value-intra-zonal-distances" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="dealing-with-0-value-intra-zonal-distances"><span class="header-section-number">3.3</span> Dealing with 0-value intra-zonal distances</h2>
+<p>The diagonals of the distance matrix are 0, and represent intra-zonal distances. We append a constant value to replace the intra-zonal distance of 0.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Pivot by SUBZONE_C</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Find minimum distance</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false">Assign constant as intra-zonal distance</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<p><code>melt()</code> converts the matrix into a long dataframe, where each row reprsents a flow (origin-destination) pair</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>distPair <span class="ot">&lt;-</span> <span class="fu">melt</span>(dist) <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">dist =</span> value,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">orig =</span> Var1,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">dest =</span> Var2</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(distPair, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     orig   dest      dist
+1  MESZ01 MESZ01     0.000
+2  RVSZ05 MESZ01  3926.003
+3  SRSZ01 MESZ01  3939.108
+4  WISZ01 MESZ01 20252.964
+5  MUSZ02 MESZ01  2989.984
+6  MPSZ05 MESZ01  1431.330
+7  WISZ03 MESZ01 19211.836
+8  WISZ02 MESZ01 14960.942
+9  SISZ02 MESZ01  7515.256
+10 SISZ01 MESZ01  6391.342</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<p>select and find out the minimum value of the distance by using <code>summary()</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>distPair <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(dist <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      orig             dest             dist        
+ MESZ01 :   331   MESZ01 :   331   Min.   :  173.8  
+ RVSZ05 :   331   RVSZ05 :   331   1st Qu.: 7149.5  
+ SRSZ01 :   331   SRSZ01 :   331   Median :11890.0  
+ WISZ01 :   331   WISZ01 :   331   Mean   :12229.4  
+ MUSZ02 :   331   MUSZ02 :   331   3rd Qu.:16401.7  
+ MPSZ05 :   331   MPSZ05 :   331   Max.   :49894.4  
+ (Other):107906   (Other):107906                    </code></pre>
+</div>
+</div>
+<p>The minimum distance recorded is 173.8</p>
+</div>
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
+<p>Next, a constant distance value of 50m is assigned to intra-zonal distance (less that minimum inter-zonal distance of 173.8)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>distPair<span class="sc">$</span>dist <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(distPair<span class="sc">$</span>dist <span class="sc">==</span> <span class="dv">0</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                        <span class="dv">50</span>, distPair<span class="sc">$</span>dist)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(distPair)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      orig             dest             dist      
+ MESZ01 :   332   MESZ01 :   332   Min.   :   50  
+ RVSZ05 :   332   RVSZ05 :   332   1st Qu.: 7097  
+ SRSZ01 :   332   SRSZ01 :   332   Median :11864  
+ WISZ01 :   332   WISZ01 :   332   Mean   :12193  
+ MUSZ02 :   332   MUSZ02 :   332   3rd Qu.:16388  
+ MPSZ05 :   332   MPSZ05 :   332   Max.   :49894  
+ (Other):108232   (Other):108232                  </code></pre>
+</div>
+</div>
+<p>The minimum distance recorded is 50, our intra-zonal distance.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="preparing-the-flow-data" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Preparing the Flow~ data</h1>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">import od_data</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">compute the total passenger trips</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-3" role="tab" aria-controls="tabset-4-3" aria-selected="false">Separate intra-flow from passenger volume df</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-4" role="tab" aria-controls="tabset-4-4" aria-selected="false">Combining passenger volume data with distance value</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>od_data <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/od_data.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<p>We compute the total passenger trip between and within planning subzones by using the code chunk below:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>flow_data <span class="ot">&lt;-</span> od_data <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">TRIPS =</span> MORNING_PEAK)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(flow_data, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   ORIGIN_SZ DESTIN_SZ TRIPS
+   &lt;chr&gt;     &lt;chr&gt;     &lt;dbl&gt;
+ 1 AMSZ01    AMSZ01     2287
+ 2 AMSZ01    AMSZ02    10057
+ 3 AMSZ01    AMSZ03    13211
+ 4 AMSZ01    AMSZ04     2836
+ 5 AMSZ01    AMSZ05     6913
+ 6 AMSZ01    AMSZ06     2086
+ 7 AMSZ01    AMSZ07     1558
+ 8 AMSZ01    AMSZ08     2451
+ 9 AMSZ01    AMSZ09     2047
+10 AMSZ01    AMSZ10      145</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-4-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-3-tab">
+<p>We add 2 new fields into the <strong>flow_data</strong> dataframe,</p>
+<ul>
+<li><strong>FlowNoIntra</strong> to keep intra-subzone number of trips as 0</li>
+<li><strong>offset</strong> separated by intra-subzone flows</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>flow_data<span class="sc">$</span>FlowNoIntra <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  flow_data<span class="sc">$</span>ORIGIN_SZ <span class="sc">==</span> flow_data<span class="sc">$</span>DESTIN_SZ, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>, flow_data<span class="sc">$</span>TRIPS)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>flow_data<span class="sc">$</span>offset <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  flow_data<span class="sc">$</span>ORIGIN_SZ <span class="sc">==</span> flow_data<span class="sc">$</span>DESTIN_SZ, </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.000001</span>, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-4-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-4-tab">
+<p>Before we can join flow_data and distPair, we need to convert data value type of ORIGIN_SZ and DESTIN_SZ fields of flow_data dataframe into factor data type.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>flow_data <span class="ot">&lt;-</span> flow_data <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">ORIGIN_SZ =</span> <span class="fu">as.factor</span>(ORIGIN_SZ),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">DESTIN_SZ =</span> <span class="fu">as.factor</span>(DESTIN_SZ)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, left_join() of dplyr will be used to flow_data dataframe and distPair dataframe</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>flow_data1 <span class="ot">&lt;-</span> flow_data <span class="sc">%&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span> (distPair,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ORIGIN_SZ"</span> <span class="ot">=</span> <span class="st">"orig"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"DESTIN_SZ"</span> <span class="ot">=</span> <span class="st">"dest"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="preparing-origin-and-destination-attributes" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Preparing Origin and Destination Attributes</h1>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Importing population data</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Adding geospatial attributes</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false">Preparing origin attributes</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-4" role="tab" aria-controls="tabset-5-4" aria-selected="false">Preparing destination attribute</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-5" role="tab" aria-controls="tabset-5-5" aria-selected="false">Save output as RDS file</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/pop.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>pop <span class="ot">&lt;-</span> pop <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(mpsz,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"PA"</span> <span class="ot">=</span> <span class="st">"PLN_AREA_N"</span>,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"SZ"</span> <span class="ot">=</span> <span class="st">"SUBZONE_N"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">SZ_NAME =</span> SZ,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">SZ =</span> SUBZONE_C)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-3-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>flow_data1 <span class="ot">&lt;-</span> flow_data1 <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(pop,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="at">ORIGIN_SZ =</span> <span class="st">"SZ"</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ORIGIN_AGE7_12 =</span> AGE7_12,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ORIGIN_AGE13_24 =</span> AGE13_24,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ORIGIN_AGE25_64 =</span> AGE25_64</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(PA, SZ_NAME))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-4-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>flow_data1 <span class="ot">&lt;-</span> flow_data1 <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(pop,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="at">DESTIN_SZ =</span> <span class="st">"SZ"</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">DESTIN_AGE7_12 =</span> AGE7_12,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">DESTIN_AGE13_24 =</span> AGE13_24,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">DESTIN_AGE25_64 =</span> AGE25_64</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(PA, SZ_NAME))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-5-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(flow_data1, <span class="st">"data/rds/SIM_data2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="visualizing-the-dependent-attributes" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Visualizing the dependent attributes</h1>
+<section id="what-is-the-distribution-of-trips" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="what-is-the-distribution-of-trips"><span class="header-section-number">6.1</span> What is the distribution of trips?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_urbn_defaults</span>(<span class="at">style =</span> <span class="st">"print"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> flow_data1,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> TRIPS)) <span class="sc">+</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex03_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The distribution is highly right-skewed.</p>
+</section>
+<section id="what-is-the-correlation-between-distance-and-number-of-trips" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="what-is-the-correlation-between-distance-and-number-of-trips"><span class="header-section-number">6.2</span> What is the correlation between distance and number of trips?</h2>
+<p>Next, we visualise the relation between the dependent variable and one of the key independent variable in Spatial Interaction Model – distance:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> flow_data1,</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> dist,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> TRIPS)) <span class="sc">+</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> .<span class="dv">5</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex03_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggscatterstats</span>(<span class="at">data =</span> flow_data1, <span class="do">## data frame from which variables are taken </span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> dist, <span class="do">## predictor/independent variable </span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> TRIPS, <span class="do">## dependent variable </span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">xlab =</span> <span class="st">"Distance (m)"</span>, </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">ylab =</span> <span class="st">"No. of Trips"</span>, </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">title =</span> <span class="st">"Relationship between Distance and No. of Trips"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex03_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Notice that their relationship hardly resemble linear relationship.</p>
+<p>On the other hand, if we plot the scatter plot by using the log transformed version of both variables, we can see that their relationship is more resemble linear relationship.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> flow_data1,</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(dist),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="fu">log</span>(TRIPS))) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> .<span class="dv">5</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex03_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-right">Copyright 2023<img src="images/Name_Logo3.png" class="img-fluid" alt="Name_logo" width="100"></div>
+  </div>
+</footer>
+
+
+
+</body></html>
