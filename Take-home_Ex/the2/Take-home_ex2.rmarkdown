@@ -1,0 +1,2002 @@
+---
+title: "Take-home Ex 2"
+date: "Published on December 7 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+    toc-title: Contents
+    number-sections: true
+execute: 
+  warning: false
+---
+
+
+<font size = "5">{{< fa train-subway >}} **Singapore Train commuter flows**</font>
+
+# Project Brief
+
+As city-wide urban infrastructure such as public buses, mass rapid transit, public utilities and roads become digital, the data sets obtained can be used for tracking movement patterns through space and time. This is particularly true with the recent trends in massive deployment of pervasive computing technologies such as GPS on vehicles and SMART cards used by public transport commuters.
+
+Unfortunately, this explosive growth of geospatially-referenced data has far outpaced the planner's ability to utilize and transform the data into insightful information. There has not been significant practice research carried out to show how these disparate data sources can be integrated, analysed, and modelled to support policy making decisions, and a general lack of practical research to show how geospatial data science and analysis (GDSA) can be used to support decision-making.
+
+This study aims to demonstrate the potential value of GDSA to integrate publicly available data from multiple sources for building spatial interaction models to **determine factors affecting urban mobility patterns in public bus transit.**
+
+# Loading Required packages
+
+The following packages are used in this exercise:
+
+-   **tmap** for cartography
+-   **mapview** for interactive map backgrouds & **leaflet.providers** for basemap customisation
+-   **sf** and **sp** for geospatial data handling
+-   **stplanr** for creating 'desire lines'
+-   **tidyverse** and **reshape2** for aspatial data transformation
+-   **sfdep** and **spdep** for computing spatial autocorrelation
+-   **Hmisc** for summary statistics
+-   **kableExtra** and **DT** for formatting of dataframes
+-   **ggplot2, patchwork** and **ggrain** for visualising attributes
+-   **performance** ang **ggpubr** for Spatial Interaction modeling
+-   **urbnthemes** for consistent plot theming
+
+
+```{r}
+#| code-fold: true
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+pacman::p_load(tmap, sf, sp, tidyverse, sfdep, stplanr,
+               mapview, leaflet.providers,
+               Hmisc, kableExtra, DT, reshape2,
+               ggplot2, patchwork, ggrain, urbnthemes, knitr,
+               performance, ggpubr)
+```
+
+
+# Importing the Data
+
+## Aspatial Data
+
+This study uses 2 aspatial datasets pertaining to **Public Train Trips**:
+
+-   **train**, a dataset from [LTA Datamall](https://www.waterpointdata.org/access-data/), *Passenger Volume by Origin Destination Train Stations* for October 2023.
+-   **train_codes**, also from LTA Datamall, lists train station codes and names. This is used to assign MRT train station codes to the geospatial data set with train station locations.
+
+
+::: panel-tabset
+## **train**
+
+The downloaded dataset is in **.csv** format. We use the function `read_csv()` to import the data into the R environment.
+
+
+```{r}
+#| message: false
+train_oct23 <- read_csv("data/aspatial/origin_destination_train_202310.csv")
+
+# remove any duplicated rows
+train_oct23 <- distinct(train_oct23)
+
+str(train_oct23)
+```
+
+
+**train_oct23** is a tibble dataframe consisting of the following variables:
+
+-   **YEAR_MONTH**: Month of data collection in YYYY-MM format
+-   **DAY_TYPE**: Category of Day
+-   **TIME_PER_HOUR**: Extracted hour of day
+-   **PT_TYPE**: Public transport type
+-   **ORIGIN_PT_CODE**: ID of Trip Origin Train Station
+-   **DESTINATION_PT_CODE**: ID of Trip Destination Train Station
+-   **TOTAL_TRIPS**: Sum of trips made per origin-Destination
+
+
+```{r}
+Hmisc::describe(train_oct23)
+```
+
+
+::: {.pinbox .solve data-latex="pin"}
+**From the summary statistics above, we can derive that:**
+
+-   There are **800,959** Origin-Destination (OD) trips made in October 2023
+-   Data is collected for 24 hours, starting from 0 Hrs to 23 Hrs in **TIME_PER_HOUR**
+-   The highest number of trips for an OD route is **21,050**, while the 95th Percentile is only **455**. This suggests a highly right-skewed distribution, with particularly busy routes.
+:::
+
+As we are interested in studying the passenger flows for **peak hour periods** only, the number of trips are calculated for each period as defined below:
+
+| Peak Period        | Tap in Time (hr) |
+|--------------------|------------------|
+| Weekday Morning    | 6 - 9            |
+| Weekday Evening    | 17 - 20          |
+| Weekend/PH Morning | 11 - 14          |
+| Weekend/PH Evening | 16 - 19          |
+
+The dataframe now shows the traffic volume by peak period for each Origin-Destination route:
+
+
+```{r}
+#| code-fold: true
+
+train_od <- train_oct23 %>%
+   # Categorize trips under period based on day and timeframe
+  mutate(period = ifelse(DAY_TYPE == "WEEKDAY" & 
+                         TIME_PER_HOUR >= 6 & TIME_PER_HOUR <= 9, 
+                         "Weekday morning peak",
+                    ifelse(DAY_TYPE == "WEEKDAY" & 
+                           TIME_PER_HOUR >= 17 & TIME_PER_HOUR <= 20,
+                           "Weekday evening peak",
+                      ifelse(DAY_TYPE == "WEEKENDS/HOLIDAY" &
+                             TIME_PER_HOUR >= 11 & TIME_PER_HOUR <= 14,
+                              "Weekend/PH morning peak",
+                        ifelse(DAY_TYPE == "WEEKENDS/HOLIDAY" & 
+                              TIME_PER_HOUR >= 16 & TIME_PER_HOUR <= 19,
+                               "Weekend/PH evening peak",
+                    "Others"))))
+  ) %>%
+  # Only retain needed periods for analysis
+  filter(
+    period != "Others"
+  ) %>%
+ # compute number of trips per origin busstop per month for each period
+  group_by(
+    ORIGIN_PT_CODE,
+    DESTINATION_PT_CODE,
+    period
+  ) %>%
+  summarise(
+    num_trips = sum(TOTAL_TRIPS)
+  ) %>%
+  # change all column names to lowercase
+  rename_with(
+    tolower, everything()
+  ) %>%
+  ungroup()
+
+```  
+
+
+  
+  
+::: {.cautionbox .solve data-latex="caution"}
+There are several instances where **ORIGIN_PT_CODE** and **DESTINATION_PT_CODE** are not composite codes, representing MRT Stations that are **interchanges** with multiple station lines. For the purpose of this investigation, only a single station code is required.
+:::
+  
+  
+
+```{r}
+#| code-fold: true
+train_od <- train_od %>%
+  separate_wider_delim(origin_pt_code,
+                       delim = "/", 
+                       names = c("origin_station_code", "unused_origin"),
+                    # to capture first station for those without multiples
+                       too_few = "align_start",
+                    # to remove any other unused station columns for 3 or more
+                       too_many = "drop"
+  ) %>%
+  separate_wider_delim(destination_pt_code,
+                       delim = "/", 
+                       names = c("dest_station_code", "unused_dest"),
+                       too_few = "align_start",
+                       too_many = "drop"
+  ) %>%
+  select(
+    origin_station_code,
+    dest_station_code,
+    period,
+    num_trips
+  )
+
+DT::datatable(head(train_od,20))
+```
+
+
+## **train_codes**
+
+This dataset lists train station codes and names. It is used to join with the geospatial dataset for station identification.
+
+
+```{r}
+train_codes <- read_csv("data/aspatial/train_codes.csv")
+
+str(train_codes)
+```
+
+
+:::
+
+# {{< fa train-subway >}} **What is the Distribution of Passenger Traffic across peak periods?**
+
+To determine which time period to analyze further, we visualize the distribution of trips by peak period:
+
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+set_urbn_defaults(style = "print")
+
+trip_density <- train_od %>%
+  ggplot(
+    aes(x = period,
+        y = num_trips,
+        fill = period,
+        color = period)
+  ) +
+  geom_violin(
+    # shift violin plot upwards
+    position = position_nudge(x = .3, y = 0), alpha = .8
+  ) +
+  geom_point(
+    aes(y = num_trips,
+        color = period),
+    position = position_jitter(width = .15),
+    size = .5,
+    alpha = 0.8
+  ) +
+  labs(
+    title = "Oct 2023: Widest range of MRT trips during Weekday Evening Peak"
+  ) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.position = "none"
+  ) +
+  coord_flip()
+
+trip_density
+
+```
+
+
+The density plot reveals a highly right-skewed distribution for all trips, especially during **weekday evening peak periods**. This could point towards congested MRT train stations, and would be useful to analyse further to determine the possible factors leading to this high passenger volume.
+
+The OD data for weekday evening peak periods will thus be the focus of the study, and data is extracted using the following code chunk:
+
+
+```{r}
+
+weekday_pm_od <- train_od %>%
+  filter(period == "Weekday evening peak")
+
+write_rds(weekday_pm_od, "data/rds/weekday_pm_od.rds")
+```
+
+
+## Geospatial Data
+
+The following geospatial dataframes are used for this exercise:
+
+-   **train_station**, the location of train stations (*RapidTransitSystemStation*) from LTA Datamall
+-   **Business**, **entertn**, **fnb**, **finserv**, **recreation** and **retail**, geospatial data sets of the locations of business establishments, entertainments, food and beverage outlets, financial centres, leisure and recreation centres, retail and services stores/outlets compiled for urban mobility studies
+-   **mpsz**, masterplan boundary 2019
+
+## Preparing Geospatial Files: train station
+
+As the files are all based on Singapore Maps, they are in SVY21 coordinate reference system (CRS) and projected in ESPG code 3414 using `st_transform()`
+
+::: panel-tabset
+## **loading train_station and mpsz**
+
+**train_station** is a Simple feature **polygon** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+train_station <- st_read(dsn = "data/geospatial",
+                         layer = "RapidTransitSystemStation") %>%
+          st_transform(crs = 3414)
+```  
+
+
+::: {.cautionbox .solve data-latex="caution"}
+**Dataset limitations**
+
+-   **train_station** only lists the Type of station (MRT or LRT), Station name and geolocation of each station. There is no station code to join with the aspatial dataset. Thus, the use of **train_codes** is needed to assign a unique train code identifier to each station
+
+-   There are only **203** Station codes in **train_codes**, compared to **220** entries in **train_station**. There may be duplicated station names, which needs further investigation.
+
+-   *GDAL Message 1: Non closed ring detected* -- This warning message was received when loading in the geospatial layer. This means that there are polygons that are not closed (starting and ending points are not joined). There is a need for further geospatial data wrangling to rectify this.
+:::
+
+
+```{r}
+#| code-fold: true
+mpsz <- st_read(dsn = "data/geospatial",
+                layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+```
+
+
+## {{< fa wrench >}} **Removing duplicates**
+
+Checking for duplicated station entires in **train_station**:
+
+
+```{r}
+
+train_duplicates <- train_station %>%
+  # remove geometry layer
+  st_set_geometry(NULL) %>%
+  group_by(TYP_CD_DES,
+           STN_NAM_DE
+  ) %>%
+  # count number of rows per train station
+  summarise(
+    count = n()
+  ) %>%
+  ungroup() %>%
+  # retrieve stations with more than single row
+  filter(count > 1)
+
+DT::datatable(train_duplicates)
+```
+
+
+The code above reveals that there are several entries for the stations above in **train_station**. This may be due to the fact that some stations are **interchanges** and have multiple train lines. However, there is no way to differentiate this without station code, and this study will assume that the location of these stations are within the same boundary anyway. Only one geospatial entry per station is selected using `slice()`:
+
+
+```{r}
+
+# Remove duplicates on selected columns
+train_station <- train_station %>%
+  group_by(STN_NAM_DE) %>%
+  slice(1) %>%
+  st_as_sf()
+```
+
+
+## {{< fa wrench >}} **Cleaning up station names**
+
+As **train_station** does not have station codes that may be joined to the OD dataset for analysis, it is joined to **train_codes** by train station name. However, the station names in **train_codes** are in lowercase and without the suffix "MRT STATION" in the station names -- there is thus an extra layer of data wrangling to be done before joining.
+
+
+```{r}
+
+train_codes_new <- train_codes %>%
+  # Assign suffix to train station names and change to upper case
+  mutate(station_name = ifelse(type == "MRT", 
+                               paste0(toupper(mrt_station_english), " MRT STATION"),
+                               paste0(toupper(mrt_station_english), " LRT STATION"))
+  )
+```
+
+
+## {{< fa wrench >}} **Joining station names to get station codes**
+
+The code chunk below assigns train station code to the geospatial layer to identify each station by code.
+
+
+```{r}
+
+train_station_comb <- train_station %>%
+  left_join(train_codes_new,
+            by = join_by(STN_NAM_DE == station_name,
+                         TYP_CD_DES == type)
+  ) %>%
+  select(
+    stn_code,
+    STN_NAM_DE,
+    TYP_CD_DES
+  )
+```
+
+
+There are several stations that have no **stn_code**:
+
+
+```{r}
+#| code-fold: true
+
+train_station_comb %>%
+  filter(is.na(stn_code)) %>%
+  datatable()
+```
+
+
+As these are mainly train depots that are not identified by code and irrelvant to analysis of OD flows, these are removed from the dataset and saved as a new file, **train_station_list**:
+
+
+```{r}
+train_station_list <- train_station_comb %>%
+  filter(!is.na(stn_code))
+```
+
+
+## {{< fa wrench >}} **Checking geometry layer**
+
+We use `st_is_valid()` to retrieve the invalid polygon datapoints in **train_station_list**:
+
+
+```{r}
+# Retrieve invalid geometries
+invalid_indices <- which(!st_is_valid(train_station_list))
+print(invalid_indices)
+```
+
+
+The code chunk above reveals that **index 195** is invalid. This is identified as **UPPER THOMSON MRT STATION**:
+
+
+```{r}
+print(train_station_list[195,])
+```
+
+
+To rectify this invalid geometry, use `st_make_valid()`:
+
+
+```{r}
+train_station_valid <- st_make_valid(train_station_list)
+```
+
+
+Check validity of the geometry layer again:
+
+
+```{r}
+invalid_indices2 <- which(!st_is_valid(train_station_valid))
+print(invalid_indices2)
+```
+
+
+The code chunk shows that there are no more invalid geometries in the file. {{< fa face-smile >}}
+
+
+```{r}
+#| eval: false
+# Save as file 
+write_rds(train_station_valid, "data/rds/train_station_valid.rds")
+```
+
+:::
+
+
+```{r}
+#| code-fold: true
+
+train_station_valid <- read_rds("data/rds/train_station_valid.rds")
+
+tmap_mode("view")
+
+tm_basemap("OneMapSG.Grey") +
+tm_shape(train_station_valid) +
+  tm_dots()
+
+```
+
+
+## {{< fa wrench >}} **Creating hexagon grid**
+
+From the mapview above, the current simple features dataframe only shows the train stations as points on the map, which not suitable for understanding commuter flows between areas. In urban transportation planning, **Traffic Analysis Zones (TAZ)** are the basic units of spatial areas delineated to tabulate traffic-related models.
+
+The following code chunks create a **hexagonal grid frame** spanning 750m between edges for each hexagon:
+
+::: panel-tabset
+## **Step 1: make hexagon grid**
+
+
+```{r}
+# create hexagon frame
+train_hex <- st_make_grid(
+    train_station_valid, 
+    # for hexagonal cells, cellsize = the distance between opposite edges
+    cellsize = 750, 
+    square = FALSE
+  ) %>%
+  st_sf() %>%
+  rowid_to_column("hex_id")
+```
+
+
+This creates a hexagonal grid over the entire area:
+
+
+```{r}
+#| code-fold: true
+tmap_mode("plot")
+qtm(train_hex)
+```
+
+
+## **Step 2: Retrieve stations per hexagon TAZ**
+
+
+```{r}
+# join to train station names
+train_stops <- st_join(
+    train_station_valid,
+    train_hex,
+    join = st_intersects
+  ) %>%
+  st_set_geometry(NULL) %>%
+  group_by(stn_code) %>%
+  summarise(
+  # Ensure that each station gets assigned to a single hex_id
+    hex_id = first(hex_id)
+  ) %>%
+  ungroup() %>%
+  group_by(hex_id) %>%
+  summarise(
+    station_count = n(),
+    station_codes = str_c(stn_code, collapse = ","),
+  ) %>%
+  ungroup()
+```
+
+
+## **Step 3: Create sf dataframe unique at hex_id**
+
+
+```{r}
+train_hex_final <- train_hex %>%
+  left_join(train_stops,
+          by = "hex_id"
+  ) %>%
+  replace(is.na(.), 0)
+```
+
+:::
+
+
+```{r}
+#| code-fold: true
+
+# Get hexagons with at least one station 
+train_hex_filtered <- train_hex_final %>%
+  filter(station_count > 0)
+
+tmap_mode("view")
+
+
+tm_basemap("OneMapSG.Grey") +
+  tm_shape(train_hex_filtered) +
+  tm_fill(
+    col = "station_count",
+    palette = "-RdYlGn",
+    style = "cont",
+    id = "hex_id",
+    popup.vars = c("No. of Train Stations: " = "station_count",
+                   "Train station codes: " = "station_codes"),
+    title = " "
+  ) +
+  tm_layout(
+    # Set legend.show to FALSE to hide the legend
+    legend.show = FALSE
+  )
+```
+
+
+# {{< fa train-subway >}} **Which trips are the most congested on Weekday Evening Peaks?**
+
+We seek to understand the inter-zone trip volume per TAZ, to understand which routes are the most popular during weekday evening peak periods.
+
+## Preparing Origin-Destination flow data
+
+The following steps are done to prepare O-D flow dataframes at hexagon level:
+
+::: panel-tabset
+## **Extract Station codes & hex_ids**
+
+
+```{r}
+#| eval: false
+station_by_hex <- train_hex_final %>%
+  select(
+    hex_id,
+    station_codes
+  ) %>%
+  st_drop_geometry() %>%
+  # create separate rows for each hex_id - station_code pair
+  separate_rows(station_codes, 
+                sep = ","
+  ) %>%
+  # drop any hexagon without stations
+  filter(station_codes != 0)
+```
+
+
+## **Get trip origin hex_ids**
+
+
+```{r}
+#| eval: false
+od_data <- left_join(
+    weekday_pm_od, 
+    station_by_hex,
+    by = c("origin_station_code" = "station_codes")
+  ) %>%
+  rename(
+    origin_stn = origin_station_code,
+    origin_hex = hex_id,
+    dest_stn = dest_station_code
+  ) %>%
+  distinct()
+```
+
+
+## **Get trip destination hex_ids**
+
+
+```{r}
+#| eval: false
+od_data <- left_join(
+    od_data,
+    station_by_hex,
+    by = c("dest_stn" = "station_codes")
+  ) %>%
+  rename(
+    dest_hex = hex_id
+  ) %>%
+  group_by(
+    origin_hex,
+    dest_hex
+  ) %>%
+  summarise(
+    weekday_pm_trips = sum(num_trips)
+  ) %>%
+  ungroup()
+```
+
+
+## **(Optional) Save file as RDS for future use**
+
+
+```{r}
+#| eval: false
+write_rds(od_data, "data/rds/od_data.rds")
+```
+
+:::
+
+## Visualising Spatial Interation
+
+The following steps are taken to visualise the traffic flows between TAZs.
+
+::: panel-tabset
+## **Remove intra-zonal flows**
+
+As we are only interested in inter-zonal flows, we remove the intra-zonal trips from **od_data** dataframe:
+
+
+```{r}
+od_data <- read_rds("data/rds/od_data.rds")
+
+od_data_inter <- od_data[od_data$origin_hex!=od_data$dest_hex,]
+```
+
+
+## **Create Desire lines**
+
+**Desire lines** are straight lines that connect origin to destination. `od2line()` function is used to create these:
+
+
+```{r}
+od_flow <- od2line(flow = od_data_inter, 
+                    zones = train_hex_filtered,
+                    zone_code = "hex_id")
+```
+
+
+## **Distribution of OD flows**
+
+`quantile()` reveals that there is a large range between 75% and 100% quantiles. This will affect the visualisation of OD flows.
+
+
+```{r}
+quantile(od_flow$weekday_pm_trips)
+```
+
+:::
+
+
+The following map visualizes O-D passenger flows for **Weekday PM trips > 20,000**: 
+
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+tmap_options(check.and.fix = TRUE)
+tmap_mode("plot")
+
+tm_shape(mpsz) +
+  tm_fill(
+    col = "#dfdfeb"
+    ) +
+tm_shape(train_hex_filtered) +
+  tm_fill(
+    col = "station_count",
+    palette = "-RdYlGn",
+    alpha = .8,
+    style = "cont",
+    # set legend title
+    title = "Station Count",
+    popup.vars = c("No. of Train Stations: " = "station_count",
+                   "TAZ: " = "hex_id",
+                   "Train station codes: " = "station_codes")
+  ) +
+  tm_borders(
+    col = "#dfdfeb",
+    lwd = .5
+  ) +
+od_flow %>% 
+  filter(weekday_pm_trips > 20000) %>%
+tm_shape() +
+  tm_lines(
+    lwd = "weekday_pm_trips",
+    scale = 1.5,
+    style = "quantile",
+    n = 6,
+    col = "#451F55",
+    alpha = .7
+  ) +
+  tm_layout(
+    title = "Weekday Evening Peak Traffic Flow",
+    scale = .9,
+    legend.stack = "horizontal",
+    legend.position = c("right", "bottom"),
+    frame = FALSE
+  ) +
+  tmap_style("white")
+```  
+
+.  
+
+
+
+
+::: {.focusbox .solve data-latex="focus"}
+**Insights from OD flow map**
+
+-   **A higher train station density in TAZs does not correlate to higher traffic.** This is possibly due to the fact that a single station may encompass multiple lines *(for instance, TAZ #1074 has the highest station density with 5 station codes, but this only corresponds to 3 stations: Marina Bay, Downtown & Shenton Way)*
+
+-   There are several **TAZs with more flowlines**, that are scattered across the country. This is suggestive of either being a key origin or destination zone for Weekday evenings. Namely:
+    + TAZ #1058 (Telok ayer and Raffles Place MRT Stations)
+    + TAZ #534 (Jurong East MRT Station)
+    + TAZ #988 (Yishun MRT Station)
+    
+-   There are also **TAZs with fewer but thicker flowlines**, indicating highly popular origin or destination train stations, that are likely to be congested during Weekday evening peak periods. These are:
+    + TAZ #1544 (Pasir Ris MRT Station)
+    + TAZ #1028 (Novena MRT Station)
+    + TAZ #774 (Woodlands MRT Station)
+    + TAZ #573 (Yew Tee MRT Station)
+
+
+:::
+
+**Top 15 O-D flows by number of trips during Weekday Evening Peak Period:**
+
+
+```{r}
+#| code-fold: true
+
+od_data %>%
+  left_join(train_hex_filtered,
+            by = c("origin_hex" = "hex_id")
+  ) %>%
+  rename(
+    origin_stations = station_codes
+  ) %>%
+  left_join(train_hex_filtered,
+            by = c("dest_hex" = "hex_id")
+  ) %>%
+  rename(
+    dest_stations = station_codes
+  ) %>%
+  st_drop_geometry() %>%
+  select(origin_hex,
+         origin_stations,
+         dest_hex,
+         dest_stations,
+         weekday_pm_trips
+  ) %>%
+  arrange(desc(weekday_pm_trips)) %>%
+  slice_head(n = 15) %>%
+  datatable()
+
+```
+
+
+
+The table above reveals that **Jurong East MRT Station** is the busiest **origin station**, with top OD trips originating from there. Only 2 TAZs occurred multiple times as top **destination stations**: **Boon Lay and Newton MRT Stations**. The fact that these stations are not in the city centre is slightly surprising, as one would assume that the busiest origin station would be in the CBD area where people would be commuting from after work. 
+
+Further analysis is conducted by using **Spatial Interaction Models (SIMs)** to determine factors explaining flow density between these TAZs. 
+
+
+# {{< fa train-subway >}} **What makes these trip origins and destinations so popular?**
+
+To understand the factors affecting MRT passenger flows during weekday evening peak periods, we calibrate Spatial Interactive Models using a variety of factors as independent variables $X$ and dependent variable total number of trips $Y$. These factors can reveal **propulsive** or **attractive** qualities origin and destination zones respectively. 
+
+
+```{mermaid}
+%%| fig-width: 8
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#ACAEDA',
+      'primaryTextColor': '#371F49',
+      'primaryBorderColor': '#3d7670',
+      'lineColor': '#371F49',
+      'secondaryColor': '#3d7670',
+      'tertiaryColor': '#371F49'
+    }
+  }
+}%%
+
+flowchart LR
+    L{fa:fa-moon \nWeekday \nEvening} -.- A{fa:fa-train-subway \nTrain Trips} --> B(Origin)
+    A --> C(Destination) -.- E[fa:fa-magnet \nAttractive \nfactors]
+    B -.- D[fa:fa-angles-right \nPropulsive \nfactors] --- O[fa:fa-ruler-horizontal Distance]
+    D --- F[fa:fa-house-user Residential density]
+    D --- G[fa:fa-briefcase Business]
+    D --- H[fa:fa-school Schools]
+    E --- I[fa:fa-dumbbell Recreation]
+    E --- J[fa:fa-burger Food & Beverage]
+    E --- K[fa:fa-cart-shopping Retail facilities]
+    E --- M[fa:fa-film Entertainment]
+    E --- N[fa:fa-ruler-horizontal Distance]
+
+```
+
+
+
+## Attractive & Propulsive Factors
+
+The factors listed above are computed at TAZ level for Spatial Interaction Modelling.
+
+
+### Distance
+
+Computing the distance between Traffic analysis zones at a hexagonal level requires the computation of a **distance matrix**. This is a table that shows the Euclidean distance between each pair of locations, and is computed using the following steps:
+
+::: panel-tabset
+
+## **Step 1: Identify data type**
+
+
+```{r}
+train_hex_filtered
+```
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+The hexagon TAZ layer, **train_hex_filtered**, is a Simple Features dataframe. We first convert it to a *SpatialPolygonsDataFrame* using `as_spatial()` function
+
+:::
+
+
+
+```{r}
+# convert to SpatialPolygonsDataFrame
+train_hex_sf <- as_Spatial(train_hex_filtered)
+
+```
+
+
+## **Step 2: Create Distance Matrix using spDists()**
+
+
+```{r}
+# compute distance between hexagons
+dist <- spDists(train_hex_sf, 
+                longlat = FALSE)
+
+head(dist, n=c(10, 10))
+```  
+
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+The resultant matrix has numbers as row and column headers, representing the hexagon pairs. To make this information more usable for analysis, we want to replace this with TAZ hexagon ids instead. 
+
+:::
+
+## **Step 3: Rename Column and Row headers**
+
+
+```{r}
+# Create a list of hex ids
+hex_names <- train_hex_filtered$hex_id
+
+# Attach hex ids to row and column variables in dist
+colnames(dist) <- paste0(hex_names)
+rownames(dist) <- paste0(hex_names)
+
+head(dist, n=c(10, 10))
+```
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+**dist** now has row and column headers as hex_id, identifying which TAZs the distance belongs to. However, the matrix has repeated information, and needs to be in an O-D format for geospatial modelling. The `melt()` function from package **reshape2** is used for this. 
+
+:::  
+
+## **Step 4: Reshape into O-D form**
+
+
+```{r}
+distPair <- melt(dist) %>%
+  rename(distance = value,
+         origin_hex = Var1,
+         dest_hex = Var2)
+
+DT::datatable(head(distPair, 10))
+```  
+
+
+## **Step 5: Updating occurrences of intra-zonal distance = 0**
+
+The inter-zonal distance is computed between hexagon centroids. The same hexagon will thus have an inter-zonal difference of 0 to itself, but this is misrepresenative of intra-zonal difference. To rectify this, we append a constant value that is less than the minimum inter-zonal difference to all '0' values. 
+
+
+```{r}
+# Find mininum inter-zonal difference:
+distPair %>%
+  filter(distance > 0) %>%
+  summary()
+```
+
+The minimum distance is **750m** -- this represents the distance between the centre of a hexgon to the centre of an adjacent hexagon. We thus set the intra-zonal distance to **200** using an `ifelse9)` statement:
+
+
+```{r}
+# If distance = 0, set to 200, else remain as is
+distPair$distance <- ifelse(distPair$distance == 0,
+                            200, distPair$distance)
+
+summary(distPair)
+```  
+
+
+The minimum distance is now set at **200m** . 
+
+**origin_hex** and **dest_hex** represent unique areas, and are set to factor data types instead of integers:
+
+
+```{r}
+distPair <- distPair %>%
+  mutate(
+    origin_hex = as.factor(origin_hex),
+    dest_hex = as.factor(dest_hex)
+  )
+```
+
+```{r}
+#| eval: false
+#| echo: false
+write_rds(distPair, "data/rds/distPair.rds")
+```
+
+
+
+:::
+
+### Flow + Distance Data
+
+The following steps are taken to prepare the dataframe with both distance and flow data:
+
+::: panel-tabset
+
+## **Identifying intra-zonal flows**
+
+Set trip number to 0 for intra-zonal flows
+
+
+```{r}
+od_flow$flowNoIntra <- ifelse(od_flow$origin_hex == od_flow$dest_hex,
+                              0, od_flow$weekday_pm_trips)
+```
+
+
+Set offset for intra-zonal flows to small value (0.00001) and inter-zonal flows to 1
+
+
+```{r}
+od_flow$offset <- ifelse(od_flow$origin_hex == od_flow$dest_hex,
+                         0.00001, 1)
+```
+
+
+## **Joining with inter-zonal distances**
+
+
+```{r}
+distPair <- read_rds("data/rds/distPair.rds")
+
+od_data_dist <- od_flow %>%
+  # Change hex_ids to factor fields
+  mutate(
+    origin_hex = as.factor(origin_hex),
+    dest_hex = as.factor(dest_hex)
+  ) %>%
+  # Retrieve distance value
+  left_join(
+    distPair,
+    by = c("origin_hex" = "origin_hex",
+           "dest_hex" = "dest_hex")
+  )
+
+DT::datatable(head(od_data_dist,10))
+```
+
+
+:::
+
+**How is the number of trips correlated to distance?**
+
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+p1 <- od_data_dist %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = distance,
+            y = weekday_pm_trips)
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .6,
+        color = "#4d5887"
+      ) +
+      geom_smooth(method = lm) +
+      ggtitle("Trips ~ Distance")
+
+logp1 <- od_data_dist %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(distance),
+            y = log(weekday_pm_trips))
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .6,
+        color = "#4d5887"
+      ) +
+      geom_smooth(method = lm) +
+      ggtitle("Log(Trips ~ Distance)")
+
+p1 + logp1
+```
+
+
+From the plots above, there is no obvious linear trend when using absolute figures. Using **log transformed values**, on the other hand, revealed an inverse relationship between higher number of trips and further distance. 
+
+
+### Flow + Distance + Attributes
+
+To determine factors that influence the movement of people between TAZ, we look at **propulsive** and **attractive** attributes. 
+
+::: {.focusbox .solve data-latex="focus"}
+
+-   **Propulsive attributes** refer to factors that encourage or drive movement from one location to another and are associated with the origin of the journey, representing conditions that "push" or "propel" entities away from their current location
+-   **Attractive attributes** are factors that pull or attract entities toward a specific location. These are associated with the destination and represent conditions that make a location appealing
+
+::: 
+
+As the flow data is based on **weekday evening peak hours**, **propulsion** is likely to be related to work, schools, or home (perhaps many people work from home). As such, **number of businesses**, **number of schools** and **residential density** per TAZ is computed as **propulsive Attributes.** On the other hand, leisure, food or shopping could be appealing at the end of a workday, and these are taken as **attractive attributes**.  
+
+
+These attributes are added to the flow data from the following sources:
+
+
+::: panel-tabset
+
+## **businesses**
+
+**business** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+business <- st_read(dsn = "data/geospatial",
+                    layer = "Business") %>%
+          st_transform(crs = 3414)
+```  
+
+```{r}
+#| code-fold: true
+
+tmap_mode("plot")
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(business) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```  
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+The resultant dataframe is a simple features dataframe with point locations of business offices in Singapore. As this is not useful as point locations, we compute the number of offices per TAZ
+
+::: 
+
+
+```{r}
+train_hex_attr <- train_hex_final %>%
+  mutate(num_offices = lengths(st_intersects(train_hex_final, business)))
+```
+
+```{r}
+summary(train_hex_attr$num_offices)
+```
+
+
+## **schools**
+
+**schools** is an aspatial dataframe with longitude and latitude data. This is imported and transformed into a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+schools <- read_csv("data/aspatial/schools.csv")
+
+```
+
+
+There are **40** columns in **schools**, but we only require a few variables. These are renamed and selected, and the data is transformed into a *Simple Features Dataframe*:
+
+
+
+```{r}
+schools_sf <- schools %>%
+  rename(
+    latitude = "results.LATITUDE",
+    longitude = "results.LONGITUDE"
+  ) %>%
+  select(
+    postal_code, 
+    school_name, 
+    latitude, 
+    longitude
+  ) %>%
+  st_as_sf(
+    coords = c("longitude", "latitude"),
+    crs=4326
+  ) %>%
+  st_transform(
+    crs = 3414
+  )
+```
+
+```{r}
+#| code-fold: true
+
+tmap_mode("plot")
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(schools_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```  
+
+```{r}
+train_hex_attr$num_schools <- lengths(st_intersects(train_hex_attr, schools_sf))
+```
+
+```{r}
+summary(train_hex_attr$num_schools)
+```
+
+## **entertainment**
+
+**entertn** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+entertn_sf <- st_read(dsn = "data/geospatial",
+                    layer = "entertn") %>%
+          st_transform(crs = 3414)
+
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(entertn_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```    
+
+```{r}
+train_hex_attr$num_entertn <- lengths(st_intersects(train_hex_attr, entertn_sf))
+```
+
+```{r}
+summary(train_hex_attr$num_entertn)
+```
+
+
+
+## **food & beverage**
+
+**fnb** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+fnb_sf <- st_read(dsn = "data/geospatial",
+               layer = "F&B") %>%
+          st_transform(crs = 3414)
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(fnb_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+train_hex_attr$num_fnb <- lengths(st_intersects(train_hex_attr, fnb_sf))
+```
+
+```{r}
+summary(train_hex_attr$num_fnb)
+```
+
+
+## **recreational facilities**
+
+**recreation** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+recreation_sf <- st_read(dsn = "data/geospatial",
+                      layer = "Liesure&Recreation") %>%
+          st_transform(crs = 3414)
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(recreation_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+train_hex_attr$num_facilities <- lengths(st_intersects(train_hex_attr, recreation_sf))
+```
+
+```{r}
+summary(train_hex_attr$num_facilities)
+```
+
+
+## **retail establishments**
+
+**retail** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
+
+
+```{r}
+retail_sf <- st_read(dsn = "data/geospatial",
+                  layer = "Retails") %>%
+          st_transform(crs = 3414)
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(retail_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```  
+
+```{r}
+train_hex_attr$num_retail <- lengths(st_intersects(train_hex_attr, retail_sf))
+```
+
+```{r}
+summary(train_hex_attr$num_retail)
+```
+
+
+## **hdb**
+
+This dataset is in **.csv** format, and features information pertaining to HDB properties in Singapore. 
+
+
+```{r}
+hdb <- read_csv("data/aspatial/hdb.csv")
+
+# Remove any duplicated rows
+hdb <- distinct(hdb)
+
+str(hdb)
+```
+
+
+**hdb** is a geocoded list of HDB properties in Singapore, with information such as:
+
+-   **blk_no** & **street**: Address of the HDB Property
+-   **max_floor_lvl** & **year_completed**: Characteristics of the HDB building, indicative of height and age
+-   **residential**, **commercial**, **market_hawker**, **miscellaneous**, **multistorey_carpark** & **precinct_pavilion** , a series of boolean columns indicating if the HDB Property has the facilities
+-   **bldg_contract_town**: A code indicating HDB town
+-   **total_dwelling_units**: Number of units in the block
+-   **xx_sold** & **xx_rental**: multiple columns indicating number of units sold and rented per type
+-   **lat** & **lng**: Geocoded lattitude and longitudinal data pertaining to HDB location
+-   **SUBZONE**: Subzone information
+
+
+
+**hdb** contains many variables, but only a few are useful for this exercise. The following code performs the following actions:
+
+-   **lng** and **lat** are renamed for easier conversion
+-   Filter only residential HDB properties
+-   Select only relevant columns for analysis
+
+
+```{r}
+hdb <- hdb %>%
+  rename(
+    longitude = lng,
+    latitude = lat
+  ) %>%
+  filter(residential == "Y") %>%
+  select(
+    blk_no,
+    street,
+    postal,
+    total_dwelling_units,
+    longitude,
+    latitude
+  )
+```
+
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+**hdb** is an aspatial dataframe, with longitude and latitude columns as variables. These are used to transform it into a simple feature layer to join at hexagon level using `st_as_sf()` function.
+
+:::  
+
+
+```{r}
+hdb_sf <- st_as_sf(hdb,
+                   coords = c("longitude", "latitude"),
+                   crs = 4326) %>%
+  st_transform(crs = 3414)
+
+# Show map of HDB blocks
+
+tm_shape(mpsz) +
+  tm_fill(col = "#dfdfeb") +
+tm_shape(train_hex_sf) +
+  tm_fill(col =  "#BAFFDF")+
+  tm_borders(col = "#dfdfeb") +
+tm_shape(hdb_sf) +
+  tm_dots(col = "#2F4858") +
+  tm_layout(frame = FALSE)
+```  
+
+
+
+
+::: {.pinbox .solve data-latex="pin"}
+
+The resultant dataframe is a simple features dataframe with point locations of residential HDB units.
+
+::: 
+
+
+```{r}
+train_hex_attr <- st_join(
+    hdb_sf,
+    train_hex_attr,
+    join = st_intersects
+  ) %>%
+  group_by(
+    hex_id
+  ) %>%
+  summarise(
+    hdb_blocks = n(),
+    hdb_units = sum(total_dwelling_units),
+    num_offices = sum(num_offices),
+    num_schools = sum(num_schools),
+    num_entertn = sum(num_entertn),
+    num_fnb = sum(num_fnb),
+    num_facilities = sum(num_facilities),
+    num_retail = sum(num_retail)
+  ) %>%
+  ungroup()
+```
+
+```{r}
+summary(train_hex_attr$hdb_blocks)
+```
+
+:::
+
+
+
+## Preparing Modeling data by flow origin and destination
+
+The following code chunks select attributes relevant to origin (propulsive factors) and destination (attractive factors) for Spatial Interaction Modelling.
+
+::: panel-tabset
+
+## **Selecting attributes**
+
+
+```{r}
+# Origin
+train_hex_attr_all <- train_hex_attr %>%
+  st_drop_geometry() %>%
+  mutate(
+    hex_id = as.factor(hex_id)
+  ) %>%
+  select( -hdb_units)
+```
+
+
+
+## **Flow by origin**
+
+
+```{r}
+#join by origin TAZ
+flow_attr <- od_data_dist %>%
+  mutate(
+    origin_hex = as.factor(origin_hex),
+    dest_hex = as.factor(dest_hex)
+  ) %>%
+  left_join(
+    train_hex_attr_all,
+    by = c("origin_hex" = "hex_id")
+  ) %>%
+  rename(
+    trips = weekday_pm_trips,
+    origin_hdb = hdb_blocks,
+    origin_schools = num_schools,
+    origin_offices = num_offices
+  ) %>%
+  select(
+    -c(num_entertn, num_retail, num_facilities, num_fnb)
+  )
+```
+
+
+
+## **Flow by destination**
+
+
+```{r}
+#join by destination TAZ
+flow_attr <- flow_attr %>%
+  left_join(
+    train_hex_attr_all,
+    by = c("dest_hex" = "hex_id")
+  ) %>%
+  rename(
+    dest_hdb = hdb_blocks,
+    dest_entertn = num_entertn,
+    dest_fnb = num_fnb,
+    dest_facilities = num_facilities,
+    dest_retail = num_retail
+  ) %>%
+  select(
+    -c(num_offices, num_schools)
+  ) %>%
+  replace(is.na(.), 0)
+```
+
+```{r}
+summary(flow_attr)
+```   
+
+
+
+
+## **Recoding variables with zero values**
+
+
+::: {.cautionbox .solve data-latex="caution"}
+
+Since the SIM is based on Poisson Regression (this model uses log values), it is important for us to ensure that no 0 values in the explanatory variables as these will be parsed as *undefined*.
+
+:::
+
+
+
+```{r}
+# save columns as a vector
+update_cols <- c("origin_hdb", "origin_offices", "origin_schools", "dest_hdb", "dest_entertn", "dest_fnb", "dest_facilities", "dest_retail")
+
+# update all 0 values across columns
+flow_attr <- flow_attr %>%
+  mutate(across(all_of(update_cols), ~ ifelse(. == 0, 0.9, .)))
+
+summary(flow_attr)
+```  
+
+```{r}
+#| eval: false
+#| code-fold: true
+write_rds(flow_attr, "data/rds/sim_data.rds")
+```
+
+
+
+:::
+
+
+**How do these variables correlate to number of trips?**
+
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+
+# residential density
+p_res <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(origin_hdb),
+            y = log(trips))
+      ) +
+      geom_point(
+        color = "#8D9EC6",
+        size = 1,
+        alpha = .7
+      ) +
+      geom_smooth(method = lm) +
+      theme(axis.text.x = element_blank()) +
+      ggtitle("Trips ~ Residential Density")
+
+# offices
+p_office <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(origin_offices),
+            y = log(trips))
+      ) +
+      geom_point(
+        color = "#4E4B5C",
+        size = 1,
+        alpha = .7
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ Office Count")
+
+# schools
+p_sch <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(origin_schools),
+            y = log(trips))
+      ) +
+      geom_point(
+        color = "#f5bc5f",
+        size = 1,
+        alpha = .7
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ School Count")
+
+origin_patch <- p_res + p_office + p_sch
+origin_patch + plot_annotation(
+  title = "Correlation between trips and propulsive factors",
+  subtitle = "+ve observed relationship between trips and office count"
+)
+```
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+#| fig-height: 7
+
+# Entertainment
+p_ent <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(dest_entertn),
+            y = log(trips))
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .7
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ Entertainment")
+
+# f&b
+p_food <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(dest_fnb),
+            y = log(trips))
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .7,
+        color = "#9590A8"
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ F&B")
+
+# recreation
+p_rec <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(dest_facilities),
+            y = log(trips))
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .7,
+        color = "#f5bc5f"
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ Recreation")
+
+# retail
+p_retail <- flow_attr %>%
+      st_drop_geometry() %>%
+      ggplot(
+        aes(x = log(dest_retail),
+            y = log(trips))
+      ) +
+      geom_point(
+        size = 1,
+        alpha = .7,
+        color = "#6D435A"
+      ) +
+      geom_smooth(method = lm) +
+      theme(
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_blank()
+      ) +
+      ggtitle("Trips ~ Retail")
+
+dest_patch <- (p_ent + p_food) / (p_rec + p_retail)
+dest_patch + plot_annotation(
+  title = "Correlation between trips and attractive factors",
+  subtitle = "+ve observed relationship between trip count and all factors"
+)
+```
+
+
+
+
+## **Constrained SIM - Origin**
+
+::: panel-tabset
+
+## **Building Model**
+
+An **origin-constrained model** features explanatory variables pertaining to the attractiveness of the destination. 
+
+
+```{r}
+originSIM <- glm(
+   # constrain by origin TAZ
+    formula = trips ~ origin_hex 
+            + log(dest_hdb)
+            + log(dest_entertn) 
+            + log(dest_fnb)
+            + log(dest_facilities)
+            + log(dest_retail)
+            + log(distance) - 1,
+    family = poisson(link = "log"),
+    data = flow_attr,
+           na.action = na.exclude)
+```
+
+
+## **Model Results**
+
+
+```{r}
+summary(originSIM)
+```
+
+
+:::
+
+::: {.focusbox .solve data-latex="focus"}
+
+**Model results reveal that**
+
+-   Number of weekday evening peak period trips has a **statistically significant relationship** with all destination attractiveness attributes
+-   The strongest +ve association is with number of HDB blocks (Coefficient Estimate: 0.1906171) followed by entertainment venues (Coefficient Estimate: 0.1394649). This suggests that the most attractive factors are **housing** and **available entertainment centres such as cinemas and theaters** 
+-   On the other hand, the strongest -ve association is with distance (-0.7006256).  This reveals that the further away the destination, the less attractive it is. 
+
+:::
+
+
+
+## **Constrained SIM - Destination**
+
+::: panel-tabset
+
+## **Building Model**
+
+A **destination-constrained model** features explanatory variables pertaining to the propulsiveness of the origin. 
+
+
+```{r}
+destSIM <- glm(
+    formula = trips ~ dest_hex 
+            + log(origin_hdb) 
+            + log(origin_offices)
+            + log(origin_schools)
+            + log(distance) - 1,
+    family = poisson(link = "log"),
+    data = flow_attr
+  )
+```
+
+
+## **Model Results**  
+
+
+```{r}
+summary(destSIM)
+```  
+
+
+:::
+
+
+::: {.focusbox .solve data-latex="focus"}
+
+**Model results reveal that:**
+
+-   Weekday evening peak period trips has a **statistically significant relationship** with all origin propulsive attributes
+-   As with the origin-constrained model, the strongest -ve association is with distance (-0.7982436), asserting that as distance increases, the number of trips decreases. 
+-   Pervasiveness of **offices** and **schools** have +ve correlations to number of trips, while more **residential properties** recorded -ve correlation -- this suggests that there is a higher propulsion to leave the origin from work or school rather than home. 
+
+:::  
+
+
+## **Doubly-constrained SIM**
+
+This is an extension of the basic spatial interaction model that introduces constraints on both the origins and destinations of flows.
+
+::: panel-tabset
+
+## **Model Building**
+
+
+```{r}
+dbcSIM <- glm(formula = trips ~ 
+                origin_hex + 
+                dest_hex +
+                log(distance),
+              family = poisson(link = "log"),
+              data = flow_attr,
+              na.action = na.exclude)
+```
+
+
+
+## **Model Results**  
+
+
+```{r}
+summary(dbcSIM)
+```
+
+:::  
+
+
+::: {.focusbox .solve data-latex="focus"}
+
+**Model results reveal that:**
+
+-   The difference between **null deviance** and **residual deviance** is substantial, suggesting that the model predictor variable (distance) provides valuable information in explaining the variability in number of weekday evening peak hour train trips
+-   This is substantiated by the origin and destination constrained model results, where higher number of trips are related to decreasing distances. 
+
+::: 
+
+
+
+
+## **Model Diagnostics- R-squared**
+
+The goodness-of-fit test using $R^2$ values is used to evaluate how well the models explain variations in number of O-D trips. 
+
+::: panel-tabset
+
+### **Define function for R2 calculation**
+
+
+```{r}
+# Function to calculate R2 value
+
+calc_r2 <- function(observed, estimated){
+  r <- cor(observed, estimated)
+  R2 <- r^2
+  R2
+}
+```
+
+
+### **Calculate R2 for each model**
+
+
+```{r}
+calc_r2(originSIM$data$trips, originSIM$fitted.values)
+```
+
+```{r}
+calc_r2(destSIM$data$trips, destSIM$fitted.values)
+```
+
+```{r}
+calc_r2(dbcSIM$data$trips, dbcSIM$fitted.values)
+```
+
+:::
+
+The $R^2$ Values for each model are summarized below:
+
+| SIM                     | $R^2$ |
+|-------------------------|-------|
+| Origin-constrained      | 0.275 |
+| Destination-constrained | 0.251 |
+| Doubly-constrained      | 0.615 |
+
+We see that there is a marked improvement in $R^2$ value in the **doubly-constrained SIM** compared to other singluar constrained models. This means that it accounts for ~62% of variation in number of trips. 
+
+
+## **Model Diagnostics- RMSE**
+
+
+```{r}
+all_models <- list(
+  origin_constrained = originSIM,
+  destination_constrained = destSIM,
+  doubly_constrained = dbcSIM)
+```
+
+
+## **Compute RMSE**
+
+
+```{r}
+compare_performance(all_models,
+                    metrics = "RMSE")
+```
+
+
+
+## **Model Diagnostics - Fitted vs Observed values**
+
+
+```{r}
+originSIM_fitted <- as.data.frame(originSIM$fitted.values) %>%
+  round(digits = 0)
+
+destSIM_fitted <- as.data.frame(destSIM$fitted.values) %>%
+  round(digits = 0)
+
+dbcSIM_fitted <- as.data.frame(dbcSIM$fitted.values) %>%
+  round(digits = 0)
+```
+
+```{r}
+flow_attr <- flow_attr %>%
+  cbind(
+    originSIM_fitted,
+    destSIM_fitted,
+    dbcSIM_fitted
+  ) %>%
+  rename(
+    orc_trips = originSIM.fitted.values,
+    destc_trips = destSIM.fitted.values,
+    dbc_trips = dbcSIM.fitted.values
+  )
+```
+
+```{r}
+#| code-fold: true
+#| fig-width: 8
+p_orc <- ggplot(
+          data = flow_attr,
+          aes(x = orc_trips,
+              y = trips)
+  ) +
+  geom_point(
+    size = flow_attr$trips/10000,
+    alpha = .6
+  ) +
+  xlim(0, 50000) +
+  geom_smooth(method = lm)
+
+p_destc <- ggplot(
+            data = flow_attr,
+            aes(x = destc_trips,
+                y = trips)
+  ) +
+  geom_point(
+    size = flow_attr$trips/10000,
+    color = "#4d5887",
+    alpha = .6
+  ) +
+  xlim(0, 50000) +
+  geom_smooth(method = lm) +
+  theme(axis.text.y = element_blank())
+
+p_dbc <- ggplot(
+          data = flow_attr,
+          aes(x = dbc_trips,
+              y = trips)
+  ) +
+  geom_point(
+    size = flow_attr$trips/10000,
+    color = "#6D435A",
+    alpha = .6
+  ) +
+  xlim(0, 50000) +
+  geom_smooth(method = lm) +
+  theme(axis.text.y = element_blank())
+
+p_orc + p_destc + p_dbc
+```
+
+
+
+Model Fit:
+
+Spread and Linearity: A well-fitting model should exhibit a tight and linear relationship between the fitted and observed values. A scattered or nonlinear pattern may indicate that the model is not capturing the underlying structure of the data.
+Consistency Across Models:
+
+Overlap: If you have fitted values from multiple models on the same scatterplot, you can observe how well the models overlap. A model with better predictive accuracy should generally have points closer to the diagonal line (perfect fit line) and may outperform other models.
+Residual Patterns:
+
+Residual Distribution: Look for patterns in the residuals (the vertical distances between observed and fitted values). Systematic patterns in residuals may suggest that the model is missing some important information or has a systematic bias.
+Heteroscedasticity: Check for consistent spread of residuals across the range of observed values. If the spread varies, it may indicate heteroscedasticity, suggesting that the variability of the errors is not constant.
+Outliers:
+
+Identification: Outliers, influential points, or data points with high leverage can be visually identified. Models that handle outliers better might show a more concentrated cluster of points around the diagonal.
+Model Comparison:
+
+Relative Performance: Comparing scatterplots for different models side by side allows you to visually assess which model provides a better fit to the data. The model with a tighter fit and less spread of points around the diagonal line may be considered better.
+Model Assumptions:
+
+Linearity: Check if the relationship between the fitted and observed values is linear. If it is not, it may suggest that the model is misspecified or that there are non-linear relationships in the data that the model does not capture.
+Residuals vs. Fitted Plot:
+
+Pattern Checking: Consider also creating a residuals vs. fitted plot for each model. This plot can reveal more details about the distribution and patterns of residuals, helping to diagnose issues with the model.

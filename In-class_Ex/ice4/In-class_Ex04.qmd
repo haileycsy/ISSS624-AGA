@@ -57,9 +57,9 @@ merged <- merge(csv, found,
 
 write_csv(merged, file = "data/aspatial/schools.csv")
 write_csv(not_found, file = "data/aspatial/not_found.csv")
-```  
+```
 
-According to **not_found**, the missing location data belongs to Postcode 677741, Zhenhua Secondary School. This is manually added into the **schools.csv** file. 
+According to **not_found**, the missing location data belongs to Postcode 677741, Zhenhua Secondary School. This is manually added into the **schools.csv** file.
 
 ## Reimporting **schools** into R environment
 
@@ -92,7 +92,7 @@ schools_sf <- st_as_sf(schools,
               st_transform(crs = 3414)
 
 schools_sf
-```  
+```
 
 ```{r}
 tmap_mode("view")
@@ -102,7 +102,6 @@ tm_shape(schools_sf) +
   tm_view(set.zoom.limits = c(11,14))
 ```
 
-
 ## Importing **Planning Subzone** geospatial layer
 
 ```{r}
@@ -110,6 +109,7 @@ mpsz <- st_read(dsn = "data/geospatial",
                 layer = "MPSZ-2019") %>%
           st_transform(crs = 3414)
 ```
+
 Use `st_within()` or `st_intersects()` to get number of schools per planning subzone
 
 ```{r}
@@ -119,12 +119,12 @@ mpsz$SCHOOL_COUNT <- lengths(
 )
 ```
 
-
 ```{r}
 business <- st_read(dsn = "data/geospatial",
                     layer = "Business") %>%
           st_transform(crs = 3414)
 ```
+
 ```{r}
 tmap_mode("plot")
 
@@ -133,56 +133,33 @@ tm_shape(mpsz) +
   tm_polygons() +
 tm_shape(business) +
   tm_dots()
-```  
+```
 
-
-flow_data <- flow_data %>%
-  left_join(mpsz_tidy,
-        # Use destination data to understand attractiveness of flow
-            by = c("DESTIN_SZ" = "SUBZONE_C"))
-
+flow_data \<- flow_data %\>% left_join(mpsz_tidy, \# Use destination data to understand attractiveness of flow by = c("DESTIN_SZ" = "SUBZONE_C"))
 
 Check for 0 values before performing regression. Recode this with small values between 0 - 1 (due to log transformation)
 
-
 # Model Calibration for attractiveness
 
-flow_data <- read_rds("data/rds/flow_data_tidy.rds")
+flow_data \<- read_rds("data/rds/flow_data_tidy.rds")
 
 glimpse(flow_data)
 
-flow_data$FlowNoIntra <- ifelse(
-flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 
-                                0, flow_data$MORNING_PEAK)
-                              
-flow_data$offset <- ifelse(
-flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ,
-                                0.000001, 1)
-                                
+flow_data$FlowNoIntra <- ifelse( flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ,  0, flow_data$MORNING_PEAK)
 
-inter_zonal_flow <- flow_data %>% filter(FlowNoIntra >0)
+flow_data$offset <- ifelse( flow_data$ORIGIN_SZ == flow_data\$DESTIN_SZ, 0.000001, 1)
 
-inter_zonal_flow <- inter_zonal_flow %>%
-  rename(TRIPS = MORNING_PEAK,
-         DIST = dist)
+inter_zonal_flow \<- flow_data %\>% filter(FlowNoIntra \>0)
+
+inter_zonal_flow \<- inter_zonal_flow %\>% rename(TRIPS = MORNING_PEAK, DIST = dist)
 
 ## fit an origin constrained SIM by using the following code:
 
-
-orcSIM_Poisson <- glm(formula = TRIPS ~ ORIGIN_SZ +
-                        log(SCHOOL_COUNT) +
-                        log(RETAIL_COUNT) +
-              # DIST will be negative (inverse relationship between further 
-                # distance and attractiveness)
-                        log(DIST) -1,
-              family = poisson(link = "log"),
-              data = inter_zonal_flow,
-              na.action = na.exclude)
+orcSIM_Poisson \<- glm(formula = TRIPS \~ ORIGIN_SZ + log(SCHOOL_COUNT) + log(RETAIL_COUNT) + \# DIST will be negative (inverse relationship between further \# distance and attractiveness) log(DIST) -1, family = poisson(link = "log"), data = inter_zonal_flow, na.action = na.exclude)
 
 summary(orcSIM_Poisson)
 
-
-* Look at the last three lines to interpret how important each factor is in terms of attractiveness. 
+-   Look at the last three lines to interpret how important each factor is in terms of attractiveness.
 
 Create function to calculate $R_2$ value
 
@@ -194,8 +171,7 @@ CalcRSquared <- function(observed,estimated){
 }
 ```
 
-
-CalcRSquared(orcSIM_Poisson$data$TRIPS, orcSIM_Poisson$fitted.values)
+CalcRSquared(orcSIM_Poisson$data$TRIPS, orcSIM_Poisson\$fitted.values)
 
 Use RMSE, one of the two main performance indicators for a regression model. It measures the average difference between values predicted by a model and the actual values. It provides an estimation of how well the model is able to predict the target value (accuracy).
 
