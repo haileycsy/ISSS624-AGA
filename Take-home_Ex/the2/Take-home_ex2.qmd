@@ -1824,6 +1824,7 @@ all_models <- list(
 compare_performance(all_models,
                     metrics = "RMSE")
 ```  
+:::
 
 ::: {.pinbox .solve data-latex="pin"}
 
