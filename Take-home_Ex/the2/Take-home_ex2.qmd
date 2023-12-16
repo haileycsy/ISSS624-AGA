@@ -418,6 +418,7 @@ tm_basemap(leaflet::providers$OneMapSG.Grey) +
 
 ```
 
+
 ## {{< fa wrench >}} **Creating hexagon grid**
 
 From the mapview above, the current simple features dataframe only shows the train stations as points on the map, which not suitable for understanding commuter flows between areas. In urban transportation planning, **Traffic Analysis Zones (TAZ)** are the basic units of spatial areas delineated to tabulate traffic-related models.
