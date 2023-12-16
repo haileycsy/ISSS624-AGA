@@ -217,4 +217,93 @@ The model results also reveal statistics and spatial lag statistics for each exp
 The above statistics reveal that school count within a zone is statistically significant, but the **spatial lag** variable has p-value > 0.05, which means that neighbouting areas' school count does not contribute to the overall 'attractiveness' of the area. 
 
 
+# Model Diagnostics
+
+## Moran Scatterplot - Residuals disgnostic
+
+```{r}
+old_par <- par(mfrow = c(1, 3),
+               mar = c(2, 2, 2, 2))
+
+spflow_moran_plots(base_model)
+```  
+
+## Rerun correlation matrix with **base_model**
+
+```{r}
+#| fig-width: 9
+#| fig-height: 9
+corr_residual <- pair_cor(base_model)
+
+colnames(corr_residual) <- substr(colnames(corr_residual),1,3)
+
+cor_image(corr_residual)
+```
+
+## Model Control - fine-tuning unconstrained Model
+
+```{r}
+# Create formula as list and save as variable
+spflow_formula <- log(1 + TRIPS) ~
+    # origin
+    O_(BUSSTOP_COUNT +
+         AGE25_64) +
+    # destination
+    D_(SCHOOL_COUNT +
+         BUSINESS_COUNT +
+         RETAILS_COUNT +
+         FINSERV_COUNT) +
+    P_(log(DISTANCE +1))
+
+# model control to define methods
+model_control <- spflow_control(
+  estimation_method = "mle",
+  #model_1 is unconstrained
+  model = "model_1")
+
+mle_model1 <- spflow(
+  spflow_formula,
+  spflow_networks = mpsz_multi_net,
+  estimation_control = model_control)
+
+
+mle_model1
+```
+
+## Model control - check intra-zonal model (model 8)
+
+
+```{r}
+# Create formula as list and save as variable
+spflow_formula <- log(1 + TRIPS) ~
+    # origin
+    O_(BUSSTOP_COUNT +
+         AGE25_64) +
+    # destination
+    D_(SCHOOL_COUNT +
+         BUSINESS_COUNT +
+         RETAILS_COUNT +
+         FINSERV_COUNT) +
+    P_(log(DISTANCE +1))
+
+# model control to define methods
+model_control <- spflow_control(
+  estimation_method = "mle",
+  #model_1 is unconstrained
+  model = "model_8")
+
+mle_model8 <- spflow(
+  spflow_formula,
+  spflow_networks = mpsz_multi_net,
+  estimation_control = model_control)
+
+
+mle_model8
+```
+
+Results reveal:
+
+> R2_corr: 0.6965974  
+
+
 

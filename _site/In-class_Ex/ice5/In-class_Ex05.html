@@ -255,6 +255,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul class="collapse">
   <li><a href="#base-model-based-on-mle" id="toc-base-model-based-on-mle" class="nav-link" data-scroll-target="#base-model-based-on-mle"><span class="toc-section-number">5.1</span>  Base Model based on <strong>MLE</strong></a></li>
   </ul></li>
+  <li><a href="#model-diagnostics" id="toc-model-diagnostics" class="nav-link" data-scroll-target="#model-diagnostics"><span class="toc-section-number">6</span>  Model Diagnostics</a>
+  <ul class="collapse">
+  <li><a href="#moran-scatterplot---residuals-disgnostic" id="toc-moran-scatterplot---residuals-disgnostic" class="nav-link" data-scroll-target="#moran-scatterplot---residuals-disgnostic"><span class="toc-section-number">6.1</span>  Moran Scatterplot - Residuals disgnostic</a></li>
+  <li><a href="#rerun-correlation-matrix-with-base_model" id="toc-rerun-correlation-matrix-with-base_model" class="nav-link" data-scroll-target="#rerun-correlation-matrix-with-base_model"><span class="toc-section-number">6.2</span>  Rerun correlation matrix with <strong>base_model</strong></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -502,26 +507,26 @@ Dependent variable: log(1 + TRIPS)
 Coefficients:
                           est     sd   t.stat  p.val
 rho_d                   0.680  0.004  192.554  0.000
-rho_o                   0.678  0.004  187.732  0.000
-rho_w                  -0.396  0.006  -65.591  0.000
-(Intercept)             0.410  0.065    6.266  0.000
-(Intra)                 1.313  0.081   16.263  0.000
+rho_o                   0.678  0.004  187.733  0.000
+rho_w                  -0.396  0.006  -65.592  0.000
+(Intercept)             0.410  0.065    6.267  0.000
+(Intra)                 1.312  0.081   16.262  0.000
 D_SCHOOL_COUNT          0.017  0.002    7.885  0.000
-D_SCHOOL_COUNT.lag1     0.002  0.004    0.551  0.581
+D_SCHOOL_COUNT.lag1     0.002  0.004    0.552  0.581
 D_BUSINESS_COUNT        0.000  0.000    3.015  0.003
 D_BUSINESS_COUNT.lag1   0.000  0.000   -0.249  0.804
 D_RETAILS_COUNT         0.000  0.000   -0.306  0.759
 D_RETAILS_COUNT.lag1    0.000  0.000    0.152  0.880
 D_FINSERV_COUNT         0.002  0.000    6.787  0.000
 D_FINSERV_COUNT.lag1   -0.002  0.001   -3.767  0.000
-O_BUSSTOP_COUNT         0.002  0.000    6.806  0.000
+O_BUSSTOP_COUNT         0.002  0.000    6.807  0.000
 O_BUSSTOP_COUNT.lag1   -0.001  0.000   -2.364  0.018
 O_AGE25_64              0.000  0.000    7.336  0.000
 O_AGE25_64.lag1         0.000  0.000   -2.797  0.005
-P_log(DISTANCE + 1)    -0.050  0.007   -6.793  0.000
+P_log(DISTANCE + 1)    -0.050  0.007   -6.794  0.000
 
 --------------------------------------------------
-R2_corr: 0.6942945  
+R2_corr: 0.6942947  
 Observations: 97969  
 Model coherence: Validated</code></pre>
 </div>
@@ -539,6 +544,34 @@ Model coherence: Validated</code></pre>
 <p>D_SCHOOL_COUNT.lag1 p-value = 0.581</p>
 </blockquote>
 <p>The above statistics reveal that school count within a zone is statistically significant, but the <strong>spatial lag</strong> variable has p-value &gt; 0.05, which means that neighbouting areas’ school count does not contribute to the overall ‘attractiveness’ of the area.</p>
+</section>
+</section>
+<section id="model-diagnostics" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Model Diagnostics</h1>
+<section id="moran-scatterplot---residuals-disgnostic" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="moran-scatterplot---residuals-disgnostic"><span class="header-section-number">6.1</span> Moran Scatterplot - Residuals disgnostic</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>old_par <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>),</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">spflow_moran_plots</span>(base_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex05_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="rerun-correlation-matrix-with-base_model" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="rerun-correlation-matrix-with-base_model"><span class="header-section-number">6.2</span> Rerun correlation matrix with <strong>base_model</strong></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>corr_residual <span class="ot">&lt;-</span> <span class="fu">pair_cor</span>(base_model)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(corr_residual) <span class="ot">&lt;-</span> <span class="fu">substr</span>(<span class="fu">colnames</span>(corr_residual),<span class="dv">1</span>,<span class="dv">3</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cor_image</span>(corr_residual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="In-class_Ex05_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="864"></p>
+</div>
+</div>
 
 
 </section>

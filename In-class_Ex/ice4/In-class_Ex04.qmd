@@ -132,11 +132,9 @@ tm_shape(mpsz) +
   tm_polygons() +
 tm_shape(business) +
   tm_dots()
-```  
+```
 
-
-
-# Model Calibration for attractiveness
+# Origin Constrained Model
 
 ```{r}
 flow_data <- read_rds("data/rds/flow_data_tidy.rds")
@@ -156,7 +154,7 @@ inter_zonal_flow <- inter_zonal_flow %>% rename(TRIPS = MORNING_PEAK, DIST = dis
 
 ## fit an origin constrained SIM by using the following code:
 
-*Note: DIST will be negative (inverse relationship between further  distance and attractiveness)*
+*Note: DIST will be negative (inverse relationship between further distance and attractiveness)*
 
 ```{r}
 orcSIM_Poisson <- glm(formula = TRIPS ~ ORIGIN_SZ 
@@ -196,4 +194,92 @@ The lower the value of the Root Mean Squared Error, the better the model is. A p
 ```{r}
 performance_rmse(orcSIM_Poisson, normalized = FALSE)
 ```
+
+
+
+# Doubly-constrained Model
+
+```{r}
+dbcSIM_Poisson <- glm(formula = TRIPS ~ 
+                ORIGIN_SZ + 
+                DESTIN_SZ +
+                log(DIST),
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+
+summary(dbcSIM_Poisson)
+```  
+
+## R-squared value of Doubly-constrained model
+
+```{r}
+CalcRSquared(dbcSIM_Poisson$data$TRIPS,
+             dbcSIM_Poisson$fitted.values)
+```
+There is a relatively greater improvement in the R-Squared value compared to the origin-constrained model.
+
+# Model Comparison
+
+## Create model list
+
+```{r}
+model_list <- list(
+  Origin_Constrained = orcSIM_Poisson,
+  Doubly_Constrained = dbcSIM_Poisson)
+```
+
+## Compute RMSE
+
+```{r}
+compare_performance(model_list,
+                    metrics = "RMSE")
+```
+This reveals that the doubly constrained SIM is the best model among the two SIMs because it has the smallest RMSE value of 1906.694.
+
+## Visualising fitted values
+
+```{r}
+df <- as.data.frame(orcSIM_Poisson$fitted.values) %>%
+  round(digits = 0)
+
+df2 <- as.data.frame(dbcSIM_Poisson$fitted.values) %>%
+  round(digits = 0)
+```
+
+```{r}
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df) %>%
+  rename(orcTRIPS = "orcSIM_Poisson.fitted.values")
+
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df2) %>%
+  rename(dbcTRIPS = "dbcSIM_Poisson.fitted.values")
+```  
+
+```{r}
+orc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = orcTRIPS,
+                    y = TRIPS)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,150000),
+                  ylim=c(0,150000))
+
+dbc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = dbcTRIPS,
+                    y = TRIPS)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,150000),
+                  ylim=c(0,150000))
+
+ggarrange(orc_p, dbc_p,
+          ncol = 2,
+          nrow = 1)
+```
+
+
+
+
 
