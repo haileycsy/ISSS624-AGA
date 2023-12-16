@@ -1,0 +1,26 @@
+---
+title: "In-class Ex 5"
+date: "Published on December 16 2023"
+date-modified: "Last updated on `r format(Sys.time(), '%B %d %Y')`"
+format:
+  html:
+    code-fold: false
+    code-summary: "code block"
+    toc-title: Contents
+    number-sections: true
+execute: 
+  warning: false
+---
+
+<font size = "5">**Spatial Econometrics**</font>
+
+# Loading R Packages
+
+
+```{r}
+
+```
+
+
+# Importing the data
+
