@@ -95,7 +95,7 @@ schools_sf
 ```
 
 ```{r}
-tmap_mode("view")
+tmap_mode("plot")
 
 tm_shape(schools_sf) +
   tm_dots() +
@@ -115,8 +115,7 @@ Use `st_within()` or `st_intersects()` to get number of schools per planning sub
 ```{r}
 mpsz$SCHOOL_COUNT <- lengths(
   st_intersects(
-    mpsz, schools_sf)
-)
+    mpsz, schools_sf))
 ```
 
 ```{r}
@@ -133,35 +132,48 @@ tm_shape(mpsz) +
   tm_polygons() +
 tm_shape(business) +
   tm_dots()
-```
+```  
 
-flow_data \<- flow_data %\>% left_join(mpsz_tidy, \# Use destination data to understand attractiveness of flow by = c("DESTIN_SZ" = "SUBZONE_C"))
 
-Check for 0 values before performing regression. Recode this with small values between 0 - 1 (due to log transformation)
 
 # Model Calibration for attractiveness
 
-flow_data \<- read_rds("data/rds/flow_data_tidy.rds")
+```{r}
+flow_data <- read_rds("data/rds/flow_data_tidy.rds")
 
 glimpse(flow_data)
+```
 
-flow_data$FlowNoIntra <- ifelse( flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ,  0, flow_data$MORNING_PEAK)
+```{r}
+flow_data$FlowNoIntra <- ifelse( flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 0, flow_data$MORNING_PEAK)
 
-flow_data$offset <- ifelse( flow_data$ORIGIN_SZ == flow_data\$DESTIN_SZ, 0.000001, 1)
+flow_data$offset <- ifelse( flow_data$ORIGIN_SZ == flow_data$DESTIN_SZ, 0.000001, 1)
 
-inter_zonal_flow \<- flow_data %\>% filter(FlowNoIntra \>0)
+inter_zonal_flow <- flow_data %>% filter(FlowNoIntra >0)
 
-inter_zonal_flow \<- inter_zonal_flow %\>% rename(TRIPS = MORNING_PEAK, DIST = dist)
+inter_zonal_flow <- inter_zonal_flow %>% rename(TRIPS = MORNING_PEAK, DIST = dist)
+```
 
 ## fit an origin constrained SIM by using the following code:
 
-orcSIM_Poisson \<- glm(formula = TRIPS \~ ORIGIN_SZ + log(SCHOOL_COUNT) + log(RETAIL_COUNT) + \# DIST will be negative (inverse relationship between further \# distance and attractiveness) log(DIST) -1, family = poisson(link = "log"), data = inter_zonal_flow, na.action = na.exclude)
+*Note: DIST will be negative (inverse relationship between further  distance and attractiveness)*
 
+```{r}
+orcSIM_Poisson <- glm(formula = TRIPS ~ ORIGIN_SZ 
+                      + log(SCHOOL_COUNT) 
+                      + log(RETAIL_COUNT) 
+                      + log(DIST) -1, 
+                      family = poisson(link = "log"), 
+                      data = inter_zonal_flow, na.action = na.exclude)
+```
+
+```{r}
 summary(orcSIM_Poisson)
+```
 
 -   Look at the last three lines to interpret how important each factor is in terms of attractiveness.
 
-Create function to calculate $R_2$ value
+## Create function to calculate R-squared value
 
 ```{r}
 CalcRSquared <- function(observed,estimated){
@@ -171,10 +183,17 @@ CalcRSquared <- function(observed,estimated){
 }
 ```
 
-CalcRSquared(orcSIM_Poisson$data$TRIPS, orcSIM_Poisson\$fitted.values)
+## Calculate R-squared value of the model
+
+```{r}
+CalcRSquared(orcSIM_Poisson$data$TRIPS, orcSIM_Poisson$fitted.values)
+```
 
 Use RMSE, one of the two main performance indicators for a regression model. It measures the average difference between values predicted by a model and the actual values. It provides an estimation of how well the model is able to predict the target value (accuracy).
 
 The lower the value of the Root Mean Squared Error, the better the model is. A perfect model (a hypothetic model that would always predict the exact expected value) would have a Root Mean Squared Error value of 0.
 
+```{r}
 performance_rmse(orcSIM_Poisson, normalized = FALSE)
+```
+

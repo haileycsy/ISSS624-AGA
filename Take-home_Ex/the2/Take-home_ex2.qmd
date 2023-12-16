@@ -2085,7 +2085,7 @@ od_data_dist %>%
 
 -   The explanatory variables used for the SIMs are related to the quantity of specific types of facilities within each TAZ, but does not account for the quality of these features. More qualitative data such as types of shops in retail areas or popularity of F&B joints could be considered as other factors
 
-
+- Spatial Interaction Models assume **independence** among observations in each TAZ, and does not consider the relative attractiveness or propulsiveness of the neighbouring areas. Further *spatial econometrics modifications* could be made to the SIMs by adding **weighted metrics** to understand the relative influence of the neighborhood on the TAZs.  
 
 
 
