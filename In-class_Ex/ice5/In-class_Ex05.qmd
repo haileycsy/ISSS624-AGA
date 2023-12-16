@@ -38,12 +38,60 @@ To use the functions in **spflow** package, we need the following R data types:
 
 -   Spatial weights
 -   O-D flow data as a tibble dataframe 
--   explanatory variables as a tibble dataframe
+-   Explanatory variables as a tibble dataframe
 
 ::: panel-tabset 
 
+## **Building the geographical area base**
 
+```{r}
+mpsz <- st_read(dsn = "data/geospatial",
+                layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+busstop <- st_read(dsn = "data/geospatial",
+                layer = "BusStop") %>%
+  st_transform(crs = 3414)
+```
+
+## Select only subzones with busstops
+
+```{r}
+#| eval: false
+mpsz_busstop <- mpsz %>%
+  st_intersects(busstop)
+```
 
 
 :::
+
+Spatial weights
+
+Calculate centroid of each zubzone area
+
+```{r}
+#| eval: false
+centroids <- suppressWarnings({
+  st_point_on_surface(st_geometry(mpsz_busstop))
+})
+```
+
+Create a list of the following spatial weights metrics:
+
+-   contiguity weights
+-   distance-based weights
+-   k-nearest neighbours
+
+```{r}
+#| eval: false
+mpsz_nb <- list(
+  "by_contiguity" = ploy2nb(mpsz_busstop),
+  "by_distance" = dnearneigh(centroids,
+                             d1 = 0,
+                             d2 = 5000),
+  "by_knn" = knn2nb(knearneigh(centroids, 3))
+)
+```
 
