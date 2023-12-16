@@ -59,7 +59,6 @@ This study uses 2 aspatial datasets pertaining to **Public Train Trips**:
 -   **train**, a dataset from [LTA Datamall](https://www.waterpointdata.org/access-data/), *Passenger Volume by Origin Destination Train Stations* for October 2023.
 -   **train_codes**, also from LTA Datamall, lists train station codes and names. This is used to assign MRT train station codes to the geospatial data set with train station locations.
 
-
 ::: panel-tabset
 ## **train**
 
@@ -146,15 +145,12 @@ train_od <- train_oct23 %>%
   ) %>%
   ungroup()
 
-```  
+```
 
-  
-  
 ::: {.cautionbox .solve data-latex="caution"}
 There are several instances where **ORIGIN_PT_CODE** and **DESTINATION_PT_CODE** are not composite codes, representing MRT Stations that are **interchanges** with multiple station lines. For the purpose of this investigation, only a single station code is required.
 :::
-  
-  
+
 ```{r}
 #| code-fold: true
 train_od <- train_od %>%
@@ -191,7 +187,6 @@ train_codes <- read_csv("data/aspatial/train_codes.csv")
 
 str(train_codes)
 ```
-
 :::
 
 # {{< fa train-subway >}} **What is the Distribution of Passenger Traffic across peak periods?**
@@ -270,7 +265,7 @@ As the files are all based on Singapore Maps, they are in SVY21 coordinate refer
 train_station <- st_read(dsn = "data/geospatial",
                          layer = "RapidTransitSystemStation") %>%
           st_transform(crs = 3414)
-```  
+```
 
 ::: {.cautionbox .solve data-latex="caution"}
 **Dataset limitations**
@@ -619,7 +614,7 @@ od_flow <- od2line(flow = od_data_inter,
 
 ```{r}
 quantile(od_flow$weekday_pm_trips)
-```    
+```
 
 To visualise this further, we bin the number of trips into custom limits using `cut()`:
 
@@ -634,7 +629,6 @@ od_flow <- od_flow %>%
                          ordered_result = TRUE
   ))
 ```
-
 :::
 
 ```{r}
@@ -679,12 +673,11 @@ tmap_animation(wd_pm_trips,
                delay = 80,
                outer.margins = NA,
                restart.delay = 100)
-```  
-![](wd_pm_trips.gif) 
+```
 
+![](wd_pm_trips.gif)
 
-
-The animated O-D map shows that the flows with trip count < 10,000 is too dense for effective visualisation. As the number of trips increases, we also observe a slight concentration of flow lines within the Central/CBD district. To investigate this further, we focus on looking at the most popular O-D passenger flows for **Weekday PM trips > 20,000**: 
+The animated O-D map shows that the flows with trip count \< 10,000 is too dense for effective visualisation. As the number of trips increases, we also observe a slight concentration of flow lines within the Central/CBD district. To investigate this further, we focus on looking at the most popular O-D passenger flows for **Weekday PM trips \> 20,000**:
 
 ```{r}
 #| code-fold: true
@@ -732,11 +725,9 @@ tm_shape() +
     frame = FALSE
   ) +
   tmap_style("white")
-```  
-.  
+```
 
-
-
+.
 
 ::: {.focusbox .solve data-latex="focus"}
 **Insights from OD flow map**
@@ -744,17 +735,17 @@ tm_shape() +
 -   **A higher train station density in TAZs does not correlate to higher traffic.** This is possibly due to the fact that a single station may encompass multiple lines *(for instance, TAZ #1074 has the highest station density with 5 station codes, but this only corresponds to 3 stations: Marina Bay, Downtown & Shenton Way)*
 
 -   There are several **TAZs with more flowlines**, that are scattered across the country. This is suggestive of either being a key origin or destination zone for Weekday evenings. Namely:
-    + TAZ #1058 (Telok ayer and Raffles Place MRT Stations)
-    + TAZ #534 (Jurong East MRT Station)
-    + TAZ #988 (Yishun MRT Station)
-    
+
+    -   TAZ #1058 (Telok ayer and Raffles Place MRT Stations)
+    -   TAZ #534 (Jurong East MRT Station)
+    -   TAZ #988 (Yishun MRT Station)
+
 -   There are also **TAZs with fewer but thicker flowlines**, indicating highly popular origin or destination train stations, that are likely to be congested during Weekday evening peak periods. These are:
-    + TAZ #1544 (Pasir Ris MRT Station)
-    + TAZ #1028 (Novena MRT Station)
-    + TAZ #774 (Woodlands MRT Station)
-    + TAZ #573 (Yew Tee MRT Station)
 
-
+    -   TAZ #1544 (Pasir Ris MRT Station)
+    -   TAZ #1028 (Novena MRT Station)
+    -   TAZ #774 (Woodlands MRT Station)
+    -   TAZ #573 (Yew Tee MRT Station)
 :::
 
 **Top 15 O-D flows by number of trips during Weekday Evening Peak Period:**
@@ -788,15 +779,13 @@ od_data %>%
 
 ```
 
+The table above reveals that **Jurong East MRT Station** is the busiest **origin station**, with top OD trips originating from there. Only 2 TAZs occurred multiple times as top **destination stations**: **Boon Lay and Newton MRT Stations**. The fact that these stations are not in the city centre is slightly surprising, as one would assume that the busiest origin station would be in the CBD area where people would be commuting from after work.
 
-The table above reveals that **Jurong East MRT Station** is the busiest **origin station**, with top OD trips originating from there. Only 2 TAZs occurred multiple times as top **destination stations**: **Boon Lay and Newton MRT Stations**. The fact that these stations are not in the city centre is slightly surprising, as one would assume that the busiest origin station would be in the CBD area where people would be commuting from after work. 
-
-Further analysis is conducted by using **Spatial Interaction Models (SIMs)** to determine factors explaining flow density between these TAZs. 
-
+Further analysis is conducted by using **Spatial Interaction Models (SIMs)** to determine factors explaining flow density between these TAZs.
 
 # {{< fa train-subway >}} **What makes these trip origins and destinations so popular?**
 
-To understand the factors affecting MRT passenger flows during weekday evening peak periods, we calibrate Spatial Interactive Models using a variety of factors as independent variables $X$ and dependent variable total number of trips $Y$. These factors can reveal **propulsive** or **attractive** qualities origin and destination zones respectively. 
+To understand the factors affecting MRT passenger flows during weekday evening peak periods, we calibrate Spatial Interactive Models using a variety of factors as independent variables $X$ and dependent variable total number of trips $Y$. These factors can reveal **propulsive** or **attractive** qualities origin and destination zones respectively.
 
 ```{mermaid}
 %%| fig-width: 8
@@ -829,18 +818,15 @@ flowchart LR
 
 ```
 
-
 ## Attractive & Propulsive Factors
 
 The factors listed above are computed at TAZ level for Spatial Interaction Modelling.
-
 
 ### Distance
 
 Computing the distance between Traffic analysis zones at a hexagonal level requires the computation of a **distance matrix**. This is a table that shows the Euclidean distance between each pair of locations, and is computed using the following steps:
 
 ::: panel-tabset
-
 ## **Step 1: Identify data type**
 
 ```{r}
@@ -848,11 +834,8 @@ train_hex_filtered
 ```
 
 ::: {.pinbox .solve data-latex="pin"}
-
 The hexagon TAZ layer, **train_hex_filtered**, is a Simple Features dataframe. We first convert it to a *SpatialPolygonsDataFrame* using `as_spatial()` function
-
 :::
-
 
 ```{r}
 # convert to SpatialPolygonsDataFrame
@@ -868,13 +851,10 @@ dist <- spDists(train_hex_sf,
                 longlat = FALSE)
 
 head(dist, n=c(10, 10))
-```  
-
+```
 
 ::: {.pinbox .solve data-latex="pin"}
-
-The resultant matrix has numbers as row and column headers, representing the hexagon pairs. To make this information more usable for analysis, we want to replace this with TAZ hexagon ids instead. 
-
+The resultant matrix has numbers as row and column headers, representing the hexagon pairs. To make this information more usable for analysis, we want to replace this with TAZ hexagon ids instead.
 :::
 
 ## **Step 3: Rename Column and Row headers**
@@ -891,10 +871,8 @@ head(dist, n=c(10, 10))
 ```
 
 ::: {.pinbox .solve data-latex="pin"}
-
-**dist** now has row and column headers as hex_id, identifying which TAZs the distance belongs to. However, the matrix has repeated information, and needs to be in an O-D format for geospatial modelling. The `melt()` function from package **reshape2** is used for this. 
-
-:::  
+**dist** now has row and column headers as hex_id, identifying which TAZs the distance belongs to. However, the matrix has repeated information, and needs to be in an O-D format for geospatial modelling. The `melt()` function from package **reshape2** is used for this.
+:::
 
 ## **Step 4: Reshape into O-D form**
 
@@ -905,11 +883,11 @@ distPair <- melt(dist) %>%
          dest_hex = Var2)
 
 DT::datatable(head(distPair, 10))
-```  
+```
 
 ## **Step 5: Updating occurrences of intra-zonal distance = 0**
 
-The inter-zonal distance is computed between hexagon centroids. The same hexagon will thus have an inter-zonal difference of 0 to itself, but this is misrepresenative of intra-zonal difference. To rectify this, we append a constant value that is less than the minimum inter-zonal difference to all '0' values. 
+The inter-zonal distance is computed between hexagon centroids. The same hexagon will thus have an inter-zonal difference of 0 to itself, but this is misrepresenative of intra-zonal difference. To rectify this, we append a constant value that is less than the minimum inter-zonal difference to all '0' values.
 
 ```{r}
 # Find mininum inter-zonal difference:
@@ -917,6 +895,7 @@ distPair %>%
   filter(distance > 0) %>%
   summary()
 ```
+
 The minimum distance is **750m** -- this represents the distance between the centre of a hexgon to the centre of an adjacent hexagon. We thus set the intra-zonal distance to **200** using an `ifelse9)` statement:
 
 ```{r}
@@ -925,9 +904,9 @@ distPair$distance <- ifelse(distPair$distance == 0,
                             200, distPair$distance)
 
 summary(distPair)
-```  
+```
 
-The minimum distance is now set at **200m** . 
+The minimum distance is now set at **200m** .
 
 **origin_hex** and **dest_hex** represent unique areas, and are set to factor data types instead of integers:
 
@@ -944,8 +923,6 @@ distPair <- distPair %>%
 #| echo: false
 write_rds(distPair, "data/rds/distPair.rds")
 ```
-
-
 :::
 
 ### {{< fa train-subway >}} **How is the number of trips correlated to distance?**
@@ -953,7 +930,6 @@ write_rds(distPair, "data/rds/distPair.rds")
 The following steps are taken to prepare the dataframe with both distance and flow data:
 
 ::: panel-tabset
-
 ## **Identifying intra-zonal flows**
 
 Set trip number to 0 for intra-zonal flows
@@ -990,9 +966,7 @@ od_data_dist <- od_flow %>%
 
 DT::datatable(head(od_data_dist,10))
 ```
-
 :::
-
 
 ```{r}
 #| code-fold: true
@@ -1028,28 +1002,22 @@ logp1 <- od_data_dist %>%
 p1 + logp1
 ```
 
-From the plots above, there is no obvious linear trend when using absolute figures. Using **log transformed values**, on the other hand, revealed an inverse relationship between higher number of trips and further distance. 
-
+From the plots above, there is no obvious linear trend when using absolute figures. Using **log transformed values**, on the other hand, revealed an inverse relationship between higher number of trips and further distance.
 
 ### {{< fa train-subway >}} **How is the number of trips correlated to other factors?**
 
 To determine factors that influence the movement of people between TAZ, we look at how flow data is related to **propulsive** and **attractive** attributes of the origin ans destination areas.
 
 ::: {.focusbox .solve data-latex="focus"}
-
 -   **Propulsive attributes** refer to factors that encourage or drive movement from one location to another and are associated with the origin of the journey, representing conditions that "push" or "propel" entities away from their current location
 -   **Attractive attributes** are factors that pull or attract entities toward a specific location. These are associated with the destination and represent conditions that make a location appealing
+:::
 
-::: 
-
-As the flow data is based on **weekday evening peak hours**, **propulsion** is likely to be related to work, schools, or home (perhaps many people work from home). As such, **number of businesses**, **number of schools** and **residential density** per TAZ is computed as **propulsive Attributes.** On the other hand, leisure, food or shopping could be appealing at the end of a workday, and these are taken as **attractive attributes**.  
-
+As the flow data is based on **weekday evening peak hours**, **propulsion** is likely to be related to work, schools, or home (perhaps many people work from home). As such, **number of businesses**, **number of schools** and **residential density** per TAZ is computed as **propulsive Attributes.** On the other hand, leisure, food or shopping could be appealing at the end of a workday, and these are taken as **attractive attributes**.
 
 These attributes are added to the flow data from the following sources:
 
-
 ::: panel-tabset
-
 ## **businesses**
 
 **business** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
@@ -1058,7 +1026,7 @@ These attributes are added to the flow data from the following sources:
 business <- st_read(dsn = "data/geospatial",
                     layer = "Business") %>%
           st_transform(crs = 3414)
-```  
+```
 
 ```{r}
 #| code-fold: true
@@ -1073,13 +1041,11 @@ tm_shape(train_hex_sf) +
 tm_shape(business) +
   tm_dots(col = "#2F4858") +
   tm_layout(frame = FALSE)
-```  
+```
 
 ::: {.pinbox .solve data-latex="pin"}
-
 The resultant dataframe is a simple features dataframe with point locations of business offices in Singapore. As this is not useful as point locations, we compute the number of offices per TAZ
-
-::: 
+:::
 
 ```{r}
 train_hex_attr <- train_hex_final %>%
@@ -1100,7 +1066,6 @@ schools <- read_csv("data/aspatial/schools.csv")
 ```
 
 There are **40** columns in **schools**, but we only require a few variables. These are renamed and selected, and the data is transformed into a *Simple Features Dataframe*:
-
 
 ```{r}
 schools_sf <- schools %>%
@@ -1136,7 +1101,8 @@ tm_shape(train_hex_sf) +
 tm_shape(schools_sf) +
   tm_dots(col = "#2F4858") +
   tm_layout(frame = FALSE)
-```  
+```
+
 ```{r}
 train_hex_attr$num_schools <- lengths(st_intersects(train_hex_attr, schools_sf))
 ```
@@ -1144,6 +1110,7 @@ train_hex_attr$num_schools <- lengths(st_intersects(train_hex_attr, schools_sf))
 ```{r}
 summary(train_hex_attr$num_schools)
 ```
+
 ## **entertainment**
 
 **entertn** is a Simple feature **point** layer based on SVY21 coordinate reference system (CRS).
@@ -1162,7 +1129,7 @@ tm_shape(train_hex_sf) +
 tm_shape(entertn_sf) +
   tm_dots(col = "#2F4858") +
   tm_layout(frame = FALSE)
-```    
+```
 
 ```{r}
 train_hex_attr$num_entertn <- lengths(st_intersects(train_hex_attr, entertn_sf))
@@ -1171,7 +1138,6 @@ train_hex_attr$num_entertn <- lengths(st_intersects(train_hex_attr, entertn_sf))
 ```{r}
 summary(train_hex_attr$num_entertn)
 ```
-
 
 ## **food & beverage**
 
@@ -1244,7 +1210,7 @@ tm_shape(train_hex_sf) +
 tm_shape(retail_sf) +
   tm_dots(col = "#2F4858") +
   tm_layout(frame = FALSE)
-```  
+```
 
 ```{r}
 train_hex_attr$num_retail <- lengths(st_intersects(train_hex_attr, retail_sf))
@@ -1256,7 +1222,7 @@ summary(train_hex_attr$num_retail)
 
 ## **hdb**
 
-This dataset is in **.csv** format, and features information pertaining to HDB properties in Singapore. 
+This dataset is in **.csv** format, and features information pertaining to HDB properties in Singapore.
 
 ```{r}
 hdb <- read_csv("data/aspatial/hdb.csv")
@@ -1277,8 +1243,6 @@ str(hdb)
 -   **xx_sold** & **xx_rental**: multiple columns indicating number of units sold and rented per type
 -   **lat** & **lng**: Geocoded lattitude and longitudinal data pertaining to HDB location
 -   **SUBZONE**: Subzone information
-
-
 
 **hdb** contains many variables, but only a few are useful for this exercise. The following code performs the following actions:
 
@@ -1303,12 +1267,9 @@ hdb <- hdb %>%
   )
 ```
 
-
 ::: {.pinbox .solve data-latex="pin"}
-
 **hdb** is an aspatial dataframe, with longitude and latitude columns as variables. These are used to transform it into a simple feature layer to join at hexagon level using `st_as_sf()` function.
-
-:::  
+:::
 
 ```{r}
 hdb_sf <- st_as_sf(hdb,
@@ -1326,15 +1287,11 @@ tm_shape(train_hex_sf) +
 tm_shape(hdb_sf) +
   tm_dots(col = "#2F4858") +
   tm_layout(frame = FALSE)
-```  
-
-
+```
 
 ::: {.pinbox .solve data-latex="pin"}
-
 The resultant dataframe is a simple features dataframe with point locations of residential HDB units.
-
-::: 
+:::
 
 ```{r}
 train_hex_attr <- st_join(
@@ -1363,14 +1320,11 @@ summary(train_hex_attr$hdb_blocks)
 ```
 :::
 
-
-
 ## Preparing Modeling data by flow origin and destination
 
 The following code chunks select attributes relevant to origin (propulsive factors) and destination (attractive factors) for Spatial Interaction Modelling.
 
 ::: panel-tabset
-
 ## **Selecting attributes**
 
 ```{r}
@@ -1382,7 +1336,6 @@ train_hex_attr_all <- train_hex_attr %>%
   ) %>%
   select( -hdb_units)
 ```
-
 
 ## **Flow by origin**
 
@@ -1408,7 +1361,6 @@ flow_attr <- od_data_dist %>%
   )
 ```
 
-
 ## **Flow by destination**
 
 ```{r}
@@ -1433,19 +1385,13 @@ flow_attr <- flow_attr %>%
 
 ```{r}
 summary(flow_attr)
-```   
-
-
+```
 
 ## **Recoding variables with zero values**
 
-
 ::: {.cautionbox .solve data-latex="caution"}
-
 Since the SIM is based on Poisson Regression (this model uses log values), it is important for us to ensure that no 0 values in the explanatory variables as these will be parsed as *undefined*.
-
 :::
-
 
 ```{r}
 # save columns as a vector
@@ -1456,18 +1402,14 @@ flow_attr <- flow_attr %>%
   mutate(across(all_of(update_cols), ~ ifelse(. == 0, 0.9, .)))
 
 summary(flow_attr)
-```  
-
+```
 
 ```{r}
 #| eval: false
 #| code-fold: true
 write_rds(flow_attr, "data/rds/sim_data.rds")
 ```
-
-
 :::
-
 
 ```{r}
 #| code-fold: true
@@ -1535,7 +1477,6 @@ origin_patch + plot_annotation(
   subtitle = "+ve observed relationship between trips and office count"
 )
 ```
-
 
 ```{r}
 #| code-fold: true
@@ -1624,17 +1565,14 @@ dest_patch + plot_annotation(
 )
 ```
 
-
 The Scatterplots above reveal that there seems to be a **positive correlation between number of trips and number of offices**, while there is a **negative correlation between trips and residential density and school count**. This could suggest that higher number of trips could be related to higher workplace concentration in the origin TAZ. Conversely, there is a similar **positive correlation between number of trips and all attractive factors**, indicating some relationship between higher trips towards destination areas with more leisure activities or food options. However, to understand the explanatory strength of these attributes as *push* or *pull* factors in these passenger trips, we run a series of spatial interactive models (SIMs) to estimate the likelihood or intensity of interactions between locations.
-
 
 ## **Constrained SIM - Origin**
 
 ::: panel-tabset
-
 ## **Building Model**
 
-An **origin-constrained model** features explanatory variables pertaining to the attractiveness of the destination. 
+An **origin-constrained model** features explanatory variables pertaining to the attractiveness of the destination.
 
 ```{r}
 originSIM <- glm(
@@ -1656,28 +1594,22 @@ originSIM <- glm(
 ```{r}
 summary(originSIM)
 ```
-
 :::
 
 ::: {.focusbox .solve data-latex="focus"}
-
 **Model results reveal that**
 
 -   Number of weekday evening peak period trips has a **statistically significant relationship** with all destination attractiveness attributes
--   The strongest +ve association is with number of HDB blocks (Coefficient Estimate: 0.1906171) followed by entertainment venues (Coefficient Estimate: 0.1394649). This suggests that the most attractive factors are **housing** and **available entertainment centres such as cinemas and theaters** 
--   On the other hand, the strongest -ve association is with distance (-0.7006256).  This reveals that the further away the destination, the less attractive it is. 
-
+-   The strongest +ve association is with number of HDB blocks (Coefficient Estimate: 0.1906171) followed by entertainment venues (Coefficient Estimate: 0.1394649). This suggests that the most attractive factors are **housing** and **available entertainment centres such as cinemas and theaters**
+-   On the other hand, the strongest -ve association is with distance (-0.7006256). This reveals that the further away the destination, the less attractive it is.
 :::
-
-
 
 ## **Constrained SIM - Destination**
 
 ::: panel-tabset
-
 ## **Building Model**
 
-A **destination-constrained model** features explanatory variables pertaining to the propulsiveness of the origin. 
+A **destination-constrained model** features explanatory variables pertaining to the propulsiveness of the origin.
 
 ```{r}
 destSIM <- glm(
@@ -1691,32 +1623,26 @@ destSIM <- glm(
   )
 ```
 
-## **Model Results**  
+## **Model Results**
 
 ```{r}
 summary(destSIM)
-```  
-
+```
 :::
 
-
 ::: {.focusbox .solve data-latex="focus"}
-
 **Model results reveal that:**
 
 -   Weekday evening peak period trips has a **statistically significant relationship** with all origin propulsive attributes
--   As with the origin-constrained model, the strongest -ve association is with distance (-0.7982436), asserting that as distance increases, the number of trips decreases. 
--   Pervasiveness of **offices** and **schools** have +ve correlations to number of trips, while more **residential properties** recorded -ve correlation -- this suggests that there is a higher propulsion to leave the origin from work or school rather than home. 
-
-:::  
-
+-   As with the origin-constrained model, the strongest -ve association is with distance (-0.7982436), asserting that as distance increases, the number of trips decreases.
+-   Pervasiveness of **offices** and **schools** have +ve correlations to number of trips, while more **residential properties** recorded -ve correlation -- this suggests that there is a higher propulsion to leave the origin from work or school rather than home.
+:::
 
 ## **Doubly-constrained SIM**
 
 This is an extension of the basic spatial interaction model that introduces constraints on both the origins and destinations of flows.
 
 ::: panel-tabset
-
 ## **Model Building**
 
 ```{r}
@@ -1729,33 +1655,25 @@ dbcSIM <- glm(formula = trips ~
               na.action = na.exclude)
 ```
 
-
-## **Model Results**  
+## **Model Results**
 
 ```{r}
 summary(dbcSIM)
 ```
-:::  
-
+:::
 
 ::: {.focusbox .solve data-latex="focus"}
-
 **Model results reveal that:**
 
 -   The difference between **null deviance** and **residual deviance** is substantial, suggesting that the model predictor variable (distance) provides valuable information in explaining the variability in number of weekday evening peak hour train trips
--   This is substantiated by the origin and destination constrained model results, where higher number of trips are related to decreasing distances. 
-
-::: 
-
-
-
+-   This is substantiated by the origin and destination constrained model results, where higher number of trips are related to decreasing distances.
+:::
 
 ## **Model Diagnostics- R-squared**
 
-The goodness-of-fit test using $R^2$ values is used to evaluate how well the models explain variations in number of O-D trips. 
+The goodness-of-fit test using $R^2$ values is used to evaluate how well the models explain variations in number of O-D trips.
 
 ::: panel-tabset
-
 ### **Define function for R2 calculation**
 
 ```{r}
@@ -1773,6 +1691,7 @@ calc_r2 <- function(observed, estimated){
 ```{r}
 calc_r2(originSIM$data$trips, originSIM$fitted.values)
 ```
+
 ```{r}
 calc_r2(destSIM$data$trips, destSIM$fitted.values)
 ```
@@ -1790,23 +1709,17 @@ The $R^2$ Values for each model are summarized below:
 | Destination-constrained | 0.251 |
 | Doubly-constrained      | 0.615 |
 
-
 ::: {.pinbox .solve data-latex="pin"}
-
-We see that there is a marked improvement in $R^2$ value in the **doubly-constrained SIM** compared to other singluar constrained models. This means that it accounts for ~62% of variation in number of trips. . 
-
-::: 
-
+We see that there is a marked improvement in $R^2$ value in the **doubly-constrained SIM** compared to other singluar constrained models. This means that it accounts for \~62% of variation in number of trips. .
+:::
 
 ## **Model Diagnostics- RMSE**
 
-Root Mean Squared Error **(RMSE)**  is a measure of RMSE how spread out the residuals (prediction errors) are -- in general, it tells us how concentrated the data is around the line of best fit. A better fitting model thus has a **lower RMSE score**.   
+Root Mean Squared Error **(RMSE)** is a measure of RMSE how spread out the residuals (prediction errors) are -- in general, it tells us how concentrated the data is around the line of best fit. A better fitting model thus has a **lower RMSE score**.
 
 The following steps are taken to compute the RMSE for all models for comparison:
 
-
 ::: panel-tabset
-
 ## **Save all models into a list**
 
 ```{r}
@@ -1823,24 +1736,19 @@ all_models <- list(
 ```{r}
 compare_performance(all_models,
                     metrics = "RMSE")
-```  
+```
 :::
 
 ::: {.pinbox .solve data-latex="pin"}
-
-The model comparison reveals that the **doubly constrained model** has the lowest RMSE score, and is the best fitting model out of all 3 SIMs. This result is consistent with the earlier $R^2$ comparison, thus strongly positioning the doubly-constrained model as the best fit model. 
-
-::: 
-
+The model comparison reveals that the **doubly constrained model** has the lowest RMSE score, and is the best fitting model out of all 3 SIMs. This result is consistent with the earlier $R^2$ comparison, thus strongly positioning the doubly-constrained model as the best fit model.
+:::
 
 ## **Model Diagnostics - Fitted vs Observed values**
 
-Plotting the model's fitted versus observed values could provide insights into the spread and linearity of the model; in general, a well-fitted model would exhibit a tight and linear relationship between the fitted and observed values. A scattered or non-linear pattern, on the other hand, may indicate that the model does not capture the underlying structure of the data. 
+Plotting the model's fitted versus observed values could provide insights into the spread and linearity of the model; in general, a well-fitted model would exhibit a tight and linear relationship between the fitted and observed values. A scattered or non-linear pattern, on the other hand, may indicate that the model does not capture the underlying structure of the data.
 
-::: panel-tabset 
-
+::: panel-tabset
 ## **Save fitted values as variables**
-
 
 ```{r}
 originSIM_fitted <- as.data.frame(originSIM$fitted.values) %>%
@@ -1868,7 +1776,6 @@ flow_attr <- flow_attr %>%
     dbc_trips = dbcSIM.fitted.values
   )
 ```
-
 :::
 
 ```{r}
@@ -1944,13 +1851,11 @@ p_dbc <- ggplot(
   )
 
 p_orc + p_destc + p_dbc
-```  
+```
 
 ::: {.pinbox .solve data-latex="pin"}
-
-The scatterplots with original values above show that there is a stronger linear trend between fitted and observed values in the **doubly-constrained model**, compared to the deviation of points in the origin-constrained and destination-constrained models. However, due to the skewed nature of the distribution of trips, this may result in disproprotional or unmeaningful conclusions. To stabilize the variance of the data scales, we look at log transformed fitted versus observed trip values instead. 
-
-::: 
+The scatterplots with original values above show that there is a stronger linear trend between fitted and observed values in the **doubly-constrained model**, compared to the deviation of points in the origin-constrained and destination-constrained models. However, due to the skewed nature of the distribution of trips, this may result in disproprotional or unmeaningful conclusions. To stabilize the variance of the data scales, we look at log transformed fitted versus observed trip values instead.
+:::
 
 ```{r}
 #| code-fold: true
@@ -2023,25 +1928,21 @@ log_dbc <- ggplot(
   )
 
 log_orc + log_destc + log_dbc
-```  
-
+```
 
 ::: {.pinbox .solve data-latex="pin"}
+The log-transformed scatterplots provide increased interpretability of the values -- The doubly-constrained model still seems to have a closer linear relationship, while the points in the origin-constrained and destination-constrained models only taper off from the linear trend towards the top.
+:::
 
-The log-transformed scatterplots provide increased interpretability of the values -- The doubly-constrained model still seems to have a closer linear relationship, while the points in the origin-constrained and destination-constrained models only taper off from the linear trend towards the top. 
-
-::: 
-
-
-#  {{< fa train-subway >}} **Key Takeaways from Study**
+# {{< fa train-subway >}} **Key Takeaways from Study**
 
 From the Goodness-of-fit and Linearity tests conducted, the **doubly constrained SIM** consistently outperformed origin-constrained and destination-constrained SIMs. This suggests that:
 
--   The simplicity of the model is effective in capturing underlying patterns in the data. Despite having fewer variables compared to the other two models, the doubly-constrained SIM achieved better performance -- thus indicating that the additional complexity of the other models may not necessarily improve the explanatory power of the models. 
+-   The simplicity of the model is effective in capturing underlying patterns in the data. Despite having fewer variables compared to the other two models, the doubly-constrained SIM achieved better performance -- thus indicating that the additional complexity of the other models may not necessarily improve the explanatory power of the models.
 
--   **Distance** between TAZs is thus the key explanatory variable influencing number of trips during **Weekday Evening Peak Periods**, where **shorter distances tend to lead to higher number of trips**. Even in the origin and destination-constrained models, distance had the highest negative association (around -0.79); this figure represents the effect of a unit of increase in distance on the expected number of trips. When we compare the top 10 trips by distance versus number of trips below, we see that **the most frequent trips by passenger volume are ~10 times shorter in distance than the least popular trips**:
+-   **Distance** between TAZs is thus the key explanatory variable influencing number of trips during **Weekday Evening Peak Periods**, where **shorter distances tend to lead to higher number of trips**. Even in the origin and destination-constrained models, distance had the highest negative association (around -0.79); this figure represents the effect of a unit of increase in distance on the expected number of trips. When we compare the top 10 trips by distance versus number of trips below, we see that **the most frequent trips by passenger volume are \~10 times shorter in distance than the least popular trips**:
 
-<font size = "3">**Most popular trips recorded an average distance of ~3500m**</font>
+<font size = "3">**Most popular trips recorded an average distance of \~3500m**</font>
 
 ```{r}
 #| code-fold: true
@@ -2061,7 +1962,7 @@ od_data_dist %>%
   datatable()
 ```
 
-<font size = "3">**Least popular trips recorded an average distance of ~37000m**</font>
+<font size = "3">**Least popular trips recorded an average distance of \~37000m**</font>
 
 ```{r}
 #| code-fold: true
@@ -2085,7 +1986,4 @@ od_data_dist %>%
 
 -   The explanatory variables used for the SIMs are related to the quantity of specific types of facilities within each TAZ, but does not account for the quality of these features. More qualitative data such as types of shops in retail areas or popularity of F&B joints could be considered as other factors
 
-- Spatial Interaction Models assume **independence** among observations in each TAZ, and does not consider the relative attractiveness or propulsiveness of the neighbouring areas. Further *spatial econometrics modifications* could be made to the SIMs by adding **weighted metrics** to understand the relative influence of the neighborhood on the TAZs.  
-
-
-
+-   Spatial Interaction Models assume **independence** among observations in each TAZ, and does not consider the relative attractiveness or propulsiveness of the neighbouring areas. Further *spatial econometrics modifications* could be made to the SIMs by adding **weighted metrics** to understand the relative influence of the neighborhood on the TAZs.

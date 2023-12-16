@@ -16,11 +16,34 @@ execute:
 
 # Loading R Packages
 
+A key package used is **spflow**, which allows us to estimate **spatial econometric models**, designed to exploit the relational structure of *~~flow data*
 
 ```{r}
+#| eval: false
+devtools::install_github("LukeCe/spflow")
+```
 
+
+```{r}
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+
+pacman::p_load(tmap, sf, spdep, sp, Matrix,
+               spflow, knitr, tidyverse)
 ```
 
 
 # Importing the data
+
+To use the functions in **spflow** package, we need the following R data types:  
+
+-   Spatial weights
+-   O-D flow data as a tibble dataframe 
+-   explanatory variables as a tibble dataframe
+
+::: panel-tabset 
+
+
+
+
+:::
 

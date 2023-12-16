@@ -543,7 +543,7 @@
     "href": "In-class_Ex/ice5/In-class_Ex05.html",
     "title": "In-class Ex 5",
     "section": "",
-    "text": "Spatial Econometrics\n\n1 Loading R Packages\n\n\n\n\n\n2 Importing the data"
+    "text": "Spatial Econometrics\n\n1 Loading R Packages\nA key package used is spflow, which allows us to estimate spatial econometric models, designed to exploit the relational structure of ~~flow data\n\ndevtools::install_github(\"LukeCe/spflow\")\n\n\noptions(repos = c(CRAN = \"https://cran.rstudio.com/\"))\n\npacman::p_load(tmap, sf, spdep, sp, Matrix,\n               spflow, knitr, tidyverse)\n\n\n\n2 Importing the data\nTo use the functions in spflow package, we need the following R data types:\n\nSpatial weights\nO-D flow data as a tibble dataframe\nexplanatory variables as a tibble dataframe"
   },
   {
     "objectID": "index.html",
