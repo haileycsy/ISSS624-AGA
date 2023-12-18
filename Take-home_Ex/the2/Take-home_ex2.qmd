@@ -412,12 +412,11 @@ train_station_valid <- read_rds("data/rds/train_station_valid.rds")
 
 tmap_mode("view")
 
-tm_basemap(leaflet::providers$OneMapSG.Grey) +
+tm_basemap("CartoDB.Positron") +
   tm_shape(train_station_valid) +
   tm_dots()
 
 ```
-
 
 ## {{< fa wrench >}} **Creating hexagon grid**
 
@@ -492,7 +491,7 @@ train_hex_filtered <- train_hex_final %>%
 
 tmap_mode("view")
 
-tm_basemap(leaflet::providers$OneMapSG.Grey) +
+tm_basemap("CartoDB.Positron") +
   tm_shape(train_hex_filtered) +
   tm_fill(
     col = "station_count",

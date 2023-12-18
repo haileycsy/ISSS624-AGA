@@ -1362,7 +1362,7 @@ We can deduce that there are 2 main types of statistically significant clusters 
 
 tmap_mode("view")
 
-plot_wdm <- tm_basemap("OneMapSG.Grey") +
+plot_wdm <- tm_basemap("CartoDB.Positron") +
   tm_shape(mean_wdm) +
   tm_fill(
     c("Weekday morning peak", "mean"),
@@ -1395,7 +1395,7 @@ plot_wdm
 mean_wde <- lisa08_wde  %>%
   filter(p_ii_sim < 0.05)
 
-plot_wde <- tm_basemap("OneMapSG.Night") +
+plot_wde <- tm_basemap("CartoDB.DarkMatter") +
   tm_shape(mean_wde) +
   tm_fill(
     c("Weekday evening peak", "mean"),
@@ -1430,7 +1430,7 @@ mean_phm <- lisa08_phm  %>%
 
 tmap_mode("view")
 
-plot_phm <- tm_basemap("OneMapSG.Grey") +
+plot_phm <- tm_basemap("CartoDB.Positron") +
   tm_shape(mean_phm) +
   tm_fill(
     c("Weekend/PH morning peak", "mean"),
@@ -1465,7 +1465,7 @@ mean_phe <- lisa08_phe  %>%
 
 tmap_mode("view")
 
-plot_phe <- tm_basemap("OneMapSG.Night") +
+plot_phe <- tm_basemap("CartoDB.DarkMatter") +
   tm_shape(mean_phe) +
   tm_fill(
     c("Weekend/PH evening peak", "mean"),
